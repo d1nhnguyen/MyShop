@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "MyShop.App (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "MyShop.App (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
