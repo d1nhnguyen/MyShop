@@ -100,7 +100,7 @@ async function seed() {
 
     // 3. Seed Products
     console.log('📦 Seeding products...');
-    const products = [
+    const productData = [
       {
         name: 'Laptop HP Pavilion',
         sku: 'ELEC-001',
@@ -158,12 +158,14 @@ async function seed() {
       },
     ];
 
-    for (const product of products) {
-      await prisma.product.upsert({
+    const products = [];
+    for (const product of productData) {
+      const created = await prisma.product.upsert({
         where: { sku: product.sku },
         update: {},
         create: product,
       });
+      products.push(created);
     }
     console.log(`   ✅ Created ${products.length} products\n`);
 
@@ -191,6 +193,18 @@ async function seed() {
           phone: '+1234567891',
           address: '456 Oak Ave, City, State 12345',
           isMember: false,
+        },
+      }),
+      prisma.customer.upsert({
+        where: { email: 'bob.wilson@example.com' },
+        update: {},
+        create: {
+          name: 'Bob Wilson',
+          email: 'bob.wilson@example.com',
+          phone: '+1234567892',
+          address: '789 Pine St, City, State 12345',
+          isMember: true,
+          memberSince: new Date('2024-06-15'),
         },
       }),
     ]);
@@ -229,13 +243,102 @@ async function seed() {
     ]);
     console.log(`   ✅ Created ${discounts.length} discounts\n`);
 
+    // 6. Seed Orders
+    console.log('📦 Seeding orders...');
+    const orders = await Promise.all([
+      prisma.order.create({
+        data: {
+          orderNumber: 'ORD-2024-001',
+          customerId: customers[0].id,
+          userId: users[2].id, // staff1
+          status: 'COMPLETED',
+          subtotal: new Prisma.Decimal(500),
+          discountAmount: new Prisma.Decimal(50),
+          taxAmount: new Prisma.Decimal(45),
+          total: new Prisma.Decimal(495),
+          completedAt: new Date('2024-12-01'),
+          orderItems: {
+            create: [
+              {
+                productId: products[0].id,
+                quantity: 2,
+                unitPrice: new Prisma.Decimal(150),
+                subtotal: new Prisma.Decimal(300),
+                discountAmount: new Prisma.Decimal(30),
+                total: new Prisma.Decimal(270),
+              },
+              {
+                productId: products[1].id,
+                quantity: 1,
+                unitPrice: new Prisma.Decimal(200),
+                subtotal: new Prisma.Decimal(200),
+                discountAmount: new Prisma.Decimal(20),
+                total: new Prisma.Decimal(180),
+              },
+            ],
+          },
+        },
+      }),
+      prisma.order.create({
+        data: {
+          orderNumber: 'ORD-2024-002',
+          customerId: customers[1].id,
+          userId: users[2].id,
+          status: 'COMPLETED',
+          subtotal: new Prisma.Decimal(1200),
+          discountAmount: new Prisma.Decimal(0),
+          taxAmount: new Prisma.Decimal(120),
+          total: new Prisma.Decimal(1320),
+          completedAt: new Date('2024-12-05'),
+          orderItems: {
+            create: [
+              {
+                productId: products[2].id,
+                quantity: 3,
+                unitPrice: new Prisma.Decimal(400),
+                subtotal: new Prisma.Decimal(1200),
+                discountAmount: new Prisma.Decimal(0),
+                total: new Prisma.Decimal(1200),
+              },
+            ],
+          },
+        },
+      }),
+      prisma.order.create({
+        data: {
+          orderNumber: 'ORD-2024-003',
+          customerId: customers[2].id,
+          userId: users[1].id, // manager1
+          status: 'PENDING',
+          subtotal: new Prisma.Decimal(300),
+          discountAmount: new Prisma.Decimal(0),
+          taxAmount: new Prisma.Decimal(30),
+          total: new Prisma.Decimal(330),
+          orderItems: {
+            create: [
+              {
+                productId: products[3].id,
+                quantity: 2,
+                unitPrice: new Prisma.Decimal(150),
+                subtotal: new Prisma.Decimal(300),
+                discountAmount: new Prisma.Decimal(0),
+                total: new Prisma.Decimal(300),
+              },
+            ],
+          },
+        },
+      }),
+    ]);
+    console.log(`   ✅ Created ${orders.length} orders\n`);
+
     console.log('✨ Database seeding completed successfully!\n');
     console.log('📊 Summary:');
     console.log(`   - Users: ${users.length}`);
     console.log(`   - Categories: ${categories.length}`);
     console.log(`   - Products: ${products.length}`);
     console.log(`   - Customers: ${customers.length}`);
-    console.log(`   - Discounts: ${discounts.length}\n`);
+    console.log(`   - Discounts: ${discounts.length}`);
+    console.log(`   - Orders: ${orders.length}\n`);
   } catch (error) {
     console.error('❌ Error seeding database:', error);
     process.exit(1);

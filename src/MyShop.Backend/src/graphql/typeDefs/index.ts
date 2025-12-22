@@ -477,6 +477,16 @@ export const typeDefs = gql`
     # Dashboard & Reports
     dashboardStats: DashboardStats!
     salesReport(dateRange: DateRangeInput!): SalesReport!
+
+    # Commissions
+    getCommissions(filter: CommissionFilterInput, pagination: PaginationInput): PaginatedCommissions!
+    getUserCommissions(userId: Int!): [Commission!]!
+    getCommissionStats(userId: Int, dateRange: DateRangeInput): CommissionStats!
+
+    # Sales Targets
+    getSalesTargets(filter: SalesTargetFilterInput, pagination: PaginationInput): PaginatedSalesTargets!
+    getMonthlyTarget(userId: Int!, month: Int!, year: Int!): SalesTarget
+    getUserTargets(userId: Int!): [SalesTarget!]!
   }
 
   # ==================== MUTATIONS ====================
@@ -516,5 +526,92 @@ export const typeDefs = gql`
     createOrder(input: CreateOrderInput!): Order!
     updateOrder(id: Int!, input: UpdateOrderInput!): Order!
     cancelOrder(id: Int!): Order!
+
+    # Commissions
+    calculateCommission(orderId: Int!): Commission!
+    markCommissionPaid(id: Int!): Commission!
+
+    # Sales Targets
+    createSalesTarget(input: CreateSalesTargetInput!): SalesTarget!
+    updateSalesTarget(id: Int!, input: UpdateSalesTargetInput!): SalesTarget!
+    deleteSalesTarget(id: Int!): Boolean!
+  }
+
+  # ==================== COMMISSION ====================
+  type Commission {
+    id: Int!
+    userId: Int!
+    orderId: Int!
+    orderTotal: Decimal!
+    commissionRate: Decimal!
+    commissionAmount: Decimal!
+    isPaid: Boolean!
+    createdAt: DateTime!
+    user: User!
+    order: Order!
+  }
+
+  type CommissionStats {
+    totalCommission: Decimal!
+    paidCommission: Decimal!
+    unpaidCommission: Decimal!
+    totalOrders: Int!
+  }
+
+  input CommissionFilterInput {
+    userId: Int
+    isPaid: Boolean
+    dateRange: DateRangeInput
+  }
+
+  type PaginatedCommissions {
+    items: [Commission!]!
+    total: Int!
+    page: Int!
+    pageSize: Int!
+    totalPages: Int!
+  }
+
+  # ==================== SALES TARGET ====================
+  type SalesTarget {
+    id: Int!
+    userId: Int!
+    month: Int!
+    year: Int!
+    targetAmount: Decimal!
+    achievedAmount: Decimal!
+    commissionRate: Decimal!
+    achievementRate: Float!
+    isAchieved: Boolean!
+    createdAt: DateTime!
+    updatedAt: DateTime!
+  }
+
+  input CreateSalesTargetInput {
+    userId: Int!
+    month: Int!
+    year: Int!
+    targetAmount: Decimal!
+    commissionRate: Decimal!
+  }
+
+  input UpdateSalesTargetInput {
+    targetAmount: Decimal
+    achievedAmount: Decimal
+    commissionRate: Decimal
+  }
+
+  input SalesTargetFilterInput {
+    userId: Int
+    month: Int
+    year: Int
+  }
+
+  type PaginatedSalesTargets {
+    items: [SalesTarget!]!
+    total: Int!
+    page: Int!
+    pageSize: Int!
+    totalPages: Int!
   }
 `;
