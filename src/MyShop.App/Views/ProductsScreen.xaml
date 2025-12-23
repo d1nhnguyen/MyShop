@@ -1,80 +1,119 @@
-<Page
+﻿<Page
     x:Class="MyShop.App.Views.ProductsScreen"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:models="using:MyShop.Core.Models"
+    xmlns:vm="using:MyShop.App.ViewModels"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:models="using:MyShop.Core.Models"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-    <Grid Padding="24">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="220"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
 
-        <StackPanel Grid.Row="0" Margin="0,0,0,20">
-            <TextBlock Text="Product Inventory" Style="{StaticResource TitleTextBlockStyle}"/>
-            <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,10,0,0">
-                <Button Content="Refresh List" Command="{x:Bind ViewModel.LoadProductsCommand}"/>
+        <Border Grid.Column="0" 
+                Background="{ThemeResource LayerFillColorDefaultBrush}" 
+                BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}" 
+                BorderThickness="0,0,1,0" Padding="0,20">
+            <StackPanel>
+                <TextBlock Text="Categories" FontWeight="Bold" Margin="20,0,0,16" FontSize="16"/>
 
-                <TextBlock Text="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}" 
-                           Foreground="Red" 
-                           VerticalAlignment="Center"
-                           Visibility="{x:Bind ViewModel.HasError, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                <ListView ItemsSource="{x:Bind ViewModel.Categories, Mode=OneWay}" 
+                          SelectedItem="{x:Bind ViewModel.SelectedCategory, Mode=TwoWay}"
+                          SelectionMode="Single">
+                    <ListView.ItemTemplate>
+                        <DataTemplate x:DataType="vm:CategoryStat">
+                            <TextBlock Text="{x:Bind DisplayText}" Margin="0,5"/>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
             </StackPanel>
-        </StackPanel>
-
-        <Border Grid.Row="1" Background="{ThemeResource SystemControlBackgroundChromeMediumLowBrush}" 
-                Padding="12,8" CornerRadius="4,4,0,0">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="50"/>
-                    <ColumnDefinition Width="2*"/>
-                    <ColumnDefinition Width="1*"/>
-                    <ColumnDefinition Width="1*"/>
-                    <ColumnDefinition Width="1*"/>
-                </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" Text="ID" FontWeight="Bold"/>
-                <TextBlock Grid.Column="1" Text="Name" FontWeight="Bold"/>
-                <TextBlock Grid.Column="2" Text="SKU" FontWeight="Bold"/>
-                <TextBlock Grid.Column="3" Text="Price ($)" FontWeight="Bold" HorizontalAlignment="Right"/>
-                <TextBlock Grid.Column="4" Text="Stock" FontWeight="Bold" HorizontalAlignment="Right"/>
-            </Grid>
         </Border>
 
-        <Grid Grid.Row="2">
-            <ProgressRing IsActive="{x:Bind ViewModel.IsBusy, Mode=OneWay}" 
-                          Width="50" Height="50" Canvas.ZIndex="1"/>
+        <Grid Grid.Column="1" Padding="24">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
 
-            <ListView ItemsSource="{x:Bind ViewModel.Products, Mode=OneWay}" 
-                      SelectionMode="Single">
-                <ListView.ItemTemplate>
+            <StackPanel Grid.Row="0" Margin="0,0,0,20">
+                <TextBlock Text="All Products" FontSize="24" FontWeight="Bold"/>
+                <TextBlock Text="Home > All Products" Foreground="{ThemeResource SystemControlForegroundBaseMediumBrush}" FontSize="12" Margin="0,4,0,0"/>
+            </StackPanel>
+
+            <Grid Grid.Row="1" Margin="0,0,0,24">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <AutoSuggestBox PlaceholderText="Search products..." Width="200" QueryIcon="Find"/>
+
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="10">
+                    <Button Content="ADD NEW CATEGORY" CornerRadius="4"/>
+                    <Button Content="➕ ADD NEW PRODUCT" Click="OnAddProductClick" Style="{StaticResource AccentButtonStyle}" CornerRadius="4"/>
+                </StackPanel>
+            </Grid>
+
+            <GridView Grid.Row="2" ItemsSource="{x:Bind ViewModel.Products, Mode=OneWay}" SelectionMode="None">
+                <GridView.ItemContainerStyle>
+                    <Style TargetType="GridViewItem">
+                        <Setter Property="Margin" Value="0,0,20,20"/>
+                    </Style>
+                </GridView.ItemContainerStyle>
+                <GridView.ItemTemplate>
                     <DataTemplate x:DataType="models:Product">
-                        <Grid Padding="0,12">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="50"/>
-                                <ColumnDefinition Width="2*"/>
-                                <ColumnDefinition Width="1*"/>
-                                <ColumnDefinition Width="1*"/>
-                                <ColumnDefinition Width="1*"/>
-                            </Grid.ColumnDefinitions>
+                        <Grid Width="280" 
+                              Background="{ThemeResource LayerFillColorDefaultBrush}" 
+                              CornerRadius="8" Padding="16" 
+                              BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}" 
+                              BorderThickness="1">
 
-                            <TextBlock Grid.Column="0" Text="{x:Bind Id}" Foreground="Gray"/>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
 
-                            <TextBlock Grid.Column="1" Text="{x:Bind Name}" FontWeight="SemiBold"/>
+                            <Grid Grid.Row="0" Margin="0,0,0,12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="60"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
 
-                            <TextBlock Grid.Column="2" Text="{x:Bind Sku}" Foreground="Gray"/>
+                                <Border Background="{ThemeResource SystemControlBackgroundBaseLowBrush}" CornerRadius="8" Height="60" Width="60">
+                                    <FontIcon Glyph="&#xE739;" Foreground="{ThemeResource SystemControlForegroundBaseMediumBrush}"/>
+                                </Border>
 
-                            <TextBlock Grid.Column="3" Text="{x:Bind Price}" HorizontalAlignment="Right"/>
+                                <StackPanel Grid.Column="1" Margin="12,0,0,0" VerticalAlignment="Center">
+                                    <TextBlock Text="{x:Bind Name}" FontWeight="Bold"/>
+                                    <TextBlock Text="{x:Bind Price}" FontWeight="Bold" Margin="0,4,0,0"/>
+                                </StackPanel>
+                            </Grid>
 
-                            <TextBlock Grid.Column="4" Text="{x:Bind Stock}" HorizontalAlignment="Right"/>
+                            <TextBlock Grid.Row="1" Text="{x:Bind Description}" FontSize="10" 
+                                       Foreground="{ThemeResource SystemControlForegroundBaseMediumBrush}" 
+                                       Height="30" TextTrimming="CharacterEllipsis" Margin="0,0,0,12"/>
+
+                            <Border Grid.Row="2" BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}" BorderThickness="1" Padding="10" CornerRadius="4">
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="6">
+                                    <TextBlock Text="Stock:" FontSize="11" Foreground="{ThemeResource SystemControlForegroundBaseMediumBrush}"/>
+                                    <TextBlock Text="{x:Bind Stock}" FontSize="11" FontWeight="Bold"/>
+                                </StackPanel>
+                            </Border>
                         </Grid>
                     </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
+                </GridView.ItemTemplate>
+            </GridView>
+
+            <ProgressRing Grid.Row="2" IsActive="{x:Bind ViewModel.IsBusy, Mode=OneWay}" Width="50" Height="50" HorizontalAlignment="Center" VerticalAlignment="Center"/>
         </Grid>
     </Grid>
 </Page>

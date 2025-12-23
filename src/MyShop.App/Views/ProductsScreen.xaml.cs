@@ -1,6 +1,9 @@
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.Extensions.DependencyInjection;
 using MyShop.App.ViewModels;
+using MyShop.App.Views.Dialogs;
+using System;
 
 namespace MyShop.App.Views
 {
@@ -11,9 +14,20 @@ namespace MyShop.App.Views
         public ProductsScreen()
         {
             this.InitializeComponent();
-
-            // Get the ViewModel (with Repository injected) from App Services
             ViewModel = App.Current.Services.GetService<ProductViewModel>();
+        }
+
+        private async void OnAddProductClick(object sender, RoutedEventArgs e)
+        {
+            var dialog = new AddProductDialog();
+            dialog.XamlRoot = this.XamlRoot;
+
+            await dialog.ShowAsync();
+
+            if (dialog.NewProduct != null)
+            {
+                await ViewModel.AddProductAsync(dialog.NewProduct);
+            }
         }
     }
 }

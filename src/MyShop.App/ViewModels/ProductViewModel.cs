@@ -1,6 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using MyShop.App.ViewModels.Base;
@@ -9,29 +10,56 @@ using MyShop.Core.Models;
 
 namespace MyShop.App.ViewModels
 {
+    public class CategoryStat
+    {
+        public string Name { get; set; }
+        public int Count { get; set; }
+        public int Id { get; set; }
+        public string DisplayText => $"{Name} ({Count})";
+    }
+
     public class ProductViewModel : ViewModelBase
     {
         private readonly IProductRepository _productRepository;
+
+        private List<Product> _allProducts;
         private ObservableCollection<Product> _products;
+        private ObservableCollection<CategoryStat> _categories;
+        private CategoryStat _selectedCategory;
 
         public ProductViewModel(IProductRepository productRepository)
         {
             _productRepository = productRepository;
             _products = new ObservableCollection<Product>();
+            _allProducts = new List<Product>();
+            _categories = new ObservableCollection<CategoryStat>();
 
-            // Load data when ViewModel is created
-            LoadProductsCommand = new RelayCommand(async _ => await LoadProductsAsync());
             _ = LoadProductsAsync();
         }
 
-        // The list bound to the UI
         public ObservableCollection<Product> Products
         {
             get => _products;
             set => SetProperty(ref _products, value);
         }
 
-        public ICommand LoadProductsCommand { get; }
+        public ObservableCollection<CategoryStat> Categories
+        {
+            get => _categories;
+            set => SetProperty(ref _categories, value);
+        }
+
+        public CategoryStat SelectedCategory
+        {
+            get => _selectedCategory;
+            set
+            {
+                if (SetProperty(ref _selectedCategory, value))
+                {
+                    FilterProducts();
+                }
+            }
+        }
 
         public async Task LoadProductsAsync()
         {
@@ -40,24 +68,82 @@ namespace MyShop.App.ViewModels
             try
             {
                 IsBusy = true;
-                ErrorMessage = string.Empty; // Clear previous errors
 
-                var productList = await _productRepository.GetAllAsync();
+                var dbData = await _productRepository.GetAllAsync();
 
-                Products.Clear();
-                foreach (var p in productList)
-                {
-                    Products.Add(p);
-                }
+                _allProducts.Clear();
+                _allProducts.AddRange(dbData);
+
+                RefreshCategoryStats();
+                FilterProducts();
             }
             catch (Exception ex)
             {
-                ErrorMessage = "Could not load products. Is the backend running?";
-                Debug.WriteLine($"[ProductViewModel Error] {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Error loading: {ex.Message}");
             }
             finally
             {
                 IsBusy = false;
+            }
+        }
+
+        public async Task AddProductAsync(Product newProduct)
+        {
+            try
+            {
+                IsBusy = true;
+                var createdProduct = await _productRepository.AddAsync(newProduct);
+
+                _allProducts.Insert(0, createdProduct);
+
+                RefreshCategoryStats();
+                FilterProducts();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Add Error: {ex.Message}");
+            }
+            finally
+            {
+                IsBusy = false;
+            }
+        }
+
+        private void RefreshCategoryStats()
+        {
+            var currentId = SelectedCategory?.Id ?? 0;
+
+            var stats = new ObservableCollection<CategoryStat>
+            {
+                new CategoryStat { Id = 0, Name = "All", Count = _allProducts.Count },
+                new CategoryStat { Id = 1, Name = "Iphone", Count = _allProducts.Count(p => p.CategoryId == 1) },
+                new CategoryStat { Id = 2, Name = "Ipad", Count = _allProducts.Count(p => p.CategoryId == 2) },
+                new CategoryStat { Id = 3, Name = "Laptop", Count = _allProducts.Count(p => p.CategoryId == 3) },
+                new CategoryStat { Id = 4, Name = "Tablet", Count = _allProducts.Count(p => p.CategoryId == 4) },
+                new CategoryStat { Id = 5, Name = "PC", Count = _allProducts.Count(p => p.CategoryId == 5) },
+                new CategoryStat { Id = 6, Name = "TV", Count = _allProducts.Count(p => p.CategoryId == 6) }
+            };
+
+            Categories = stats;
+
+            var restoredSelection = stats.FirstOrDefault(c => c.Id == currentId);
+            if (restoredSelection != null)
+            {
+                _selectedCategory = restoredSelection;
+                OnPropertyChanged(nameof(SelectedCategory));
+            }
+        }
+
+        private void FilterProducts()
+        {
+            if (SelectedCategory == null || SelectedCategory.Id == 0)
+            {
+                Products = new ObservableCollection<Product>(_allProducts);
+            }
+            else
+            {
+                var filtered = _allProducts.Where(p => p.CategoryId == SelectedCategory.Id).ToList();
+                Products = new ObservableCollection<Product>(filtered);
             }
         }
     }

@@ -13,6 +13,7 @@ namespace MyShop.App
     {
         public new static App Current => (App)Application.Current;
         public IServiceProvider Services { get; }
+        public static Window MainWindowInstance { get; private set; }
 
         public App()
         {
@@ -25,33 +26,30 @@ namespace MyShop.App
 
         private void ConfigureServices(IServiceCollection services)
         {
-            // Infrastructure
             services.AddSingleton<IConfigService, ConfigService>();
             services.AddSingleton<ISessionManager, SessionManager>();
 
-            // GraphQL Configuration (Initial load from config)
             var configService = new ConfigService();
             services.AddSingleton(new GraphQLService(configService.GetServerUrl()));
 
-            // Services
             services.AddSingleton<IAuthService, AuthService>();
             services.AddSingleton<IAuthorizationService, AuthorizationService>();
             services.AddSingleton<IEncryptionService, EncryptionService>();
 
-            // Repositories (GraphQL-first)
             services.AddSingleton<IUserRepository, GraphQLUserRepository>();
             services.AddSingleton<IProductRepository, GraphQLProductRepository>();
 
-            // ViewModels
             services.AddTransient<MainWindow>();
             services.AddTransient<LoginViewModel>();
             services.AddTransient<ConfigViewModel>();
             services.AddTransient<ShellViewModel>();
             services.AddTransient<ProductViewModel>();
         }
+
         protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
         {
             m_window = Services.GetService<MainWindow>();
+            MainWindowInstance = m_window;
 
             m_window?.Activate();
         }
