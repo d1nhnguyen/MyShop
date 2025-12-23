@@ -1,10 +1,3 @@
-/**
- * Database Seeder Script
- *
- * This script seeds the database with sample data for development/testing.
- * Run with: pnpm seed
- */
-
 import { PrismaClient, Prisma } from '@prisma/client';
 import { AuthUtils } from './auth';
 
@@ -52,110 +45,89 @@ async function seed() {
     ]);
     console.log(`   ✅ Created ${users.length} users\n`);
 
-    // 2. Seed Categories
+    // 2. Seed Categories (Updated to match your theme)
     console.log('📁 Seeding categories...');
     const categories = await Promise.all([
       prisma.category.upsert({
-        where: { name: 'Electronics' },
+        where: { name: 'iPhone' },
         update: {},
-        create: {
-          name: 'Electronics',
-          description: 'Electronic devices and accessories',
-        },
+        create: { name: 'iPhone', description: 'Apple Smartphones' },
       }),
       prisma.category.upsert({
-        where: { name: 'Clothing' },
+        where: { name: 'iPad' },
         update: {},
-        create: {
-          name: 'Clothing',
-          description: 'Apparel and fashion items',
-        },
+        create: { name: 'iPad', description: 'Apple Tablets' },
       }),
       prisma.category.upsert({
-        where: { name: 'Home & Garden' },
+        where: { name: 'Laptop' },
         update: {},
-        create: {
-          name: 'Home & Garden',
-          description: 'Home improvement and garden supplies',
-        },
+        create: { name: 'Laptop', description: 'Portable computers' },
       }),
       prisma.category.upsert({
-        where: { name: 'Books' },
+        where: { name: 'Tablet' },
         update: {},
-        create: {
-          name: 'Books',
-          description: 'Books and reading materials',
-        },
+        create: { name: 'Tablet', description: 'Android and other tablets' },
       }),
       prisma.category.upsert({
-        where: { name: 'Sports' },
+        where: { name: 'PC' },
         update: {},
-        create: {
-          name: 'Sports',
-          description: 'Sports equipment and accessories',
-        },
+        create: { name: 'PC', description: 'Desktop computers' },
+      }),
+      prisma.category.upsert({
+        where: { name: 'TV' },
+        update: {},
+        create: { name: 'TV', description: 'Smart Televisions' },
       }),
     ]);
     console.log(`   ✅ Created ${categories.length} categories\n`);
 
-    // 3. Seed Products
+    // 3. Seed Products (Updated to match categories)
     console.log('📦 Seeding products...');
     const productData = [
       {
-        name: 'Laptop HP Pavilion',
-        sku: 'ELEC-001',
-        barcode: '1234567890123',
-        price: new Prisma.Decimal(799.99),
-        costPrice: new Prisma.Decimal(650),
-        stock: 15,
+        name: 'iPhone 15 Pro',
+        sku: 'IPH-15P',
+        barcode: '194253701234',
+        price: new Prisma.Decimal(999.00),
+        costPrice: new Prisma.Decimal(750),
+        stock: 25,
         minStock: 5,
         categoryId: categories[0].id,
-        description: 'High-performance laptop for work and play',
+        description: 'Titanium design, A17 Pro chip',
       },
       {
-        name: 'Wireless Mouse',
-        sku: 'ELEC-002',
-        barcode: '1234567890124',
-        price: new Prisma.Decimal(29.99),
-        costPrice: new Prisma.Decimal(15),
-        stock: 50,
-        minStock: 10,
-        categoryId: categories[0].id,
-        description: 'Ergonomic wireless mouse',
-      },
-      {
-        name: 'Cotton T-Shirt',
-        sku: 'CLTH-001',
-        barcode: '1234567890125',
-        price: new Prisma.Decimal(19.99),
-        costPrice: new Prisma.Decimal(8),
-        stock: 100,
-        minStock: 20,
+        name: 'iPad Pro M2',
+        sku: 'IPD-M2',
+        barcode: '194253705678',
+        price: new Prisma.Decimal(799.00),
+        costPrice: new Prisma.Decimal(600),
+        stock: 15,
+        minStock: 3,
         categoryId: categories[1].id,
-        description: 'Comfortable cotton t-shirt',
+        description: '11-inch Liquid Retina display',
       },
       {
-        name: 'Jeans',
-        sku: 'CLTH-002',
-        barcode: '1234567890126',
-        price: new Prisma.Decimal(49.99),
-        costPrice: new Prisma.Decimal(25),
-        stock: 75,
-        minStock: 15,
-        categoryId: categories[1].id,
-        description: 'Classic blue jeans',
-      },
-      {
-        name: 'Garden Hose',
-        sku: 'HOME-001',
-        barcode: '1234567890127',
-        price: new Prisma.Decimal(34.99),
-        costPrice: new Prisma.Decimal(18),
-        stock: 30,
-        minStock: 10,
+        name: 'MacBook Air M3',
+        sku: 'MAC-M3',
+        barcode: '194253709012',
+        price: new Prisma.Decimal(1099.00),
+        costPrice: new Prisma.Decimal(850),
+        stock: 10,
+        minStock: 2,
         categoryId: categories[2].id,
-        description: '50ft expandable garden hose',
+        description: 'Midnight, 13-inch display',
       },
+      {
+        name: 'Samsung 4K Smart TV',
+        sku: 'SAM-4K',
+        barcode: '880609012345',
+        price: new Prisma.Decimal(549.99),
+        costPrice: new Prisma.Decimal(400),
+        stock: 8,
+        minStock: 2,
+        categoryId: categories[5].id,
+        description: '55-inch Crystal UHD 4K',
+      }
     ];
 
     const products = [];
@@ -173,38 +145,15 @@ async function seed() {
     console.log('👤 Seeding customers...');
     const customers = await Promise.all([
       prisma.customer.upsert({
-        where: { email: 'john.doe@example.com' },
+        where: { email: 'customer1@example.com' },
         update: {},
         create: {
-          name: 'John Doe',
-          email: 'john.doe@example.com',
-          phone: '+1234567890',
-          address: '123 Main St, City, State 12345',
+          name: 'Nguyen Van A',
+          email: 'customer1@example.com',
+          phone: '0901234567',
+          address: 'District 1, HCM City',
           isMember: true,
           memberSince: new Date('2024-01-01'),
-        },
-      }),
-      prisma.customer.upsert({
-        where: { email: 'jane.smith@example.com' },
-        update: {},
-        create: {
-          name: 'Jane Smith',
-          email: 'jane.smith@example.com',
-          phone: '+1234567891',
-          address: '456 Oak Ave, City, State 12345',
-          isMember: false,
-        },
-      }),
-      prisma.customer.upsert({
-        where: { email: 'bob.wilson@example.com' },
-        update: {},
-        create: {
-          name: 'Bob Wilson',
-          email: 'bob.wilson@example.com',
-          phone: '+1234567892',
-          address: '789 Pine St, City, State 12345',
-          isMember: true,
-          memberSince: new Date('2024-06-15'),
         },
       }),
     ]);
@@ -212,170 +161,34 @@ async function seed() {
 
     // 5. Seed Discounts
     console.log('🎟️  Seeding discounts...');
-    const discounts = await Promise.all([
-      prisma.discount.upsert({
-        where: { code: 'SAVE10' },
-        update: {},
-        create: {
-          code: 'SAVE10',
-          name: '10% Off',
-          description: 'Get 10% off your purchase',
-          type: 'PERCENTAGE',
-          value: new Prisma.Decimal(10),
-          minPurchase: new Prisma.Decimal(50),
-          maxDiscount: new Prisma.Decimal(100),
-          applicableToAll: true,
-        },
-      }),
-      prisma.discount.upsert({
-        where: { code: 'MEMBER20' },
-        update: {},
-        create: {
-          code: 'MEMBER20',
-          name: 'Member Discount',
-          description: '20% off for members',
-          type: 'MEMBER_DISCOUNT',
-          value: new Prisma.Decimal(20),
-          memberOnly: true,
-          applicableToAll: true,
-        },
-      }),
-    ]);
-    console.log(`   ✅ Created ${discounts.length} discounts\n`);
-
-    // 6. Seed Orders
-    console.log('📦 Seeding orders...');
-    const orders = await Promise.all([
-      prisma.order.upsert({
-        where: { orderNumber: 'ORD-2024-001' },
-        update: {},
-        create: {
-          orderNumber: 'ORD-2024-001',
-          customerId: customers[0].id,
-          userId: users[2].id, // staff1
-          status: 'COMPLETED',
-          subtotal: new Prisma.Decimal(500),
-          discountAmount: new Prisma.Decimal(50),
-          taxAmount: new Prisma.Decimal(45),
-          total: new Prisma.Decimal(495),
-          completedAt: new Date('2024-12-01'),
-          orderItems: {
-            create: [
-              {
-                productId: products[0].id,
-                quantity: 2,
-                unitPrice: new Prisma.Decimal(150),
-                subtotal: new Prisma.Decimal(300),
-                discountAmount: new Prisma.Decimal(30),
-                total: new Prisma.Decimal(270),
-              },
-              {
-                productId: products[1].id,
-                quantity: 1,
-                unitPrice: new Prisma.Decimal(200),
-                subtotal: new Prisma.Decimal(200),
-                discountAmount: new Prisma.Decimal(20),
-                total: new Prisma.Decimal(180),
-              },
-            ],
-          },
-        },
-      }),
-      prisma.order.upsert({
-        where: { orderNumber: 'ORD-2024-002' },
-        update: {},
-        create: {
-          orderNumber: 'ORD-2024-002',
-          customerId: customers[1].id,
-          userId: users[2].id,
-          status: 'COMPLETED',
-          subtotal: new Prisma.Decimal(1200),
-          discountAmount: new Prisma.Decimal(0),
-          taxAmount: new Prisma.Decimal(120),
-          total: new Prisma.Decimal(1320),
-          completedAt: new Date('2024-12-05'),
-          orderItems: {
-            create: [
-              {
-                productId: products[2].id,
-                quantity: 3,
-                unitPrice: new Prisma.Decimal(400),
-                subtotal: new Prisma.Decimal(1200),
-                discountAmount: new Prisma.Decimal(0),
-                total: new Prisma.Decimal(1200),
-              },
-            ],
-          },
-        },
-      }),
-      prisma.order.upsert({
-        where: { orderNumber: 'ORD-2024-003' },
-        update: {},
-        create: {
-          orderNumber: 'ORD-2024-003',
-          customerId: customers[2].id,
-          userId: users[1].id, // manager1
-          status: 'PENDING',
-          subtotal: new Prisma.Decimal(300),
-          discountAmount: new Prisma.Decimal(0),
-          taxAmount: new Prisma.Decimal(30),
-          total: new Prisma.Decimal(330),
-          orderItems: {
-            create: [
-              {
-                productId: products[3].id,
-                quantity: 2,
-                unitPrice: new Prisma.Decimal(150),
-                subtotal: new Prisma.Decimal(300),
-                discountAmount: new Prisma.Decimal(0),
-                total: new Prisma.Decimal(300),
-              },
-            ],
-          },
-        },
-      }),
-    ]);
-    console.log(`   ✅ Created ${orders.length} orders\n`);
-
-    // 7. Seed License Keys for testing
-    console.log('🔑 Seeding license keys...');
-    const licenses = await Promise.all([
-      prisma.appLicense.upsert({
-        where: { licenseKey: 'MYSHOP-TEST-0001' },
-        update: {},
-        create: {
-          licenseKey: 'MYSHOP-TEST-0001',
-          activatedAt: new Date('2024-12-01'),
-          expiresAt: new Date('2025-12-01'), // 1 year
-          isActive: true,
-        },
-      }),
-      prisma.appLicense.upsert({
-        where: { licenseKey: 'MYSHOP-TRIAL-0001' },
-        update: {},
-        create: {
-          licenseKey: 'MYSHOP-TRIAL-0001',
-          activatedAt: new Date(),
-          expiresAt: new Date(new Date().getTime() + 15 * 24 * 60 * 60 * 1000), // 15 days
-          isActive: true,
-        },
-      }),
-    ]);
-    console.log(`   ✅ Created ${licenses.length} license keys\n`);
-
-    console.log('✨ Database seeding completed successfully!\n');
-    console.log('📊 Summary:');
-    console.log(`   - Users: ${users.length}`);
-    console.log(`   - Categories: ${categories.length}`);
-    console.log(`   - Products: ${products.length}`);
-    console.log(`   - Customers: ${customers.length}`);
-    console.log(`   - Discounts: ${discounts.length}`);
-    console.log(`   - Orders: ${orders.length}`);
-    console.log(`   - License Keys: ${licenses.length}\n`);
-    console.log('🔐 Available License Keys for Testing:');
-    licenses.forEach((lic) => {
-      console.log(`   - ${lic.licenseKey} (expires: ${lic.expiresAt})`);
+    await prisma.discount.upsert({
+      where: { code: 'NEWYEAR' },
+      update: {},
+      create: {
+        code: 'NEWYEAR',
+        name: 'New Year Sale',
+        description: '10% discount on all items',
+        type: 'PERCENTAGE',
+        value: new Prisma.Decimal(10),
+        applicableToAll: true,
+      },
     });
+    console.log(`   ✅ Created discounts\n`);
+
+    // 6. Seed License Keys
+    console.log('🔑 Seeding license keys...');
+    await prisma.appLicense.upsert({
+      where: { licenseKey: 'MYSHOP-TRIAL-0001' },
+      update: {},
+      create: {
+        licenseKey: 'MYSHOP-TRIAL-0001',
+        activatedAt: new Date(),
+        expiresAt: new Date(new Date().getTime() + 15 * 24 * 60 * 60 * 1000),
+        isActive: true,
+      },
+    });
+
+    console.log('✨ Database seeding completed successfully!');
   } catch (error) {
     console.error('❌ Error seeding database:', error);
     process.exit(1);
@@ -384,5 +197,4 @@ async function seed() {
   }
 }
 
-// Run the seeder
 seed();

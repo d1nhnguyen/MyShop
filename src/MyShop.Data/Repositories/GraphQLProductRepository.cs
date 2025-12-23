@@ -170,8 +170,8 @@ namespace MyShop.Data.Repositories
                         description = entity.Description,
                         barcode = entity.Barcode,
                         minStock = entity.MinStock,
-                        imageUrl = entity.ImageUrl,
-                        isActive = entity.IsActive
+                        imageUrl = entity.ImageUrl
+                        // isActive removed from here to fix 'Variable $input got invalid value'
                     }
                 }
             };

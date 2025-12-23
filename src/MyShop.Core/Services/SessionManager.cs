@@ -10,9 +10,11 @@ namespace MyShop.Core.Services
         private const string TokenKey = "AuthToken";
         private const string UserKey = "CurrentUser";
         private readonly ApplicationDataContainer _localSettings;
+        private readonly GraphQLService _graphQLService;
 
-        public SessionManager()
+        public SessionManager(GraphQLService graphQLService)
         {
+            _graphQLService = graphQLService;
             _localSettings = ApplicationData.Current.LocalSettings;
             LoadSession();
         }
@@ -27,6 +29,8 @@ namespace MyShop.Core.Services
             CurrentUser = null;
             _localSettings.Values.Remove(TokenKey);
             _localSettings.Values.Remove(UserKey);
+
+            _graphQLService.SetAuthToken(null);
         }
 
         private void LoadSession()
@@ -47,6 +51,11 @@ namespace MyShop.Core.Services
                     CurrentUser = null;
                 }
             }
+
+            if (IsAuthenticated)
+            {
+                _graphQLService.SetAuthToken(Token);
+            }
         }
 
         public void SaveSession(string token, User user)
@@ -55,6 +64,8 @@ namespace MyShop.Core.Services
             CurrentUser = user;
             _localSettings.Values[TokenKey] = token;
             _localSettings.Values[UserKey] = JsonSerializer.Serialize(user);
+
+            _graphQLService.SetAuthToken(token);
         }
     }
 }

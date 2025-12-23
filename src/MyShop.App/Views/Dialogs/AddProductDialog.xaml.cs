@@ -70,9 +70,9 @@ namespace MyShop.App.Views.Dialogs
                 Price = (decimal)PriceBox.Value,
                 Stock = (int)StockBox.Value,
                 CategoryId = CategoryCombo.SelectedIndex + 1,
-                IsActive = true,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
+                // IsActive defaults to true in the Model, so we don't need to set it here
             };
         }
 
