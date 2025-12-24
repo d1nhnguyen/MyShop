@@ -70,6 +70,7 @@ namespace MyShop.App
             services.AddTransient<ReportsViewModel>();
             services.AddTransient<OrderViewModel>();
 
+            services.AddTransient<CustomersViewModel>();
         }
 
         protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
