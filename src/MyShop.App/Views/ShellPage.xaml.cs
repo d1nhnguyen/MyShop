@@ -15,7 +15,7 @@ namespace MyShop.App.Views
             this.InitializeComponent();
             ViewModel = App.Current.Services.GetRequiredService<ShellViewModel>();
             ViewModel.LogoutRequested += OnLogoutRequested;
-            
+
             // Handle Navigation
             NavView.SelectionChanged += NavView_SelectionChanged;
             NavView.Loaded += NavView_Loaded;
@@ -31,7 +31,6 @@ namespace MyShop.App.Views
         {
             if (args.IsSettingsSelected)
             {
-                // Settings page if needed
                 // ContentFrame.Navigate(typeof(SettingsPage));
             }
             else
@@ -48,7 +47,7 @@ namespace MyShop.App.Views
                             pageType = typeof(Dashboard);
                             break;
                         case "Products":
-                            pageType = typeof(ProductsPage);
+                            pageType = typeof(ProductsScreen);
                             break;
                         case "Orders":
                             pageType = typeof(OrdersPage);
@@ -57,8 +56,7 @@ namespace MyShop.App.Views
                             pageType = typeof(ReportsPage);
                             break;
                         case "Categories":
-                            // Category doesn't navigate itself, maybe expand?
-                            // For now do nothing or navigate to a category list
+                            // pageType = typeof(ProductsScreen);
                             break;
                     }
 
@@ -70,9 +68,10 @@ namespace MyShop.App.Views
             }
         }
 
+        // ... existing methods (OnManageProductsClick, OnLogoutRequested) ...
+
         private void OnManageProductsClick(object sender, RoutedEventArgs e)
         {
-            // Navigate the current Frame to your new ProductsScreen
             this.Frame.Navigate(typeof(ProductsScreen));
         }
 
