@@ -27,7 +27,7 @@ namespace MyShop.App.ViewModels
         private ObservableCollection<CategoryStat> _categories;
         private CategoryStat _selectedCategory;
 
-        // Search state fields
+        // Search state
         private string _currentSearchTerm = string.Empty;
         private List<Product> _currentSearchResults = new List<Product>();
 
@@ -72,7 +72,6 @@ namespace MyShop.App.ViewModels
             try
             {
                 IsBusy = true;
-
                 var dbData = await _productRepository.GetAllAsync();
 
                 _allProducts.Clear();
@@ -106,6 +105,40 @@ namespace MyShop.App.ViewModels
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Add Error: {ex.Message}");
+            }
+            finally
+            {
+                IsBusy = false;
+            }
+        }
+
+        public async Task UpdateProductAsync(Product updatedProduct)
+        {
+            try
+            {
+                IsBusy = true;
+                await _productRepository.UpdateAsync(updatedProduct);
+
+                // 1. Update in main cache
+                var index = _allProducts.FindIndex(p => p.Id == updatedProduct.Id);
+                if (index >= 0)
+                {
+                    _allProducts[index] = updatedProduct;
+                }
+
+                // 2. Update in search results if active
+                var searchIndex = _currentSearchResults.FindIndex(p => p.Id == updatedProduct.Id);
+                if (searchIndex >= 0)
+                {
+                    _currentSearchResults[searchIndex] = updatedProduct;
+                }
+
+                // 3. Refresh UI
+                FilterProducts();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Update Error: {ex.Message}");
             }
             finally
             {
@@ -170,15 +203,18 @@ namespace MyShop.App.ViewModels
 
         private void FilterProducts()
         {
+            // Determine source: Search Results OR All Products
             IEnumerable<Product> source = string.IsNullOrWhiteSpace(_currentSearchTerm)
                 ? _allProducts
                 : _currentSearchResults;
 
+            // Apply Category Filter
             if (SelectedCategory != null && SelectedCategory.Id != 0)
             {
                 source = source.Where(p => p.CategoryId == SelectedCategory.Id);
             }
 
+            // Update UI
             Products = new ObservableCollection<Product>(source.ToList());
         }
     }

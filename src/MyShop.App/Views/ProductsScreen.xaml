@@ -72,10 +72,10 @@
                 <GridView.ItemTemplate>
                     <DataTemplate x:DataType="models:Product">
                         <Grid Width="280" 
-                              Background="{ThemeResource LayerFillColorDefaultBrush}" 
-                              CornerRadius="8" Padding="16" 
-                              BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}" 
-                              BorderThickness="1">
+              Background="{ThemeResource LayerFillColorDefaultBrush}" 
+              CornerRadius="8" Padding="16" 
+              BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}" 
+              BorderThickness="1">
 
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
@@ -98,6 +98,11 @@
                                     <TextBlock Text="{x:Bind Name}" FontWeight="Bold"/>
                                     <TextBlock Text="{x:Bind Price}" FontWeight="Bold" Margin="0,4,0,0"/>
                                 </StackPanel>
+
+                                <Button Grid.Column="2" Background="Transparent" BorderThickness="0" Padding="4"
+                                        Click="OnEditProductClick" Tag="{x:Bind}">
+                                    <FontIcon Glyph="&#xE70F;" FontSize="14"/>
+                                </Button>
                             </Grid>
 
                             <TextBlock Grid.Row="1" Text="{x:Bind Description}" FontSize="10" 
