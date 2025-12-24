@@ -53,7 +53,9 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                <AutoSuggestBox PlaceholderText="Search products..." Width="200" QueryIcon="Find"/>
+                <AutoSuggestBox PlaceholderText="Search products..." Width="200" QueryIcon="Find"
+                                QuerySubmitted="OnSearchQuerySubmitted"
+                                TextChanged="OnSearchTextChanged"/>
 
                 <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="10">
                     <Button Content="ADD NEW CATEGORY" CornerRadius="4"/>

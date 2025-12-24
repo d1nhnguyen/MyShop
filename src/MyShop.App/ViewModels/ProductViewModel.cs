@@ -27,6 +27,10 @@ namespace MyShop.App.ViewModels
         private ObservableCollection<CategoryStat> _categories;
         private CategoryStat _selectedCategory;
 
+        // Search state fields
+        private string _currentSearchTerm = string.Empty;
+        private List<Product> _currentSearchResults = new List<Product>();
+
         public ProductViewModel(IProductRepository productRepository)
         {
             _productRepository = productRepository;
@@ -109,6 +113,36 @@ namespace MyShop.App.ViewModels
             }
         }
 
+        public async Task SearchProductsAsync(string keyword)
+        {
+            if (IsBusy) return;
+
+            try
+            {
+                IsBusy = true;
+                _currentSearchTerm = keyword;
+
+                if (string.IsNullOrWhiteSpace(keyword))
+                {
+                    _currentSearchResults.Clear();
+                }
+                else
+                {
+                    _currentSearchResults = await _productRepository.SearchByNameAsync(keyword);
+                }
+
+                FilterProducts();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Search Error: {ex.Message}");
+            }
+            finally
+            {
+                IsBusy = false;
+            }
+        }
+
         private void RefreshCategoryStats()
         {
             var currentId = SelectedCategory?.Id ?? 0;
@@ -136,15 +170,16 @@ namespace MyShop.App.ViewModels
 
         private void FilterProducts()
         {
-            if (SelectedCategory == null || SelectedCategory.Id == 0)
+            IEnumerable<Product> source = string.IsNullOrWhiteSpace(_currentSearchTerm)
+                ? _allProducts
+                : _currentSearchResults;
+
+            if (SelectedCategory != null && SelectedCategory.Id != 0)
             {
-                Products = new ObservableCollection<Product>(_allProducts);
+                source = source.Where(p => p.CategoryId == SelectedCategory.Id);
             }
-            else
-            {
-                var filtered = _allProducts.Where(p => p.CategoryId == SelectedCategory.Id).ToList();
-                Products = new ObservableCollection<Product>(filtered);
-            }
+
+            Products = new ObservableCollection<Product>(source.ToList());
         }
     }
 }

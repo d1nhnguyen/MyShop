@@ -5,10 +5,9 @@ const prisma = new PrismaClient();
 
 async function seed() {
   try {
-    console.log('🌱 Starting database seeding...\n');
+    console.log('Starting database seeding...\n');
 
-    // 1. Seed Users
-    console.log('👥 Seeding users...');
+    console.log('Seeding users...');
     const hashedPassword = await AuthUtils.hashPassword('Password@123');
 
     const users = await Promise.all([
@@ -43,10 +42,9 @@ async function seed() {
         },
       }),
     ]);
-    console.log(`   ✅ Created ${users.length} users\n`);
+    console.log(`Created ${users.length} users\n`);
 
-    // 2. Seed Categories (Updated to match your theme)
-    console.log('📁 Seeding categories...');
+    console.log('Seeding categories...');
     const categories = await Promise.all([
       prisma.category.upsert({
         where: { name: 'iPhone' },
@@ -79,10 +77,9 @@ async function seed() {
         create: { name: 'TV', description: 'Smart Televisions' },
       }),
     ]);
-    console.log(`   ✅ Created ${categories.length} categories\n`);
+    console.log(`Created ${categories.length} categories\n`);
 
-    // 3. Seed Products (Updated to match categories)
-    console.log('📦 Seeding products...');
+    console.log('Seeding products...');
     const productData = [
       {
         name: 'iPhone 15 Pro',
@@ -139,10 +136,9 @@ async function seed() {
       });
       products.push(created);
     }
-    console.log(`   ✅ Created ${products.length} products\n`);
+    console.log(`Created ${products.length} products\n`);
 
-    // 4. Seed Customers
-    console.log('👤 Seeding customers...');
+    console.log('Seeding customers...');
     const customers = await Promise.all([
       prisma.customer.upsert({
         where: { email: 'customer1@example.com' },
@@ -157,10 +153,9 @@ async function seed() {
         },
       }),
     ]);
-    console.log(`   ✅ Created ${customers.length} customers\n`);
+    console.log(`Created ${customers.length} customers\n`);
 
-    // 5. Seed Discounts
-    console.log('🎟️  Seeding discounts...');
+    console.log('Seeding discounts...');
     await prisma.discount.upsert({
       where: { code: 'NEWYEAR' },
       update: {},
@@ -173,10 +168,9 @@ async function seed() {
         applicableToAll: true,
       },
     });
-    console.log(`   ✅ Created discounts\n`);
+    console.log(`Created discounts\n`);
 
-    // 6. Seed License Keys
-    console.log('🔑 Seeding license keys...');
+    console.log('Seeding license keys...');
     await prisma.appLicense.upsert({
       where: { licenseKey: 'MYSHOP-TRIAL-0001' },
       update: {},
@@ -188,9 +182,9 @@ async function seed() {
       },
     });
 
-    console.log('✨ Database seeding completed successfully!');
+    console.log('Database seeding completed successfully!');
   } catch (error) {
-    console.error('❌ Error seeding database:', error);
+    console.error('Error seeding database:', error);
     process.exit(1);
   } finally {
     await prisma.$disconnect();

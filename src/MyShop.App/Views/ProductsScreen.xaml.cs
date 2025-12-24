@@ -29,5 +29,18 @@ namespace MyShop.App.Views
                 await ViewModel.AddProductAsync(dialog.NewProduct);
             }
         }
+
+        private async void OnSearchQuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
+        {
+            await ViewModel.SearchProductsAsync(args.QueryText);
+        }
+
+        private async void OnSearchTextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
+        {
+            if (args.Reason == AutoSuggestionBoxTextChangeReason.UserInput && string.IsNullOrWhiteSpace(sender.Text))
+            {
+                await ViewModel.SearchProductsAsync(string.Empty);
+            }
+        }
     }
 }

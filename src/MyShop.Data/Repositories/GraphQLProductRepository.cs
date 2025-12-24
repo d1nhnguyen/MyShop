@@ -89,6 +89,7 @@ namespace MyShop.Data.Repositories
                                 sku
                                 price
                                 stock
+                                categoryId
                             }
                         }
                     }",
@@ -112,6 +113,7 @@ namespace MyShop.Data.Repositories
                                 sku
                                 price
                                 stock
+                                categoryId
                             }
                         }
                     }",
@@ -171,7 +173,6 @@ namespace MyShop.Data.Repositories
                         barcode = entity.Barcode,
                         minStock = entity.MinStock,
                         imageUrl = entity.ImageUrl
-                        // isActive removed from here to fix 'Variable $input got invalid value'
                     }
                 }
             };
