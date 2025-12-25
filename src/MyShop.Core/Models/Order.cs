@@ -48,5 +48,13 @@ namespace MyShop.Core.Models
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public DateTime? UpdatedAt { get; set; }
+
+        public DateTime? CompletedAt { get; set; }
+
+        public List<OrderItem>? OrderItems { get; set; }
+
+        // Formatted date properties for display
+        public string FormattedDate => CreatedAt.ToString("dd/MM/yyyy");
+        public string FormattedTime => CreatedAt.ToString("HH:mm");
     }
 }

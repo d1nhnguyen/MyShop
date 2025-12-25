@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ContentDialog
+    x:Class="MyShop.App.Views.Dialogs.CreateOrderDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:models="using:MyShop.Core.Models"
+    Title="Create New Order"
+    PrimaryButtonText="Create Order"
+    CloseButtonText="Cancel"
+    DefaultButton="Primary"
+    PrimaryButtonClick="OnCreateOrderClick">
+
+    <ScrollViewer MaxHeight="600">
+        <StackPanel Spacing="16" Padding="4">
+            <!-- Customer Selection -->
+            <StackPanel>
+                <Grid Margin="0,0,0,8">
+                    <TextBlock Text="Customer (Optional)" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                    <Button Content="Clear" HorizontalAlignment="Right" Click="OnClearCustomerClick"
+                            Padding="8,4" FontSize="12"/>
+                </Grid>
+                <ComboBox x:Name="CustomerComboBox"
+                          PlaceholderText="Select Customer or walk-in"
+                          HorizontalAlignment="Stretch"
+                          DisplayMemberPath="Name"
+                          SelectionChanged="OnCustomerSelectionChanged"/>
+            </StackPanel>
+
+            <!-- Order Items -->
+            <StackPanel>
+                <Grid Margin="0,0,0,8">
+                    <TextBlock Text="Order Items" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                    <Button Content="+ Add Product" Click="OnAddProductClick" HorizontalAlignment="Right"
+                            Style="{StaticResource AccentButtonStyle}"/>
+                </Grid>
+
+                <ListView x:Name="OrderItemsList"
+                          SelectionMode="None"
+                          MaxHeight="300">
+                    <ListView.ItemTemplate>
+                        <DataTemplate x:DataType="models:OrderItem">
+                            <Grid Padding="12"
+                                  Background="{ThemeResource LayerFillColorDefaultBrush}"
+                                  CornerRadius="4"
+                                  Margin="0,0,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="100"/>
+                                    <ColumnDefinition Width="100"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Column="0" VerticalAlignment="Center">
+                                    <Run Text="{x:Bind Product.Name}" FontWeight="SemiBold"/>
+                                    <LineBreak/>
+                                    <Run Text="{x:Bind Product.Sku}" FontSize="11"
+                                         Foreground="{ThemeResource SystemControlForegroundBaseMediumBrush}"/>
+                                </TextBlock>
+
+                                <NumberBox Grid.Column="1"
+                                           Value="{x:Bind Quantity, Mode=TwoWay}"
+                                           Minimum="1"
+                                           SpinButtonPlacementMode="Inline"
+                                           Margin="8,0"
+                                           VerticalAlignment="Center"
+                                           ValueChanged="OnQuantityChanged"
+                                           Tag="{x:Bind}"/>
+
+                                <TextBlock Grid.Column="2" VerticalAlignment="Center" Margin="8,0">
+                                    <Run Text="$"/>
+                                    <Run Text="{x:Bind Total, Mode=OneWay}" FontWeight="Bold"/>
+                                </TextBlock>
+
+                                <Button Grid.Column="3"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        Padding="8"
+                                        Click="OnRemoveItemClick"
+                                        Tag="{x:Bind}">
+                                    <FontIcon Glyph="&#xE74D;" FontSize="14" Foreground="#FF5555"/>
+                                </Button>
+                            </Grid>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+
+                <TextBlock Text="No items added yet"
+                           Foreground="{ThemeResource SystemControlForegroundBaseMediumBrush}"
+                           HorizontalAlignment="Center"
+                           Margin="0,20"
+                           Visibility="{x:Bind OrderItemsList.Items.Count, Mode=OneWay, Converter={StaticResource InvertedBoolToVisibilityConverter}}"/>
+            </StackPanel>
+
+            <!-- Discount (Optional) -->
+            <StackPanel>
+                <Grid Margin="0,0,0,8">
+                    <TextBlock Text="Discount Code (Optional)" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                    <Button Content="Clear" HorizontalAlignment="Right" Click="OnClearDiscountClick"
+                            Padding="8,4" FontSize="12"/>
+                </Grid>
+                <ComboBox x:Name="DiscountComboBox"
+                          PlaceholderText="No discount"
+                          HorizontalAlignment="Stretch"
+                          DisplayMemberPath="Code"
+                          SelectionChanged="OnDiscountSelectionChanged"/>
+            </StackPanel>
+
+            <!-- Notes -->
+            <StackPanel>
+                <TextBlock Text="Notes (Optional)" FontWeight="SemiBold" Margin="0,0,0,8"/>
+                <TextBox x:Name="NotesTextBox"
+                         PlaceholderText="Enter order notes..."
+                         TextWrapping="Wrap"
+                         AcceptsReturn="True"
+                         Height="80"/>
+            </StackPanel>
+
+            <!-- Order Summary -->
+            <Border BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="16"
+                    Background="{ThemeResource LayerFillColorDefaultBrush}">
+                <StackPanel Spacing="8">
+                    <TextBlock Text="Order Summary" FontWeight="Bold" FontSize="16"/>
+
+                    <Grid>
+                        <TextBlock Text="Subtotal:" />
+                        <TextBlock x:Name="SubtotalText" HorizontalAlignment="Right" FontWeight="SemiBold">
+                            <Run Text="$0.00"/>
+                        </TextBlock>
+                    </Grid>
+
+                    <Grid>
+                        <TextBlock Text="Discount:" />
+                        <TextBlock x:Name="DiscountText" HorizontalAlignment="Right"
+                                   Foreground="{ThemeResource SystemAccentColor}" FontWeight="SemiBold">
+                            <Run Text="-$0.00"/>
+                        </TextBlock>
+                    </Grid>
+
+                    <Border BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}"
+                            BorderThickness="0,1,0,0"
+                            Padding="0,8,0,0">
+                        <Grid>
+                            <TextBlock Text="Total:" FontWeight="Bold" FontSize="16"/>
+                            <TextBlock x:Name="TotalText" HorizontalAlignment="Right"
+                                       FontWeight="Bold" FontSize="18"
+                                       Foreground="{ThemeResource SystemAccentColor}">
+                                <Run Text="$0.00"/>
+                            </TextBlock>
+                        </Grid>
+                    </Border>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</ContentDialog>

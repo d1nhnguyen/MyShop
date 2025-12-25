@@ -152,11 +152,34 @@ async function seed() {
           memberSince: new Date('2024-01-01'),
         },
       }),
+      prisma.customer.upsert({
+        where: { email: 'customer2@example.com' },
+        update: {},
+        create: {
+          name: 'Tran Thi B',
+          email: 'customer2@example.com',
+          phone: '0902345678',
+          address: 'District 3, HCM City',
+          isMember: false,
+        },
+      }),
+      prisma.customer.upsert({
+        where: { email: 'customer3@example.com' },
+        update: {},
+        create: {
+          name: 'Le Van C',
+          email: 'customer3@example.com',
+          phone: '0903456789',
+          address: 'District 7, HCM City',
+          isMember: true,
+          memberSince: new Date('2024-06-15'),
+        },
+      }),
     ]);
     console.log(`Created ${customers.length} customers\n`);
 
     console.log('Seeding discounts...');
-    await prisma.discount.upsert({
+    const discount = await prisma.discount.upsert({
       where: { code: 'NEWYEAR' },
       update: {},
       create: {
@@ -169,6 +192,123 @@ async function seed() {
       },
     });
     console.log(`Created discounts\n`);
+
+    console.log('Seeding orders...');
+    const orderData = [
+      {
+        orderNumber: 'ORD-2024-001',
+        customerId: customers[0].id,
+        userId: users[2].id, // staff1
+        status: 'COMPLETED' as const,
+        items: [
+          { productId: products[0].id, quantity: 1, unitPrice: products[0].price },
+          { productId: products[1].id, quantity: 1, unitPrice: products[1].price },
+        ],
+        discountId: discount.id,
+        createdAt: new Date('2024-12-01T10:00:00Z'),
+        completedAt: new Date('2024-12-01T11:00:00Z'),
+      },
+      {
+        orderNumber: 'ORD-2024-002',
+        customerId: customers[1].id,
+        userId: users[2].id,
+        status: 'COMPLETED' as const,
+        items: [
+          { productId: products[2].id, quantity: 1, unitPrice: products[2].price },
+        ],
+        discountId: null,
+        createdAt: new Date('2024-12-05T14:30:00Z'),
+        completedAt: new Date('2024-12-05T15:00:00Z'),
+      },
+      {
+        orderNumber: 'ORD-2024-003',
+        customerId: customers[2].id,
+        userId: users[1].id, // manager1
+        status: 'PROCESSING' as const,
+        items: [
+          { productId: products[3].id, quantity: 2, unitPrice: products[3].price },
+        ],
+        discountId: null,
+        createdAt: new Date('2024-12-10T09:15:00Z'),
+        completedAt: null,
+      },
+      {
+        orderNumber: 'ORD-2024-004',
+        customerId: customers[0].id,
+        userId: users[2].id,
+        status: 'PENDING' as const,
+        items: [
+          { productId: products[0].id, quantity: 2, unitPrice: products[0].price },
+        ],
+        discountId: null,
+        createdAt: new Date('2024-12-15T16:45:00Z'),
+        completedAt: null,
+      },
+      {
+        orderNumber: 'ORD-2024-005',
+        customerId: null,
+        userId: users[2].id,
+        status: 'COMPLETED' as const,
+        items: [
+          { productId: products[1].id, quantity: 1, unitPrice: products[1].price },
+          { productId: products[3].id, quantity: 1, unitPrice: products[3].price },
+        ],
+        discountId: null,
+        createdAt: new Date('2024-12-18T11:20:00Z'),
+        completedAt: new Date('2024-12-18T12:00:00Z'),
+      },
+    ];
+
+    for (const orderInfo of orderData) {
+      // Calculate order totals
+      const subtotal = orderInfo.items.reduce((sum, item) => {
+        return sum + Number(item.unitPrice) * item.quantity;
+      }, 0);
+
+      let discountAmount = 0;
+      if (orderInfo.discountId) {
+        discountAmount = subtotal * 0.1; // 10% discount
+      }
+
+      const total = subtotal - discountAmount;
+
+      // Check if order exists
+      const existingOrder = await prisma.order.findUnique({
+        where: { orderNumber: orderInfo.orderNumber },
+      });
+
+      if (!existingOrder) {
+        await prisma.order.create({
+          data: {
+            orderNumber: orderInfo.orderNumber,
+            customerId: orderInfo.customerId,
+            userId: orderInfo.userId,
+            status: orderInfo.status,
+            subtotal: new Prisma.Decimal(subtotal),
+            discountId: orderInfo.discountId,
+            discountAmount: new Prisma.Decimal(discountAmount),
+            taxAmount: new Prisma.Decimal(0),
+            total: new Prisma.Decimal(total),
+            createdAt: orderInfo.createdAt,
+            completedAt: orderInfo.completedAt,
+            orderItems: {
+              create: orderInfo.items.map(item => {
+                const itemSubtotal = Number(item.unitPrice) * item.quantity;
+                return {
+                  productId: item.productId,
+                  quantity: item.quantity,
+                  unitPrice: item.unitPrice,
+                  subtotal: new Prisma.Decimal(itemSubtotal),
+                  discountAmount: new Prisma.Decimal(0),
+                  total: new Prisma.Decimal(itemSubtotal),
+                };
+              }),
+            },
+          },
+        });
+      }
+    }
+    console.log(`Created ${orderData.length} orders\n`);
 
     console.log('Seeding license keys...');
     await prisma.appLicense.upsert({
