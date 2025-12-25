@@ -1,4 +1,3 @@
-
 using GraphQL.Client.Http;
 using GraphQL.Client.Serializer.SystemTextJson;
 using System;
@@ -37,21 +36,28 @@ namespace MyShop.Core.Services
             if (response.Errors != null && response.Errors.Length > 0)
             {
                 var errorMessage = string.Join(", ", response.Errors.Select(e => e.Message));
-                throw new GraphQLException($"GraphQL query error: {errorMessage}");
+                throw new Exception($"GraphQL query error: {errorMessage}");
             }
 
             if (response.Data == null)
             {
-                throw new GraphQLException("GraphQL response data is null");
+                throw new Exception("GraphQL response data is null");
             }
 
             return response.Data;
         }
 
-        public void SetAuthToken(string token)
+        public void SetAuthToken(string? token)
         {
-            _client.HttpClient.DefaultRequestHeaders.Authorization = 
-                new AuthenticationHeaderValue("Bearer", token);
+            if (string.IsNullOrEmpty(token))
+            {
+                _client.HttpClient.DefaultRequestHeaders.Authorization = null;
+            }
+            else
+            {
+                _client.HttpClient.DefaultRequestHeaders.Authorization =
+                    new AuthenticationHeaderValue("Bearer", token);
+            }
         }
     }
 }

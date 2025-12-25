@@ -15,6 +15,7 @@ namespace MyShop.App
     {
         public new static App Current => (App)Application.Current;
         public IServiceProvider Services { get; }
+        public static Window MainWindowInstance { get; private set; }
 
         public App()
         {
@@ -36,40 +37,42 @@ namespace MyShop.App
         }
         private void ConfigureServices(IServiceCollection services)
         {
+
             services.AddTransient<DashboardViewModel>();
             // Infrastructure
             services.AddSingleton<IConfigService, ConfigService>();
             services.AddSingleton<ISessionManager, SessionManager>();
 
-            // GraphQL Configuration (Initial load from config)
             var configService = new ConfigService();
             var graphQLService = new GraphQLService(configService.GetServerUrl());
             services.AddSingleton(graphQLService);
             services.AddSingleton<IGraphQLService>(graphQLService);
 
-            // Services
             services.AddSingleton<IAuthService, AuthService>();
             services.AddSingleton<IAuthorizationService, AuthorizationService>();
             services.AddSingleton<IEncryptionService, EncryptionService>();
             services.AddSingleton<IDashboardService, DashboardService>();
 
-            // Repositories (GraphQL-first)
             services.AddSingleton<IUserRepository, GraphQLUserRepository>();
             services.AddSingleton<IProductRepository, GraphQLProductRepository>();
             // services.AddSingleton<ICategoryRepository, GraphQLCategoryRepository>();
             services.AddSingleton<IReportRepository, GraphQLReportRepository>();
 
-            // ViewModels
             services.AddTransient<MainWindow>();
             services.AddTransient<LoginViewModel>();
             services.AddTransient<ConfigViewModel>();
             services.AddTransient<ConfigViewModel>();
             services.AddTransient<ShellViewModel>();
+
+            services.AddTransient<ProductViewModel>();
             services.AddTransient<ReportsViewModel>();
+
         }
+
         protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
         {
             m_window = Services.GetService<MainWindow>();
+            MainWindowInstance = m_window;
 
             m_window?.Activate();
         }

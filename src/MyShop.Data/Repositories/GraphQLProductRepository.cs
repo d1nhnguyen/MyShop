@@ -6,12 +6,13 @@ using MyShop.Data.Repositories.Base;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace MyShop.Data.Repositories
 {
     public class GraphQLProductRepository : GraphQLRepositoryBase<Product>, IProductRepository
     {
-        public GraphQLProductRepository(GraphQLService graphQLService) 
+        public GraphQLProductRepository(GraphQLService graphQLService)
             : base(graphQLService, "product")
         {
         }
@@ -66,6 +67,12 @@ namespace MyShop.Data.Repositories
             };
 
             var response = await _graphQLService.Client.SendQueryAsync<ProductsResponse>(request);
+
+            if (response.Errors != null && response.Errors.Any())
+            {
+                throw new Exception($"GraphQL Error: {response.Errors[0].Message}");
+            }
+
             return response.Data?.Products?.Products ?? new List<Product>();
         }
 
@@ -82,6 +89,7 @@ namespace MyShop.Data.Repositories
                                 sku
                                 price
                                 stock
+                                categoryId
                             }
                         }
                     }",
@@ -105,6 +113,7 @@ namespace MyShop.Data.Repositories
                                 sku
                                 price
                                 stock
+                                categoryId
                             }
                         }
                     }",
@@ -148,10 +157,13 @@ namespace MyShop.Data.Repositories
                             sku
                             price
                             stock
+                            categoryId
                         }
                     }",
-                Variables = new { 
-                    input = new { 
+                Variables = new
+                {
+                    input = new
+                    {
                         name = entity.Name,
                         sku = entity.Sku,
                         price = entity.Price,
@@ -161,12 +173,23 @@ namespace MyShop.Data.Repositories
                         barcode = entity.Barcode,
                         minStock = entity.MinStock,
                         imageUrl = entity.ImageUrl
-                    } 
+                    }
                 }
             };
 
             var response = await _graphQLService.Client.SendMutationAsync<CreateProductResponse>(request);
-            return response.Data?.CreateProduct ?? entity;
+
+            if (response.Errors != null && response.Errors.Any())
+            {
+                throw new Exception($"Failed to add product: {response.Errors[0].Message}");
+            }
+
+            if (response.Data?.CreateProduct == null)
+            {
+                throw new Exception("Server returned success but no data.");
+            }
+
+            return response.Data.CreateProduct;
         }
 
         public override async Task UpdateAsync(Product entity)
@@ -180,20 +203,26 @@ namespace MyShop.Data.Repositories
                             name
                         }
                     }",
-                Variables = new { 
+                Variables = new
+                {
                     id = entity.Id,
-                    input = new { 
+                    input = new
+                    {
                         name = entity.Name,
                         sku = entity.Sku,
                         price = entity.Price,
                         stock = entity.Stock,
                         categoryId = entity.CategoryId,
                         isActive = entity.IsActive
-                    } 
+                    }
                 }
             };
 
-            await _graphQLService.Client.SendMutationAsync<dynamic>(request);
+            var response = await _graphQLService.Client.SendMutationAsync<dynamic>(request);
+            if (response.Errors != null && response.Errors.Any())
+            {
+                throw new Exception($"Update failed: {response.Errors[0].Message}");
+            }
         }
 
         public override async Task DeleteAsync(int id)
@@ -207,7 +236,11 @@ namespace MyShop.Data.Repositories
                 Variables = new { id }
             };
 
-            await _graphQLService.Client.SendMutationAsync<dynamic>(request);
+            var response = await _graphQLService.Client.SendMutationAsync<dynamic>(request);
+            if (response.Errors != null && response.Errors.Any())
+            {
+                throw new Exception($"Delete failed: {response.Errors[0].Message}");
+            }
         }
 
         public override async Task<int> CountAsync()

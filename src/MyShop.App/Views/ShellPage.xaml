@@ -20,21 +20,20 @@
                     Background="White">
 
         <NavigationView.Resources>
-             <SolidColorBrush x:Key="NavigationViewItemForeground" Color="Black" />
-             <SolidColorBrush x:Key="NavigationViewItemForegroundSelected" Color="White" />
-             <SolidColorBrush x:Key="NavigationViewItemForegroundPointerOver" Color="Black" />
-             <SolidColorBrush x:Key="NavigationViewItemForegroundSelectedPointerOver" Color="White" />
-             <SolidColorBrush x:Key="NavigationViewItemBackgroundSelected" Color="#004060" /> <!-- Dark Blue -->
-             <SolidColorBrush x:Key="NavigationViewItemBackgroundPointerOver" Color="#F0F0F0" />
-             <SolidColorBrush x:Key="NavigationViewItemBackgroundSelectedPointerOver" Color="#004060" /> <!-- Keep blue when selected and hovered -->
+            <SolidColorBrush x:Key="NavigationViewItemForeground" Color="Black" />
+            <SolidColorBrush x:Key="NavigationViewItemForegroundSelected" Color="White" />
+            <SolidColorBrush x:Key="NavigationViewItemForegroundPointerOver" Color="Black" />
+            <SolidColorBrush x:Key="NavigationViewItemForegroundSelectedPointerOver" Color="White" />
+            <SolidColorBrush x:Key="NavigationViewItemBackgroundSelected" Color="#004060" />
+            <SolidColorBrush x:Key="NavigationViewItemBackgroundPointerOver" Color="#F0F0F0" />
+            <SolidColorBrush x:Key="NavigationViewItemBackgroundSelectedPointerOver" Color="#004060" />
         </NavigationView.Resources>
 
         <NavigationView.PaneHeader>
             <Grid Padding="20">
                 <StackPanel Orientation="Vertical" HorizontalAlignment="Center" Spacing="10">
-                    <!-- Logo Placeholder -->
                     <Viewbox Width="40" Height="40">
-                       <SymbolIcon Symbol="FourBars" Foreground="#004060"/>
+                        <SymbolIcon Symbol="FourBars" Foreground="#004060"/>
                     </Viewbox>
                 </StackPanel>
             </Grid>
@@ -42,7 +41,14 @@
 
         <NavigationView.MenuItems>
             <NavigationViewItem Content="DASHBOARD" Tag="Dashboard" Icon="ViewAll" FontWeight="SemiBold"/>
-            <NavigationViewItem Content="ALL PRODUCTS" Tag="Products" Icon="Shop" FontWeight="SemiBold"/>
+
+            <NavigationViewItemHeader Content="Inventory" />
+            <NavigationViewItem Content="All Products" Tag="Products_0" Icon="Shop" FontWeight="SemiBold"/>
+
+            <NavigationViewItemHeader Content="Categories" x:Name="CategoryHeader"/>
+
+            <NavigationViewItemSeparator/>
+
             <NavigationViewItem Content="ORDER LIST" Tag="Orders" Icon="List" FontWeight="SemiBold"/>
             <NavigationViewItem Content="REPORT" Tag="Reports" Icon="Document" FontWeight="SemiBold"/>
         </NavigationView.MenuItems>
@@ -54,14 +60,12 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
-                <!-- Top Bar -->
                 <Grid Grid.Row="0" Height="60" Background="White" Padding="20,0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    
-                    <!-- Right Side: Search, Notif, Profile -->
+
                     <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="20" VerticalAlignment="Center">
                         <Button Background="Transparent" BorderThickness="0">
                             <SymbolIcon Symbol="Find" Foreground="#0C2B4E"/>
@@ -69,7 +73,7 @@
                         <Button Background="Transparent" BorderThickness="0">
                             <SymbolIcon Symbol="Message" Foreground="#0C2B4E"/>
                         </Button>
-                        
+
                         <Button Background="White" BorderBrush="#E0E0E0" BorderThickness="1" Padding="10,5">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <TextBlock Text="{x:Bind ViewModel.UserRole, Mode=OneWay}" 
@@ -92,7 +96,6 @@
                     </StackPanel>
                 </Grid>
 
-                <!-- Main Content Frame -->
                 <Frame x:Name="ContentFrame" Grid.Row="1" Background="#F5F5F5"/>
             </Grid>
         </NavigationView.Content>
