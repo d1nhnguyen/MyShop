@@ -1,0 +1,411 @@
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Threading.Tasks;
+using MyShop.App.ViewModels.Base;
+using MyShop.Core.Interfaces.Repositories;
+using MyShop.Core.Models;
+
+namespace MyShop.App.ViewModels
+{
+    public class OrderViewModel : ViewModelBase
+    {
+        private readonly IOrderRepository _orderRepository;
+        private readonly IProductRepository _productRepository;
+        private List<Order> _allOrders;
+        private ObservableCollection<Order> _orders;
+        private OrderStatus? _selectedStatus;
+        private DateTime? _startDate;
+        private DateTime? _endDate;
+        private int _currentPage = 1;
+        private int _totalPages = 1;
+        private int _totalOrders = 0;
+        private const int PAGE_SIZE = 20;
+
+        public OrderViewModel(IOrderRepository orderRepository, IProductRepository productRepository)
+        {
+            _orderRepository = orderRepository;
+            _productRepository = productRepository;
+            _orders = new ObservableCollection<Order>();
+            _allOrders = new List<Order>();
+
+            _ = LoadOrdersAsync();
+        }
+
+        public ObservableCollection<Order> Orders
+        {
+            get => _orders;
+            set => SetProperty(ref _orders, value);
+        }
+
+        public OrderStatus? SelectedStatus
+        {
+            get => _selectedStatus;
+            set
+            {
+                if (SetProperty(ref _selectedStatus, value))
+                {
+                    _ = FilterOrdersAsync();
+                }
+            }
+        }
+
+        public DateTime? StartDate
+        {
+            get => _startDate;
+            set
+            {
+                if (SetProperty(ref _startDate, value))
+                {
+                    _ = FilterOrdersAsync();
+                }
+            }
+        }
+
+        public DateTime? EndDate
+        {
+            get => _endDate;
+            set
+            {
+                if (SetProperty(ref _endDate, value))
+                {
+                    _ = FilterOrdersAsync();
+                }
+            }
+        }
+
+        public int CurrentPage
+        {
+            get => _currentPage;
+            set => SetProperty(ref _currentPage, value);
+        }
+
+        public int TotalPages
+        {
+            get => _totalPages;
+            set => SetProperty(ref _totalPages, value);
+        }
+
+        public int TotalOrders
+        {
+            get => _totalOrders;
+            set => SetProperty(ref _totalOrders, value);
+        }
+
+        public bool HasPreviousPage => CurrentPage > 1;
+        public bool HasNextPage => CurrentPage < TotalPages;
+
+        public async Task LoadOrdersAsync()
+        {
+            if (IsBusy) return;
+
+            try
+            {
+                IsBusy = true;
+                ErrorMessage = null;
+
+                var orders = await _orderRepository.GetAllAsync();
+                _allOrders.Clear();
+                _allOrders.AddRange(orders.OrderByDescending(o => o.CreatedAt));
+
+                UpdatePagination();
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"Failed to load orders: {ex.Message}";
+                System.Diagnostics.Debug.WriteLine($"Error loading orders: {ex.Message}");
+            }
+            finally
+            {
+                IsBusy = false;
+            }
+        }
+
+        public async Task FilterOrdersAsync()
+        {
+            if (IsBusy) return;
+
+            try
+            {
+                IsBusy = true;
+                ErrorMessage = null;
+
+                List<Order> filteredOrders;
+
+                // Filter by date range first
+                if (StartDate.HasValue && EndDate.HasValue)
+                {
+                    filteredOrders = await _orderRepository.GetByDateRangeAsync(
+                        StartDate.Value.Date,
+                        EndDate.Value.Date.AddDays(1).AddSeconds(-1)
+                    );
+                }
+                else if (StartDate.HasValue || EndDate.HasValue)
+                {
+                    // If only one date is selected, filter in-memory
+                    var allOrders = await _orderRepository.GetAllAsync();
+                    filteredOrders = allOrders.Where(o =>
+                    {
+                        if (StartDate.HasValue && o.CreatedAt.Date < StartDate.Value.Date)
+                            return false;
+                        if (EndDate.HasValue && o.CreatedAt.Date > EndDate.Value.Date)
+                            return false;
+                        return true;
+                    }).ToList();
+                }
+                else
+                {
+                    filteredOrders = await _orderRepository.GetAllAsync();
+                }
+
+                // Then filter by status if selected
+                if (SelectedStatus.HasValue)
+                {
+                    filteredOrders = filteredOrders.Where(o => o.Status == SelectedStatus.Value).ToList();
+                }
+
+                _allOrders.Clear();
+                _allOrders.AddRange(filteredOrders.OrderByDescending(o => o.CreatedAt));
+
+                CurrentPage = 1;
+                UpdatePagination();
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"Failed to filter orders: {ex.Message}";
+                System.Diagnostics.Debug.WriteLine($"Error filtering orders: {ex.Message}");
+            }
+            finally
+            {
+                IsBusy = false;
+            }
+        }
+
+        public async Task ClearFiltersAsync()
+        {
+            SelectedStatus = null;
+            StartDate = null;
+            EndDate = null;
+            await LoadOrdersAsync();
+        }
+
+        public async Task SearchOrdersAsync(string query)
+        {
+            if (IsBusy) return;
+
+            try
+            {
+                IsBusy = true;
+                ErrorMessage = null;
+
+                var allOrders = await _orderRepository.GetAllAsync();
+                var searchQuery = query.ToLower();
+
+                var filteredOrders = allOrders.Where(o =>
+                    o.OrderNumber.ToLower().Contains(searchQuery) ||
+                    (o.Customer != null && o.Customer.Name.ToLower().Contains(searchQuery))
+                ).ToList();
+
+                _allOrders.Clear();
+                _allOrders.AddRange(filteredOrders.OrderByDescending(o => o.CreatedAt));
+
+                CurrentPage = 1;
+                UpdatePagination();
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"Failed to search orders: {ex.Message}";
+                System.Diagnostics.Debug.WriteLine($"Error searching orders: {ex.Message}");
+            }
+            finally
+            {
+                IsBusy = false;
+            }
+        }
+
+        private void UpdatePagination()
+        {
+            TotalOrders = _allOrders.Count;
+            TotalPages = (int)Math.Ceiling((double)TotalOrders / PAGE_SIZE);
+
+            if (TotalPages == 0) TotalPages = 1;
+            if (CurrentPage > TotalPages) CurrentPage = TotalPages;
+
+            var pagedOrders = _allOrders
+                .Skip((CurrentPage - 1) * PAGE_SIZE)
+                .Take(PAGE_SIZE)
+                .ToList();
+
+            Orders = new ObservableCollection<Order>(pagedOrders);
+
+            OnPropertyChanged(nameof(HasPreviousPage));
+            OnPropertyChanged(nameof(HasNextPage));
+        }
+
+        public void GoToNextPage()
+        {
+            if (HasNextPage)
+            {
+                CurrentPage++;
+                UpdatePagination();
+            }
+        }
+
+        public void GoToPreviousPage()
+        {
+            if (HasPreviousPage)
+            {
+                CurrentPage--;
+                UpdatePagination();
+            }
+        }
+
+        public void GoToFirstPage()
+        {
+            CurrentPage = 1;
+            UpdatePagination();
+        }
+
+        public void GoToLastPage()
+        {
+            CurrentPage = TotalPages;
+            UpdatePagination();
+        }
+
+        public async Task<Order?> GetOrderDetailsAsync(int orderId)
+        {
+            try
+            {
+                return await _orderRepository.GetByIdAsync(orderId);
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"Failed to get order details: {ex.Message}";
+                return null;
+            }
+        }
+
+        public async Task<Order?> CreateOrderAsync(Order newOrder)
+        {
+            try
+            {
+                IsBusy = true;
+                ErrorMessage = null;
+
+                var created = await _orderRepository.AddAsync(newOrder);
+                _allOrders.Insert(0, created);
+                UpdatePagination();
+
+                return created;
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"Failed to create order: {ex.Message}";
+                System.Diagnostics.Debug.WriteLine($"Error creating order: {ex.Message}");
+                return null;
+            }
+            finally
+            {
+                IsBusy = false;
+            }
+        }
+
+        public async Task<bool> UpdateOrderAsync(Order updatedOrder)
+        {
+            try
+            {
+                IsBusy = true;
+                ErrorMessage = null;
+
+                await _orderRepository.UpdateAsync(updatedOrder);
+
+                var index = _allOrders.FindIndex(o => o.Id == updatedOrder.Id);
+                if (index >= 0)
+                {
+                    _allOrders[index] = updatedOrder;
+                }
+
+                UpdatePagination();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"Failed to update order: {ex.Message}";
+                System.Diagnostics.Debug.WriteLine($"Error updating order: {ex.Message}");
+                return false;
+            }
+            finally
+            {
+                IsBusy = false;
+            }
+        }
+
+        public async Task<bool> CancelOrderAsync(int orderId)
+        {
+            try
+            {
+                IsBusy = true;
+                ErrorMessage = null;
+
+                await _orderRepository.DeleteAsync(orderId);
+
+                var order = _allOrders.FirstOrDefault(o => o.Id == orderId);
+                if (order != null)
+                {
+                    order.Status = OrderStatus.CANCELLED;
+                }
+
+                UpdatePagination();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"Failed to cancel order: {ex.Message}";
+                System.Diagnostics.Debug.WriteLine($"Error cancelling order: {ex.Message}");
+                return false;
+            }
+            finally
+            {
+                IsBusy = false;
+            }
+        }
+
+        public async Task<List<Product>> GetAllProductsAsync()
+        {
+            try
+            {
+                return await _productRepository.GetAllAsync();
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"Failed to load products: {ex.Message}";
+                return new List<Product>();
+            }
+        }
+
+        public string GetStatusDisplayText(OrderStatus status)
+        {
+            return status switch
+            {
+                OrderStatus.PENDING => "Pending",
+                OrderStatus.PROCESSING => "Processing",
+                OrderStatus.COMPLETED => "Completed",
+                OrderStatus.CANCELLED => "Cancelled",
+                _ => status.ToString()
+            };
+        }
+
+        public string GetStatusColor(OrderStatus status)
+        {
+            return status switch
+            {
+                OrderStatus.PENDING => "#FFA500", // Orange
+                OrderStatus.PROCESSING => "#4169E1", // Royal Blue
+                OrderStatus.COMPLETED => "#32CD32", // Lime Green
+                OrderStatus.CANCELLED => "#DC143C", // Crimson
+                _ => "#808080" // Gray
+            };
+        }
+    }
+}

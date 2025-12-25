@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ContentDialog
+    x:Class="MyShop.App.Views.Dialogs.EditOrderDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:models="using:MyShop.Core.Models"
+    Title="Edit Order"
+    PrimaryButtonText="Save Changes"
+    CloseButtonText="Cancel"
+    DefaultButton="Primary"
+    PrimaryButtonClick="OnSaveClick">
+
+    <ScrollViewer MaxHeight="500">
+        <StackPanel Spacing="16" Padding="4">
+            <!-- Order Number (Read-only) -->
+            <StackPanel>
+                <TextBlock Text="Order Number" FontWeight="SemiBold" Margin="0,0,0,8"/>
+                <TextBox x:Name="OrderNumberTextBox" IsReadOnly="True" IsEnabled="False"/>
+            </StackPanel>
+
+            <!-- Status -->
+            <StackPanel>
+                <TextBlock Text="Status" FontWeight="SemiBold" Margin="0,0,0,8"/>
+                <ComboBox x:Name="StatusComboBox" HorizontalAlignment="Stretch">
+                    <ComboBoxItem Content="Pending" Tag="PENDING"/>
+                    <ComboBoxItem Content="Processing" Tag="PROCESSING"/>
+                    <ComboBoxItem Content="Completed" Tag="COMPLETED"/>
+                </ComboBox>
+                <TextBlock Text="Note: Cancelled orders cannot be edited"
+                           FontSize="11"
+                           Foreground="{ThemeResource SystemControlForegroundBaseMediumBrush}"
+                           Margin="0,4,0,0"/>
+            </StackPanel>
+
+            <!-- Notes -->
+            <StackPanel>
+                <TextBlock Text="Notes" FontWeight="SemiBold" Margin="0,0,0,8"/>
+                <TextBox x:Name="NotesTextBox"
+                         PlaceholderText="Enter order notes..."
+                         TextWrapping="Wrap"
+                         AcceptsReturn="True"
+                         Height="100"/>
+            </StackPanel>
+
+            <!-- Order Summary (Read-only) -->
+            <Border BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="16"
+                    Background="{ThemeResource LayerFillColorDefaultBrush}">
+                <StackPanel Spacing="8">
+                    <TextBlock Text="Order Summary" FontWeight="Bold" FontSize="16"/>
+
+                    <Grid>
+                        <TextBlock Text="Customer:"/>
+                        <TextBlock x:Name="CustomerText" HorizontalAlignment="Right" FontWeight="SemiBold"/>
+                    </Grid>
+
+                    <Grid>
+                        <TextBlock Text="Created Date:"/>
+                        <TextBlock x:Name="CreatedDateText" HorizontalAlignment="Right"/>
+                    </Grid>
+
+                    <Grid>
+                        <TextBlock Text="Total Items:"/>
+                        <TextBlock x:Name="TotalItemsText" HorizontalAlignment="Right" FontWeight="SemiBold"/>
+                    </Grid>
+
+                    <Border BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}"
+                            BorderThickness="0,1,0,0"
+                            Padding="0,8,0,0">
+                        <Grid>
+                            <TextBlock Text="Total Amount:" FontWeight="Bold" FontSize="16"/>
+                            <TextBlock x:Name="TotalAmountText" HorizontalAlignment="Right"
+                                       FontWeight="Bold" FontSize="18"
+                                       Foreground="{ThemeResource SystemAccentColor}"/>
+                        </Grid>
+                    </Border>
+                </StackPanel>
+            </Border>
+
+            <TextBlock TextWrapping="Wrap"
+                       FontSize="11"
+                       Foreground="{ThemeResource SystemControlForegroundBaseMediumBrush}">
+                <Run Text="Note: Only order status and notes can be modified. To change order items, please cancel this order and create a new one."/>
+            </TextBlock>
+        </StackPanel>
+    </ScrollViewer>
+</ContentDialog>
