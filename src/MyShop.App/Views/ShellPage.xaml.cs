@@ -20,7 +20,6 @@ namespace MyShop.App.Views
             NavView.SelectionChanged += NavView_SelectionChanged;
             NavView.Loaded += NavView_Loaded;
 
-            // Subscribe to collection changes
             ViewModel.Categories.CollectionChanged += Categories_CollectionChanged;
         }
 
@@ -31,32 +30,26 @@ namespace MyShop.App.Views
 
         private void RefreshCategoryMenuItems()
         {
-            // Clear existing children from the "All Products" item
+            if (AllProductsNavItem == null) return;
+
             AllProductsNavItem.MenuItems.Clear();
 
-            // Add categories as children
-            // Skip ID 0 because that is the parent "All Products" itself
             foreach (var cat in ViewModel.Categories.Where(c => c.Id != 0))
             {
                 var item = new NavigationViewItem
                 {
                     Content = cat.DisplayText,
-                    Tag = $"Products_{cat.Id}", // Tag format: "Products_ID"
-                    Icon = new SymbolIcon(Symbol.Folder) // Optional: Add folder icon
+                    Tag = $"Products_{cat.Id}",
+                    Icon = new SymbolIcon(Symbol.Folder)
                 };
-
-                // Add tooltip for stock count
                 ToolTipService.SetToolTip(item, $"{cat.Count} items in stock");
-
                 AllProductsNavItem.MenuItems.Add(item);
             }
         }
 
         private void NavView_Loaded(object sender, RoutedEventArgs e)
         {
-            NavView.SelectedItem = NavView.MenuItems[0]; // Dashboard
-
-            // Initial populate
+            NavView.SelectedItem = NavView.MenuItems[0];
             if (ViewModel.Categories.Count > 0)
             {
                 RefreshCategoryMenuItems();
@@ -80,14 +73,25 @@ namespace MyShop.App.Views
                     Type pageType = null;
                     object navigationParam = null;
 
-                    if (tag.StartsWith("Products_"))
+                    // FIX: Safer check for Product tags
+                    if (tag.StartsWith("Products"))
                     {
                         pageType = typeof(ProductsScreen);
-                        // Extract ID from "Products_1"
-                        if (int.TryParse(tag.Split('_')[1], out int catId))
+
+                        // Default to 0 (All)
+                        int catId = 0;
+
+                        // Try to extract ID if underscore exists (e.g. "Products_5")
+                        if (tag.Contains('_'))
                         {
-                            navigationParam = catId;
+                            var parts = tag.Split('_');
+                            if (parts.Length > 1)
+                            {
+                                int.TryParse(parts[1], out catId);
+                            }
                         }
+
+                        navigationParam = catId;
                     }
                     else
                     {
@@ -115,14 +119,8 @@ namespace MyShop.App.Views
 
         private void OnLogoutRequested()
         {
-            if (Frame.CanGoBack)
-            {
-                Frame.GoBack();
-            }
-            else
-            {
-                Frame.Navigate(typeof(LoginScreen));
-            }
+            if (Frame.CanGoBack) Frame.GoBack();
+            else Frame.Navigate(typeof(LoginScreen));
         }
     }
 }

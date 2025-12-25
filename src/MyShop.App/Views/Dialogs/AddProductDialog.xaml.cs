@@ -5,6 +5,10 @@ using MyShop.Core.Models;
 using System;
 using System.Threading.Tasks;
 using Windows.Storage.Pickers;
+using System.Net.Http;
+using System.Text;
+using System.Text.Json;
+using MyShop.Core.Interfaces.Services;
 
 namespace MyShop.App.Views.Dialogs
 {
@@ -48,37 +52,100 @@ namespace MyShop.App.Views.Dialogs
                     }
                 }
             }
-            catch
+            catch { }
+        }
+
+        private async void OnPrimaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
+        {
+            var deferral = args.GetDeferral();
+
+            try
             {
+                if (string.IsNullOrWhiteSpace(NameBox.Text) || string.IsNullOrWhiteSpace(SkuBox.Text))
+                {
+                    NameBox.BorderBrush = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Red);
+                    args.Cancel = true;
+                    return;
+                }
+
+                string imageUrl = null;
+                if (!string.IsNullOrEmpty(_selectedImagePath))
+                {
+                    imageUrl = await UploadImageAsync(_selectedImagePath);
+                }
+
+                NewProduct = new Product
+                {
+                    Name = NameBox.Text,
+                    Description = DescBox.Text,
+                    Sku = SkuBox.Text,
+                    Price = (decimal)PriceBox.Value,
+                    Stock = (int)StockBox.Value,
+                    CategoryId = CategoryCombo.SelectedIndex + 1,
+                    ImageUrl = imageUrl, // Set the uploaded URL
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                };
+            }
+            finally
+            {
+                deferral.Complete();
             }
         }
 
-        private void OnPrimaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
+        private async Task<string> UploadImageAsync(string filePath)
         {
-            if (string.IsNullOrWhiteSpace(NameBox.Text) || string.IsNullOrWhiteSpace(SkuBox.Text))
+            try
             {
-                NameBox.BorderBrush = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Red);
-                args.Cancel = true;
-                return;
-            }
+                var file = await Windows.Storage.StorageFile.GetFileFromPathAsync(filePath);
+                using var stream = await file.OpenReadAsync();
 
-            NewProduct = new Product
+                var reader = new Windows.Storage.Streams.DataReader(stream.GetInputStreamAt(0));
+                var bytes = new byte[stream.Size];
+                await reader.LoadAsync((uint)stream.Size);
+                reader.ReadBytes(bytes);
+                string base64 = Convert.ToBase64String(bytes);
+
+                var payload = new { image = base64, fileName = file.Name };
+
+                // Resolve API URL
+                string serverUrl = "http://localhost:4000";
+                var configService = App.Current.GetService<IConfigService>();
+                if (configService != null)
+                {
+                    var url = configService.GetServerUrl();
+                    if (url.Contains("/graphql")) serverUrl = url.Replace("/graphql", "");
+                    else serverUrl = url;
+                    serverUrl = serverUrl.TrimEnd('/');
+                }
+
+                using var client = new HttpClient();
+                var json = JsonSerializer.Serialize(payload);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                var response = await client.PostAsync($"{serverUrl}/api/upload", content);
+                response.EnsureSuccessStatusCode();
+
+                var responseString = await response.Content.ReadAsStringAsync();
+                var result = JsonSerializer.Deserialize<UploadResponse>(responseString);
+
+                return result?.url;
+            }
+            catch (Exception ex)
             {
-                Name = NameBox.Text,
-                Description = DescBox.Text,
-                Sku = SkuBox.Text,
-                Price = (decimal)PriceBox.Value,
-                Stock = (int)StockBox.Value,
-                CategoryId = CategoryCombo.SelectedIndex + 1,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-                // IsActive defaults to true in the Model, so we don't need to set it here
-            };
+                System.Diagnostics.Debug.WriteLine($"Upload failed: {ex.Message}");
+                return null;
+            }
         }
 
         private void OnCloseButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
         {
             NewProduct = null;
+        }
+
+        private class UploadResponse
+        {
+            public string url { get; set; }
         }
     }
 }
