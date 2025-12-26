@@ -6,9 +6,9 @@ namespace MyShop.Core.Interfaces.Services
     {
         User? CurrentUser { get; set; }
         string? Token { get; set; }
-        bool IsAuthenticated { get; }
+        bool IsAuthenticated { get; }   
         void ClearSession();
 
-        void SaveSession(string token, User user);
+        void SaveSession(string token, User user, bool rememberMe);
     }
 }

@@ -70,7 +70,7 @@ namespace MyShop.App.ViewModels
                 IsBusy = true;
                 ErrorMessage = string.Empty;
 
-                var user = await _authService.LoginAsync(Username, Password);
+                var user = await _authService.LoginAsync(Username, Password, RememberMe);
 
                 if (user != null)
                 {

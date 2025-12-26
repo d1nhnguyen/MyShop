@@ -24,10 +24,18 @@ namespace MyShop.App
     /// </summary>
     public sealed partial class MainWindow : Window
     {
-        public MainWindow()
+        public MainWindow(MyShop.Core.Interfaces.Services.ISessionManager sessionManager)
         {
             this.InitializeComponent();
-            RootFrame.Navigate(typeof(LoginScreen));
+
+            if (sessionManager.IsAuthenticated)
+            {
+                RootFrame.Navigate(typeof(ShellPage));
+            }
+            else
+            {
+                RootFrame.Navigate(typeof(LoginScreen));
+            }
         }
     }
 }

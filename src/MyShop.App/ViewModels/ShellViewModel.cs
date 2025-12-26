@@ -68,9 +68,9 @@ namespace MyShop.App.ViewModels
 
         public event System.Action? LogoutRequested;
 
-        private void ExecuteLogout()
+        private async void ExecuteLogout()
         {
-            _authService.LogoutAsync();
+            await _authService.LogoutAsync();
             LogoutRequested?.Invoke();
         }
 
