@@ -138,43 +138,82 @@ namespace MyShop.App.Views
 
         private async void OnCancelOrderClick(object sender, RoutedEventArgs e)
         {
-            if (sender is Button button && button.Tag is Order order)
+            // Handle both Button and MenuFlyoutItem triggers
+            Order order = null;
+
+            if (sender is Button button && button.Tag is Order o1)
             {
-                var confirmDialog = new ContentDialog
+                order = o1;
+            }
+            else if (sender is MenuFlyoutItem item && item.Tag is Order o2)
+            {
+                order = o2;
+            }
+
+            if (order == null) return;
+
+            // If already cancelled, just inform and return (already deleted)
+            if (order.Status == OrderStatus.CANCELLED)
+            {
+                var infoDialog = new ContentDialog
                 {
-                    Title = "Cancel Order",
-                    Content = $"Are you sure you want to cancel order {order.OrderNumber}?",
-                    PrimaryButtonText = "Yes, Cancel",
-                    CloseButtonText = "No",
+                    Title = "Order Already Deleted",
+                    Content = "This order has already been deleted/cancelled.",
+                    CloseButtonText = "OK",
                     XamlRoot = this.XamlRoot
                 };
+                await infoDialog.ShowAsync();
+                return;
+            }
 
-                var result = await confirmDialog.ShowAsync();
-                if (result == ContentDialogResult.Primary)
+            // Block deleting completed orders
+            if (order.Status == OrderStatus.COMPLETED)
+            {
+                var completedDialog = new ContentDialog
                 {
-                    var success = await ViewModel.CancelOrderAsync(order.Id);
-                    if (success)
+                    Title = "Cannot Delete",
+                    Content = "Completed orders cannot be deleted.",
+                    CloseButtonText = "OK",
+                    XamlRoot = this.XamlRoot
+                };
+                await completedDialog.ShowAsync();
+                return;
+            }
+
+            var confirmDialog = new ContentDialog
+            {
+                Title = "Delete Order",
+                Content = $"Are you sure you want to delete order {order.OrderNumber}?\nThis action will cancel the order.",
+                PrimaryButtonText = "Yes, Delete",
+                CloseButtonText = "No",
+                XamlRoot = this.XamlRoot
+            };
+
+            var result = await confirmDialog.ShowAsync();
+            if (result == ContentDialogResult.Primary)
+            {
+                var success = await ViewModel.CancelOrderAsync(order.Id);
+                if (success)
+                {
+                    var successDialog = new ContentDialog
                     {
-                        var successDialog = new ContentDialog
-                        {
-                            Title = "Success",
-                            Content = "Order cancelled successfully!",
-                            CloseButtonText = "OK",
-                            XamlRoot = this.XamlRoot
-                        };
-                        await successDialog.ShowAsync();
-                    }
-                    else
+                        Title = "Success",
+                        Content = "Order deleted successfully!",
+                        CloseButtonText = "OK",
+                        XamlRoot = this.XamlRoot
+                    };
+                    await successDialog.ShowAsync();
+                }
+                else
+                {
+                    var errorDialog = new ContentDialog
                     {
-                        var errorDialog = new ContentDialog
-                        {
-                            Title = "Error",
-                            Content = ViewModel.ErrorMessage ?? "Failed to cancel order",
-                            CloseButtonText = "OK",
-                            XamlRoot = this.XamlRoot
-                        };
-                        await errorDialog.ShowAsync();
-                    }
+                        Title = "Error",
+                        Content = ViewModel.ErrorMessage ?? "Failed to delete order",
+                        CloseButtonText = "OK",
+                        XamlRoot = this.XamlRoot
+                    };
+                    await errorDialog.ShowAsync();
                 }
             }
         }
