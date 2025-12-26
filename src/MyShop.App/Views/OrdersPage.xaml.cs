@@ -16,16 +16,52 @@ namespace MyShop.App.Views
             ViewModel = App.Current.GetService<OrderViewModel>();
         }
 
-        private async void OnSearchQuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
+        private async void OnSearchTextChanged(object sender, TextChangedEventArgs e)
         {
-            var query = args.QueryText;
-            if (!string.IsNullOrWhiteSpace(query))
+            if (ViewModel == null) return;
+            if (sender is TextBox textBox)
             {
-                await ViewModel.SearchOrdersAsync(query);
+                var query = textBox.Text;
+                if (!string.IsNullOrWhiteSpace(query))
+                {
+                    await ViewModel.SearchOrdersAsync(query);
+                }
+                else
+                {
+                    await ViewModel.LoadOrdersAsync();
+                }
             }
-            else
+        }
+
+        private void OnStatusFilterChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (ViewModel == null) return;
+            if (sender is ComboBox comboBox && comboBox.SelectedItem is ComboBoxItem selectedItem)
             {
-                await ViewModel.LoadOrdersAsync();
+                var statusTag = selectedItem.Tag as string;
+                if (statusTag == "All")
+                {
+                    ViewModel.SelectedStatus = null;
+                }
+                else if (Enum.TryParse<OrderStatus>(statusTag, out var status))
+                {
+                    ViewModel.SelectedStatus = status;
+                }
+            }
+        }
+
+        private void OnPriceFilterChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (ViewModel == null) return;
+            if (sender is ComboBox comboBox && comboBox.SelectedItem is ComboBoxItem selectedItem)
+            {
+                var priceTag = selectedItem.Tag as string;
+                if (priceTag == null) return;
+
+                if (Enum.TryParse<PriceFilter>(priceTag, out var filter))
+                {
+                    ViewModel.SelectedPriceFilter = filter;
+                }
             }
         }
 
@@ -132,32 +168,6 @@ namespace MyShop.App.Views
         private void OnLastPageClick(object sender, RoutedEventArgs e)
         {
             ViewModel.GoToLastPage();
-        }
-
-        private void OnStatusFilterChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (sender is ComboBox comboBox && comboBox.SelectedItem is ComboBoxItem selectedItem)
-            {
-                var statusTag = selectedItem.Tag as string;
-
-                if (string.IsNullOrEmpty(statusTag))
-                {
-                    ViewModel.SelectedStatus = null;
-                }
-                else if (Enum.TryParse<OrderStatus>(statusTag, out var status))
-                {
-                    ViewModel.SelectedStatus = status;
-                }
-                // FilterOrdersAsync is automatically called by SelectedStatus setter
-            }
-        }
-
-        private async void OnClearFiltersClick(object sender, RoutedEventArgs e)
-        {
-            StatusFilterComboBox.SelectedIndex = -1;
-            StartDatePicker.Date = null;
-            EndDatePicker.Date = null;
-            await ViewModel.ClearFiltersAsync();
         }
 
         private async void OnStartDateChanged(CalendarDatePicker sender, CalendarDatePickerDateChangedEventArgs args)
