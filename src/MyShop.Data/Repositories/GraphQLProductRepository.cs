@@ -61,18 +61,17 @@ namespace MyShop.Data.Repositories
                                 stock
                                 categoryId
                                 isActive
+                                imageUrl 
                             }
                         }
                     }"
             };
 
             var response = await _graphQLService.Client.SendQueryAsync<ProductsResponse>(request);
-
             if (response.Errors != null && response.Errors.Any())
             {
                 throw new Exception($"GraphQL Error: {response.Errors[0].Message}");
             }
-
             return response.Data?.Products?.Products ?? new List<Product>();
         }
 
@@ -90,6 +89,7 @@ namespace MyShop.Data.Repositories
                                 price
                                 stock
                                 categoryId
+                                imageUrl
                             }
                         }
                     }",
@@ -114,6 +114,7 @@ namespace MyShop.Data.Repositories
                                 price
                                 stock
                                 categoryId
+                                imageUrl
                             }
                         }
                     }",
@@ -136,6 +137,7 @@ namespace MyShop.Data.Repositories
                             sku
                             stock
                             minStock
+                            imageUrl
                         }
                     }",
                 Variables = new { threshold }
@@ -158,6 +160,7 @@ namespace MyShop.Data.Repositories
                             price
                             stock
                             categoryId
+                            imageUrl
                         }
                     }",
                 Variables = new
@@ -192,6 +195,7 @@ namespace MyShop.Data.Repositories
             return response.Data.CreateProduct;
         }
 
+        // Update, Delete, Count methods remain the same (ensure Update includes ImageUrl if you plan to edit images later)
         public override async Task UpdateAsync(Product entity)
         {
             var request = new GraphQLRequest
@@ -213,48 +217,32 @@ namespace MyShop.Data.Repositories
                         price = entity.Price,
                         stock = entity.Stock,
                         categoryId = entity.CategoryId,
-                        isActive = entity.IsActive
+                        isActive = entity.IsActive,
+                        imageUrl = entity.ImageUrl // Include this if updating image is allowed
                     }
                 }
             };
 
             var response = await _graphQLService.Client.SendMutationAsync<dynamic>(request);
             if (response.Errors != null && response.Errors.Any())
-            {
                 throw new Exception($"Update failed: {response.Errors[0].Message}");
-            }
         }
 
         public override async Task DeleteAsync(int id)
         {
             var request = new GraphQLRequest
             {
-                Query = @"
-                    mutation DeleteProduct($id: Int!) {
-                        deleteProduct(id: $id)
-                    }",
+                Query = @"mutation DeleteProduct($id: Int!) { deleteProduct(id: $id) }",
                 Variables = new { id }
             };
-
             var response = await _graphQLService.Client.SendMutationAsync<dynamic>(request);
             if (response.Errors != null && response.Errors.Any())
-            {
                 throw new Exception($"Delete failed: {response.Errors[0].Message}");
-            }
         }
 
         public override async Task<int> CountAsync()
         {
-            var request = new GraphQLRequest
-            {
-                Query = @"
-                    query GetTotal {
-                        products {
-                            total
-                        }
-                    }"
-            };
-
+            var request = new GraphQLRequest { Query = @"query GetTotal { products { total } }" };
             var response = await _graphQLService.Client.SendQueryAsync<ProductsResponse>(request);
             return response.Data?.Products?.Total ?? 0;
         }

@@ -4,10 +4,15 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:models="using:MyShop.Core.Models"
     xmlns:vm="using:MyShop.App.ViewModels"
+    xmlns:converters="using:MyShop.App.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Page.Resources>
+        <converters:StringToImageSourceConverter x:Key="StringToImageSourceConverter" />
+    </Page.Resources>
 
     <Grid Padding="24">
         <Grid.RowDefinitions>
@@ -67,7 +72,12 @@
                             </Grid.ColumnDefinitions>
 
                             <Border Background="{ThemeResource SystemControlBackgroundBaseLowBrush}" CornerRadius="8" Height="60" Width="60">
-                                <FontIcon Glyph="&#xE739;" Foreground="{ThemeResource SystemControlForegroundBaseMediumBrush}"/>
+                                <Grid>
+                                    <FontIcon Glyph="&#xE739;" Foreground="{ThemeResource SystemControlForegroundBaseMediumBrush}"/>
+
+                                    <Image Source="{x:Bind ImageUrl, Converter={StaticResource StringToImageSourceConverter}}" 
+                                           Stretch="UniformToFill"/>
+                                </Grid>
                             </Border>
 
                             <StackPanel Grid.Column="1" Margin="12,0,0,0" VerticalAlignment="Center">

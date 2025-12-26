@@ -20,59 +20,48 @@ namespace MyShop.App.Views
             NavView.SelectionChanged += NavView_SelectionChanged;
             NavView.Loaded += NavView_Loaded;
 
-            // Subscribe to collection changes to update UI
             ViewModel.Categories.CollectionChanged += Categories_CollectionChanged;
         }
 
         private void Categories_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
-            // Rebuild the dynamic category menu items
             RefreshCategoryMenuItems();
         }
 
         private void RefreshCategoryMenuItems()
         {
-            // 1. Find the index of the Category Header  
-            int headerIndex = NavView.MenuItems.IndexOf(CategoryHeader);
-            if (headerIndex < 0) return;
+            if (AllProductsNavItem == null) return;
 
-            // 2. Remove existing dynamic items (items between Header and Separator/End)  
-            while (NavView.MenuItems.Count > headerIndex + 1)
-            {
-                var item = NavView.MenuItems[headerIndex + 1];
-                if (item is NavigationViewItemSeparator || (item is NavigationViewItem ni && ni.Tag.ToString() == "Orders"))
-                    break;
-                NavView.MenuItems.RemoveAt(headerIndex + 1);
-            }
+            AllProductsNavItem.MenuItems.Clear();
 
-            // 3. Add new items  
-            // Skip ID 0 (All Products) because we have a static "All Products" button  
             foreach (var cat in ViewModel.Categories.Where(c => c.Id != 0))
             {
                 var item = new NavigationViewItem
                 {
-                    Content = cat.DisplayText, // "Iphone (5)"  
-                    Tag = $"Products_{cat.Id}", // Tag format: "Products_ID"  
+                    Content = cat.DisplayText,
+                    Tag = $"Products_{cat.Id}",
                     Icon = new SymbolIcon(Symbol.Folder)
                 };
-
-                // Set the tooltip using ToolTipService.SetToolTip  
                 ToolTipService.SetToolTip(item, $"{cat.Count} items in stock");
-
-                NavView.MenuItems.Insert(++headerIndex, item);
+                AllProductsNavItem.MenuItems.Add(item);
             }
         }
 
         private void NavView_Loaded(object sender, RoutedEventArgs e)
         {
-            NavView.SelectedItem = NavView.MenuItems[0]; // Dashboard
-            // Initial populate if data is already there
-            if (ViewModel.Categories.Count > 0) RefreshCategoryMenuItems();
+            NavView.SelectedItem = NavView.MenuItems[0];
+            if (ViewModel.Categories.Count > 0)
+            {
+                RefreshCategoryMenuItems();
+            }
         }
 
         private void NavView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
         {
-            if (args.IsSettingsSelected) { /* ... */ }
+            if (args.IsSettingsSelected)
+            {
+                // ContentFrame.Navigate(typeof(SettingsPage));
+            }
             else
             {
                 var selectedItem = args.SelectedItem as NavigationViewItem;
@@ -84,22 +73,39 @@ namespace MyShop.App.Views
                     Type pageType = null;
                     object navigationParam = null;
 
-                    if (tag.StartsWith("Products_"))
+                    // FIX: Safer check for Product tags
+                    if (tag.StartsWith("Products"))
                     {
                         pageType = typeof(ProductsScreen);
-                        // Extract ID from "Products_1"
-                        if (int.TryParse(tag.Split('_')[1], out int catId))
+
+                        // Default to 0 (All)
+                        int catId = 0;
+
+                        // Try to extract ID if underscore exists (e.g. "Products_5")
+                        if (tag.Contains('_'))
                         {
-                            navigationParam = catId;
+                            var parts = tag.Split('_');
+                            if (parts.Length > 1)
+                            {
+                                int.TryParse(parts[1], out catId);
+                            }
                         }
+
+                        navigationParam = catId;
                     }
                     else
                     {
                         switch (tag)
                         {
-                            case "Dashboard": pageType = typeof(Dashboard); break;
-                            case "Orders": pageType = typeof(OrdersPage); break;
-                            case "Reports": pageType = typeof(ReportsPage); break;
+                            case "Dashboard":
+                                pageType = typeof(Dashboard);
+                                break;
+                            case "Orders":
+                                pageType = typeof(OrdersPage);
+                                break;
+                            case "Reports":
+                                pageType = typeof(ReportsPage);
+                                break;
                         }
                     }
 
@@ -111,7 +117,10 @@ namespace MyShop.App.Views
             }
         }
 
-        // ... (Logout and other handlers remain the same)
-        private void OnLogoutRequested() { /*...*/ }
+        private void OnLogoutRequested()
+        {
+            if (Frame.CanGoBack) Frame.GoBack();
+            else Frame.Navigate(typeof(LoginScreen));
+        }
     }
 }

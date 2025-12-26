@@ -58,7 +58,6 @@
   <ItemGroup>
     <Folder Include="Controls\" />
     <Folder Include="Helpers\" />
-    <Folder Include="Converters\" />
   </ItemGroup>
   <ItemGroup>
     <Page Update="Views\Dialogs\EditProductDialog.xaml">
