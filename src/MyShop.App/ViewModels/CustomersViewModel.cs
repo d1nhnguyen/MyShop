@@ -13,19 +13,25 @@ namespace MyShop.App.ViewModels
     public partial class CustomersViewModel : ObservableObject
     {
         private readonly ICustomerRepository _customerRepository;
-        private List<Customer> _allCustomers = new();
+        private List<SelectableCustomer> _allCustomers = new();
 
         [ObservableProperty]
-        private ObservableCollection<Customer> _customers = new();
+        private ObservableCollection<SelectableCustomer> _customers = new();
         
         [ObservableProperty]
-        private Customer? _selectedCustomer;
+        private SelectableCustomer? _selectedCustomer;
         
         [ObservableProperty]
         private string _searchText = string.Empty;
 
         [ObservableProperty]
         private string _selectedFilter = "All";
+        
+        [ObservableProperty]
+        private bool _isAllSelected;
+
+        [ObservableProperty]
+        private bool _isSelectionMode;
         
         [ObservableProperty]
         private int _currentPage = 1;
@@ -45,6 +51,33 @@ namespace MyShop.App.ViewModels
         {
             _customerRepository = customerRepository;
             _ = LoadCustomersFromBackendAsync();
+        }
+
+        partial void OnIsAllSelectedChanged(bool value)
+        {
+            foreach (var customer in Customers)
+            {
+                customer.IsSelected = value;
+            }
+        }
+
+        partial void OnIsSelectionModeChanged(bool value)
+        {
+            // Update visibility for all items
+            foreach (var customer in _allCustomers)
+            {
+                customer.IsCheckboxVisible = value;
+                if (!value) customer.IsSelected = false; // Reset selection when exiting mode
+            }
+            
+            // Also update visible collection if different references
+            foreach (var customer in Customers)
+            {
+                customer.IsCheckboxVisible = value;
+                if (!value) customer.IsSelected = false;
+            }
+
+            if (!value) IsAllSelected = false;
         }
 
         [RelayCommand]
@@ -68,7 +101,7 @@ namespace MyShop.App.ViewModels
              {
                  IsLoading = true;
                  var createdCustomer = await _customerRepository.AddAsync(customer);
-                 _allCustomers.Insert(0, createdCustomer);
+                 _allCustomers.Insert(0, new SelectableCustomer(createdCustomer));
                  ApplyFilters();
              }
              catch (Exception ex)
@@ -79,6 +112,90 @@ namespace MyShop.App.ViewModels
              {
                  IsLoading = false;
              }
+        }
+
+        [RelayCommand]
+        private async Task UpdateCustomer(Customer customer)
+        {
+             if (customer == null) return;
+
+             try
+             {
+                 IsLoading = true;
+                 await _customerRepository.UpdateAsync(customer);
+                 
+                 var index = _allCustomers.FindIndex(c => c.Customer.Id == customer.Id);
+                 if (index != -1)
+                 {
+                     // Preserve selection state if needed, currently we just replace the wrapper
+                     bool wasSelected = _allCustomers[index].IsSelected;
+                     var wrapper = new SelectableCustomer(customer) { IsSelected = wasSelected };
+                     _allCustomers[index] = wrapper;
+                     ApplyFilters();
+                 }
+             }
+             catch (Exception ex)
+             {
+                 System.Diagnostics.Debug.WriteLine($"Error updating customer: {ex.Message}");
+             }
+             finally
+             {
+                 IsLoading = false;
+             }
+        }
+
+        [RelayCommand]
+        private async Task DeleteCustomer(Customer customer)
+        {
+            if (customer == null) return;
+
+            try
+            {
+                IsLoading = true;
+                await _customerRepository.DeleteAsync(customer.Id);
+                
+                var item = _allCustomers.FirstOrDefault(c => c.Customer.Id == customer.Id);
+                if (item != null)
+                {
+                    _allCustomers.Remove(item);
+                    ApplyFilters();
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error deleting customer: {ex.Message}");
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
+
+        [RelayCommand]
+        private async Task DeleteSelected()
+        {
+            var selected = _customers.Where(c => c.IsSelected).ToList();
+            if (!selected.Any()) return;
+
+            IsLoading = true;
+            try
+            {
+                foreach (var item in selected)
+                {
+                    await _customerRepository.DeleteAsync(item.Customer.Id);
+                    _allCustomers.Remove(item);
+                }
+                ApplyFilters();
+                IsAllSelected = false; // Reset header checkbox
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error deleting selected customers: {ex.Message}");
+            }
+            finally
+            {
+                IsLoading = false;
+            }
         }
 
         [RelayCommand]
@@ -121,7 +238,7 @@ namespace MyShop.App.ViewModels
             // Filter by member status
             if (SelectedFilter == "Members")
             {
-                filtered = filtered.Where(c => c.IsMember);
+                filtered = filtered.Where(c => c.Customer.IsMember);
             }
 
             // Filter by search text
@@ -129,12 +246,12 @@ namespace MyShop.App.ViewModels
             {
                 var searchLower = SearchText.ToLower();
                 filtered = filtered.Where(c =>
-                    c.Name.ToLower().Contains(searchLower) ||
-                    (c.Email?.ToLower().Contains(searchLower) ?? false) ||
-                    c.Phone.Contains(searchLower));
+                    c.Customer.Name.ToLower().Contains(searchLower) ||
+                    (c.Customer.Email?.ToLower().Contains(searchLower) ?? false) ||
+                    c.Customer.Phone.Contains(searchLower));
             }
 
-            Customers = new ObservableCollection<Customer>(filtered);
+            Customers = new ObservableCollection<SelectableCustomer>(filtered);
             TotalCustomers = Customers.Count;
         }
 
@@ -150,14 +267,14 @@ namespace MyShop.App.ViewModels
                     isMember: null
                 );
 
-                _allCustomers = customers;
+                _allCustomers = customers.Select(c => new SelectableCustomer(c)).ToList();
                 ApplyFilters();
                 TotalPages = 1;
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error loading customers: {ex.Message}");
-                _allCustomers = new List<Customer>();
+                _allCustomers = new List<SelectableCustomer>();
                 ApplyFilters();
             }
             finally

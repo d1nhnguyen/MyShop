@@ -6,12 +6,15 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:converters="using:MyShop.App.Converters"
     mc:Ignorable="d"
+    x:Name="PageRoot"
     Background="#F5F7FA">
 
     <Page.Resources>
         <converters:BoolToMemberStatusColorConverter x:Key="BoolToMemberStatusColorConverter"/>
         <converters:BoolToMemberStatusTextConverter x:Key="BoolToMemberStatusTextConverter"/>
         <converters:DateFormatConverter x:Key="DateFormatConverter"/>
+        <converters:BoolToSelectionModeConverter x:Key="BoolToSelectionModeConverter"/>
+        <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
         <converters:CurrencyConverter x:Key="CurrencyConverter"/>
 
         <Style x:Key="TabRadioButtonStyle" TargetType="RadioButton">
@@ -176,14 +179,14 @@
             </Grid.RowDefinitions>
 
             <TextBlock Text="Recent Customers" FontSize="18" FontWeight="SemiBold" Margin="24,12"/>
-            <Button Grid.Row="0" HorizontalAlignment="Right" Margin="24,12" Padding="8,4" Background="Transparent" BorderThickness="1" BorderBrush="#E0E0E0">
+            <Button Grid.Row="0" HorizontalAlignment="Right" Margin="24,12" Padding="8,4" Background="Transparent" BorderThickness="1" BorderBrush="#E0E0E0" Click="DeleteSelected_Click">
                 <FontIcon Glyph="&#xE74D;" FontSize="14" Foreground="#666666"/> <!-- Delete/Trash -->
             </Button>
 
             <!-- Table Header -->
             <Grid Grid.Row="1" Background="#F9FAFB" Padding="24,12" BorderBrush="#E0E0E0" BorderThickness="0,1">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="50"/> <!-- Checkbox -->
+                    <ColumnDefinition Width="Auto"/> <!-- Checkbox Spacer -->
                     <ColumnDefinition Width="2*"/> <!-- Name -->
                     <ColumnDefinition Width="2*"/> <!-- Email/Phone -->
                     <ColumnDefinition Width="1.5*"/> <!-- Total Spent -->
@@ -191,7 +194,11 @@
                     <ColumnDefinition Width="1.5*"/> <!-- Join Date -->
                     <ColumnDefinition Width="1*"/> <!-- Actions -->
                 </Grid.ColumnDefinitions>
-                <CheckBox HorizontalAlignment="Center"/>
+                
+                <Border Width="50" Visibility="{x:Bind ViewModel.IsSelectionMode, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <CheckBox HorizontalAlignment="Center" IsChecked="{x:Bind ViewModel.IsAllSelected, Mode=TwoWay}"/>
+                </Border>
+                
                 <TextBlock Grid.Column="1" Text="Customer Name" FontWeight="SemiBold" Foreground="#666666" VerticalAlignment="Center"/>
                 <TextBlock Grid.Column="2" Text="Contact" FontWeight="SemiBold" Foreground="#666666" VerticalAlignment="Center"/>
                 <TextBlock Grid.Column="3" Text="Total Spent" FontWeight="SemiBold" Foreground="#666666" VerticalAlignment="Center"/>
@@ -201,7 +208,9 @@
             </Grid>
 
             <!-- Items -->
-            <ListView Grid.Row="2" ItemsSource="{x:Bind ViewModel.Customers, Mode=OneWay}" SelectionMode="None">
+            <ListView Grid.Row="2" ItemsSource="{x:Bind ViewModel.Customers, Mode=OneWay}" 
+                      SelectionMode="{x:Bind ViewModel.IsSelectionMode, Mode=OneWay, Converter={StaticResource BoolToSelectionModeConverter}}"
+                      SelectionChanged="ListView_SelectionChanged">
                 <ListView.ItemContainerStyle>
                     <Style TargetType="ListViewItem">
                         <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
@@ -213,7 +222,6 @@
                     <DataTemplate>
                         <Grid Padding="24,16" BorderBrush="#F0F0F0" BorderThickness="0,0,0,1">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="50"/>
                                 <ColumnDefinition Width="2*"/>
                                 <ColumnDefinition Width="2*"/>
                                 <ColumnDefinition Width="1.5*"/>
@@ -222,35 +230,33 @@
                                 <ColumnDefinition Width="1*"/>
                             </Grid.ColumnDefinitions>
                             
-                            <CheckBox HorizontalAlignment="Center"/>
-                            
-                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12">
-                                <PersonPicture DisplayName="{Binding Name}" Width="32" Height="32"/>
-                                <TextBlock Text="{Binding Name}" VerticalAlignment="Center" FontWeight="Medium"/>
+                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                <PersonPicture DisplayName="{Binding Customer.Name}" Width="32" Height="32"/>
+                                <TextBlock Text="{Binding Customer.Name}" VerticalAlignment="Center" FontWeight="Medium"/>
                             </StackPanel>
 
-                            <StackPanel Grid.Column="2" VerticalAlignment="Center">
-                                <TextBlock Text="{Binding Email}" FontSize="12"/>
-                                <TextBlock Text="{Binding Phone}" FontSize="12" Foreground="#888888"/>
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding Customer.Email}" FontSize="12"/>
+                                <TextBlock Text="{Binding Customer.Phone}" FontSize="12" Foreground="#888888"/>
                             </StackPanel>
 
-                            <TextBlock Grid.Column="3" Text="{Binding TotalSpent, Converter={StaticResource CurrencyConverter}}" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                            <TextBlock Grid.Column="2" Text="{Binding Customer.TotalSpent, Converter={StaticResource CurrencyConverter}}" VerticalAlignment="Center" FontWeight="SemiBold"/>
 
-                            <Border Grid.Column="4" VerticalAlignment="Center" HorizontalAlignment="Left" CornerRadius="4" Padding="8,4"
-                                    Background="{Binding IsMember, Converter={StaticResource BoolToMemberStatusColorConverter}, ConverterParameter=Background}">
-                                <TextBlock Text="{Binding IsMember, Converter={StaticResource BoolToMemberStatusTextConverter}}" 
+                            <Border Grid.Column="3" VerticalAlignment="Center" HorizontalAlignment="Left" CornerRadius="4" Padding="8,4"
+                                    Background="{Binding Customer.IsMember, Converter={StaticResource BoolToMemberStatusColorConverter}, ConverterParameter=Background}">
+                                <TextBlock Text="{Binding Customer.IsMember, Converter={StaticResource BoolToMemberStatusTextConverter}}" 
                                            FontSize="12" FontWeight="Medium"
-                                           Foreground="{Binding IsMember, Converter={StaticResource BoolToMemberStatusColorConverter}, ConverterParameter=Foreground}"/>
+                                           Foreground="{Binding Customer.IsMember, Converter={StaticResource BoolToMemberStatusColorConverter}, ConverterParameter=Foreground}"/>
                             </Border>
 
-                            <TextBlock Grid.Column="5" Text="{Binding CreatedAt, Converter={StaticResource DateFormatConverter}}" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Column="4" Text="{Binding Customer.CreatedAt, Converter={StaticResource DateFormatConverter}}" VerticalAlignment="Center"/>
 
-                            <Button Grid.Column="6" Background="Transparent" BorderThickness="0" HorizontalAlignment="Center">
+                            <Button Grid.Column="5" Background="Transparent" BorderThickness="0" HorizontalAlignment="Center">
                                 <SymbolIcon Symbol="More"/>
                                 <Button.Flyout>
                                     <MenuFlyout>
-                                        <MenuFlyoutItem Text="Edit" Icon="Edit"/>
-                                        <MenuFlyoutItem Text="Delete" Icon="Delete"/>
+                                        <MenuFlyoutItem Text="Edit" Icon="Edit" Click="EditCustomer_Click" Tag="{Binding}"/>
+                                        <MenuFlyoutItem Text="Delete" Icon="Delete" Click="DeleteCustomer_Click" Tag="{Binding}"/>
                                     </MenuFlyout>
                                 </Button.Flyout>
                             </Button>

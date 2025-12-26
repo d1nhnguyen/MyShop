@@ -1,4 +1,5 @@
 using Microsoft.UI;
+using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Media;
 using System;
@@ -58,6 +59,20 @@ namespace MyShop.App.Converters
         public object ConvertBack(object value, Type targetType, object parameter, string language)
         {
             throw new NotImplementedException();
+        }
+    }
+
+
+    public class BoolToSelectionModeConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, string language)
+        {
+            return (value is bool b && b) ? ListViewSelectionMode.Multiple : ListViewSelectionMode.None;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, string language)
+        {
+            return (value is ListViewSelectionMode mode && mode == ListViewSelectionMode.Multiple);
         }
     }
 }
