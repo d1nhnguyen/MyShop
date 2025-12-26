@@ -208,8 +208,8 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="80"/>
                     <ColumnDefinition Width="120"/>
+                    <ColumnDefinition Width="3*"/>
                     <ColumnDefinition Width="2*"/>
-                    <ColumnDefinition Width="150"/>
                     <ColumnDefinition Width="150"/>
                     <ColumnDefinition Width="100"/>
                 </Grid.ColumnDefinitions>
@@ -244,8 +244,8 @@
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="80"/>
                                         <ColumnDefinition Width="120"/>
+                                        <ColumnDefinition Width="3*"/>
                                         <ColumnDefinition Width="2*"/>
-                                        <ColumnDefinition Width="150"/>
                                         <ColumnDefinition Width="150"/>
                                         <ColumnDefinition Width="100"/>
                                     </Grid.ColumnDefinitions>
