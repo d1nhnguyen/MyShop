@@ -57,6 +57,9 @@ namespace MyShop.App
             services.AddSingleton<IProductRepository, GraphQLProductRepository>();
             // services.AddSingleton<ICategoryRepository, GraphQLCategoryRepository>();
             services.AddSingleton<IReportRepository, GraphQLReportRepository>();
+            services.AddSingleton<IOrderRepository, GraphQLOrderRepository>();
+            services.AddSingleton<ICustomerRepository, GraphQLCustomerRepository>();
+            services.AddSingleton<IDiscountRepository, GraphQLDiscountRepository>();
 
             services.AddTransient<MainWindow>();
             services.AddTransient<LoginViewModel>();
@@ -66,6 +69,7 @@ namespace MyShop.App
 
             services.AddTransient<ProductViewModel>();
             services.AddTransient<ReportsViewModel>();
+            services.AddTransient<OrderViewModel>();
 
         }
 
