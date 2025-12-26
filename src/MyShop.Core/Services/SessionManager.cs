@@ -58,12 +58,16 @@ namespace MyShop.Core.Services
             }
         }
 
-        public void SaveSession(string token, User user)
+        public void SaveSession(string token, User user, bool rememberMe)
         {
             Token = token;
             CurrentUser = user;
-            _localSettings.Values[TokenKey] = token;
-            _localSettings.Values[UserKey] = JsonSerializer.Serialize(user);
+
+            if (rememberMe)
+            {
+                _localSettings.Values[TokenKey] = token;
+                _localSettings.Values[UserKey] = JsonSerializer.Serialize(user);
+            }
 
             _graphQLService.SetAuthToken(token);
         }

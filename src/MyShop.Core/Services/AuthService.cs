@@ -22,7 +22,7 @@ namespace MyShop.Core.Services
         public User? CurrentUser => _sessionManager.CurrentUser;
         public string? Token => _sessionManager.Token;
 
-        public async Task<User?> LoginAsync(string username, string password)
+        public async Task<User?> LoginAsync(string username, string password, bool rememberMe)
         {
             if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
                 return null;
@@ -74,7 +74,7 @@ namespace MyShop.Core.Services
                     if (user != null)
                     {
                         // Save session 
-                        _sessionManager.SaveSession(token, user);
+                        _sessionManager.SaveSession(token, user, rememberMe);
                         
                         System.Diagnostics.Debug.WriteLine("Login successful and session saved.");
                         return user;

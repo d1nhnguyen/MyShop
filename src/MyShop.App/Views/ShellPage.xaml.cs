@@ -117,10 +117,25 @@ namespace MyShop.App.Views
             }
         }
 
-        private void OnLogoutRequested()
+        private async void OnLogoutRequested()
         {
-            if (Frame.CanGoBack) Frame.GoBack();
-            else Frame.Navigate(typeof(LoginScreen));
+            ContentDialog logoutDialog = new ContentDialog
+            {
+                Title = "Log out",
+                Content = "Are you sure you want to log out?",
+                PrimaryButtonText = "Log out",
+                CloseButtonText = "Cancel",
+                DefaultButton = ContentDialogButton.Close,
+                XamlRoot = this.XamlRoot
+            };
+
+            var result = await logoutDialog.ShowAsync();
+
+            if (result == ContentDialogResult.Primary)
+            {
+                Frame.Navigate(typeof(LoginScreen));
+                Frame.BackStack.Clear();
+            }
         }
     }
 }
