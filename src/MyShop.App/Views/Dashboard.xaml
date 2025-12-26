@@ -22,6 +22,7 @@
         <converters:StringComparisonToForegroundConverter x:Key="StringComparisonToForegroundConverter"/>
         <converters:OrderStatusToBackgroundConverter x:Key="OrderStatusToBackgroundConverter"/>
         <converters:OrderStatusToForegroundConverter x:Key="OrderStatusToForegroundConverter"/>
+        <converters:StringToImageSourceConverter x:Key="StringToImageSourceConverter"/>
     </Page.Resources>
 
     <ScrollViewer>
@@ -138,11 +139,14 @@
                                             <ColumnDefinition Width="*"/>
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
-                                        <Ellipse Grid.Column="0" Width="40" Height="40" Margin="0,0,12,0">
-                                            <Ellipse.Fill>
-                                                <ImageBrush ImageSource="{x:Bind Product.ImageUrl}" Stretch="UniformToFill"/>
-                                            </Ellipse.Fill>
-                                        </Ellipse>
+                                        <Grid Grid.Column="0" Width="40" Height="40" Margin="0,0,12,0">
+                                            <Ellipse Fill="#1D546C"/>
+                                            <Ellipse>
+                                                <Ellipse.Fill>
+                                                    <ImageBrush ImageSource="{x:Bind Product.ImageUrl, Mode=OneWay, Converter={StaticResource StringToImageSourceConverter}}" Stretch="UniformToFill"/>
+                                                </Ellipse.Fill>
+                                            </Ellipse>
+                                        </Grid>
                                         <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                             <TextBlock Text="{x:Bind Product.Name}" FontWeight="SemiBold"/>
                                             <TextBlock Text="{x:Bind Product.Price, Converter={StaticResource CurrencyConverter}}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
@@ -241,11 +245,14 @@
                                             <ColumnDefinition Width="*"/>
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
-                                        <Ellipse Grid.Column="0" Width="40" Height="40" Margin="0,0,12,0">
-                                            <Ellipse.Fill>
-                                                <ImageBrush ImageSource="{x:Bind ImageUrl}" Stretch="UniformToFill"/>
-                                            </Ellipse.Fill>
-                                        </Ellipse>
+                                        <Grid Grid.Column="0" Width="40" Height="40" Margin="0,0,12,0">
+                                            <Ellipse Fill="#1D546C"/>
+                                            <Ellipse>
+                                                <Ellipse.Fill>
+                                                    <ImageBrush ImageSource="{x:Bind ImageUrl, Mode=OneWay, Converter={StaticResource StringToImageSourceConverter}}" Stretch="UniformToFill"/>
+                                                </Ellipse.Fill>
+                                            </Ellipse>
+                                        </Grid>
                                         <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                             <TextBlock Text="{x:Bind Name}" FontWeight="SemiBold"/>
                                             <TextBlock Text="{x:Bind Price, Converter={StaticResource CurrencyConverter}}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
