@@ -226,6 +226,18 @@ namespace MyShop.App.Views
             {
                 item.Quantity = (int)args.NewValue;
                 item.Total = item.UnitPrice * item.Quantity;
+                
+                // Directly update the Total TextBlock in the row to avoid re-rendering the whole row (which causes focus loss)
+                if (sender.Parent is Grid grid)
+                {
+                    // Total TextBlock is in Column 4 based on XAML
+                    var totalTextBlock = grid.Children.OfType<TextBlock>().FirstOrDefault(t => Grid.GetColumn(t) == 4);
+                    if (totalTextBlock != null)
+                    {
+                        totalTextBlock.Text = $"{item.Total:N0} ₫";
+                    }
+                }
+                
                 UpdateTotals();
             }
         }
