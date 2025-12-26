@@ -88,6 +88,37 @@
                 <TextBlock Grid.Column="2" Text="{x:Bind Price, Converter={StaticResource CurrencyConverter}}" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Right" MinWidth="100" TextAlignment="Right"/>
             </Grid>
         </DataTemplate>
+        <DataTemplate x:Key="ReadOnlyOrderItemTemplate" x:DataType="models:OrderItem">
+            <Grid Padding="12" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="2.5*"/>
+                    <ColumnDefinition Width="1.2*"/>
+                    <ColumnDefinition Width="1.5*"/>
+                    <ColumnDefinition Width="1.2*"/>
+                    <ColumnDefinition Width="1.2*"/>
+                    <ColumnDefinition Width="Auto" MinWidth="80"/>
+                </Grid.ColumnDefinitions>
+                
+                <Grid Grid.Column="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Border Width="40" Height="40" CornerRadius="4" Background="#F5F5F5" Margin="0,0,12,0">
+                        <FontIcon Glyph="&#xE7F4;" Foreground="#CCCCCC"/>
+                    </Border>
+                    <TextBlock Grid.Column="1" Text="{x:Bind Product.Name}" VerticalAlignment="Center" FontWeight="Medium" TextTrimming="CharacterEllipsis"/>
+                </Grid>
+
+                <TextBlock Grid.Column="1" Text="{x:Bind Product.Sku}" VerticalAlignment="Center" Foreground="#666666"/>
+                
+                <TextBlock Grid.Column="2" Text="{x:Bind Quantity}" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+
+                <TextBlock Grid.Column="3" Text="{x:Bind UnitPrice, Converter={StaticResource CurrencyConverter}}" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+
+                <TextBlock Grid.Column="4" Text="{x:Bind Total, Converter={StaticResource CurrencyConverter}}" FontWeight="SemiBold" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+            </Grid>
+        </DataTemplate>
     </Page.Resources>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
@@ -108,9 +139,9 @@
 
                 <StackPanel Spacing="12">
                     <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
-                        <TextBlock Text="New Order" FontSize="24" FontWeight="Bold" Foreground="#1A1A1A"/>
-                        <Border x:Name="StatusBadgeBorder" CornerRadius="4" Padding="8,4" Background="#E0F2F1" VerticalAlignment="Center">
-                            <TextBlock x:Name="StatusBadgeText" Text="PENDING" FontSize="12" FontWeight="SemiBold" Foreground="#00796B"/>
+                        <TextBlock x:Name="PageTitleText" Text="New Order" FontSize="24" FontWeight="Bold" Foreground="#1A1A1A"/>
+                        <Border x:Name="StatusBadgeBorder" CornerRadius="4" Padding="8,4" Background="#20FF9F00" VerticalAlignment="Center">
+                            <TextBlock x:Name="StatusBadgeText" Text="PENDING" FontSize="12" FontWeight="SemiBold" Foreground="#FFFF9F00"/>
                         </Border>
                     </StackPanel>
                     
@@ -134,7 +165,7 @@
 
                     <Button Content="Cancel" Click="OnCancelClick" Background="White" BorderBrush="#E0E0E0" BorderThickness="1" Foreground="#333333" Padding="16,8" CornerRadius="4" VerticalAlignment="Bottom" Margin="0,0,0,1"/>
                     
-                    <Button Background="#003F62" Foreground="White" Padding="24,8" CornerRadius="4" VerticalAlignment="Bottom" Click="OnSaveOrderClick" Margin="0,0,0,1">
+                    <Button x:Name="SaveButton" Background="#003F62" Foreground="White" Padding="24,8" CornerRadius="4" VerticalAlignment="Bottom" Click="OnSaveOrderClick" Margin="0,0,0,1">
                         <TextBlock Text="Save" FontWeight="SemiBold"/>
                     </Button>
                 </StackPanel>
@@ -147,49 +178,51 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
                 
-                <TextBlock Text="Customer Details" Style="{StaticResource SectionHeaderStyle}"/>
+                <TextBlock Text="Customer Information" Style="{StaticResource SectionHeaderStyle}"/>
 
-                <StackPanel Grid.Row="1" Spacing="16">
-                    <!-- Customer Selection -->
-                    <StackPanel Spacing="8">
-                        <TextBlock Text="Customer" FontWeight="Medium" Foreground="#666666"/>
-                        <Grid ColumnSpacing="8">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <AutoSuggestBox x:Name="CustomerSuggestBox" 
-                                            HorizontalAlignment="Stretch" 
-                                            PlaceholderText="Search customer (name/phone)..."
-                                            TextChanged="OnCustomerSearchTextChanged"
-                                            SuggestionChosen="OnCustomerSuggestionChosen"
-                                            QueryIcon="Find">
-                                <AutoSuggestBox.ItemTemplate>
-                                    <DataTemplate>
-                                        <StackPanel>
-                                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold"/>
-                                            <TextBlock Text="{Binding Phone}" FontSize="12" Foreground="#666666"/>
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </AutoSuggestBox.ItemTemplate>
-                            </AutoSuggestBox>
-                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
-                                <Button Background="#F0F0F0" BorderThickness="0" Padding="12,8" Click="OnClearCustomerClick" ToolTipService.ToolTip="Clear Selection">
-                                    <FontIcon Glyph="&#xE894;" FontSize="12"/>
-                                </Button>
-                                <Button Background="#F0F0F0" BorderThickness="0" Padding="12,8" Click="OnAddCustomerClick" ToolTipService.ToolTip="Create New Customer">
-                                    <FontIcon Glyph="&#xE710;" FontSize="12"/>
-                                </Button>
-                            </StackPanel>
-                        </Grid>
-                    </StackPanel>
+                <Grid Grid.Row="1" ColumnSpacing="24">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
 
-                    <!-- Notes -->
-                    <StackPanel Spacing="8">
-                        <TextBlock Text="Notes" FontWeight="Medium" Foreground="#666666"/>
-                        <TextBox x:Name="NotesTextBox" PlaceholderText="Type notes..." Height="60" AcceptsReturn="True"/>
+                    <StackPanel Spacing="16">
+                         <!-- Search Customer -->
+                         <StackPanel Spacing="8">
+                            <TextBlock Text="Search Customer" FontWeight="Medium" Foreground="#666666"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <AutoSuggestBox x:Name="CustomerSuggestBox" 
+                                              PlaceholderText="Search by name or phone..." 
+                                              QueryIcon="Find"
+                                              TextChanged="OnCustomerSearchTextChanged"
+                                              SuggestionChosen="OnCustomerSuggestionChosen">
+                                    <AutoSuggestBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding Name}" FontWeight="SemiBold"/>
+                                                <TextBlock Text="{Binding Phone}" FontSize="12" Foreground="#666666"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </AutoSuggestBox.ItemTemplate>
+                                </AutoSuggestBox>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" Margin="8,0,0,0">
+                                     <Button x:Name="AddCustomerButton" Content="Add Customer" Click="OnAddCustomerClick" Background="#E0F7FA" Foreground="#006064" BorderThickness="0"/>
+                                     <Button x:Name="ClearCustomerButton" Content="Clear" Click="OnClearCustomerClick" Background="Transparent" BorderThickness="1" BorderBrush="#E0E0E0"/>
+                                </StackPanel>
+                            </Grid>
+                         </StackPanel>
+
+                        <!-- Notes -->
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="Notes" FontWeight="Medium" Foreground="#666666"/>
+                            <TextBox x:Name="NotesTextBox" PlaceholderText="Type notes..." Height="60" AcceptsReturn="True"/>
+                        </StackPanel>
                     </StackPanel>
-                </StackPanel>
+                </Grid>
             </Grid>
 
             <!-- Products Section -->
@@ -202,7 +235,7 @@
 
                 <Grid Grid.Row="0" Margin="0,0,0,16">
                     <TextBlock Text="Products" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
-                    <Button HorizontalAlignment="Right" Background="#003F62" Foreground="White" Padding="12,6" Click="OnAddProductClick" CornerRadius="4">
+                    <Button x:Name="AddProductButton" HorizontalAlignment="Right" Background="#003F62" Foreground="White" Padding="12,6" Click="OnAddProductClick" CornerRadius="4">
                         <StackPanel Orientation="Horizontal" Spacing="8">
                              <FontIcon Glyph="&#xE710;" FontSize="12"/>
                              <TextBlock Text="Add Product"/>

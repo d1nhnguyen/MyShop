@@ -70,18 +70,29 @@ namespace MyShop.App.Views
             Frame.Navigate(typeof(CreateOrderPage), ViewModel);
         }
 
-        private async void OnViewOrderClick(object sender, RoutedEventArgs e)
+        private void OnViewOrderClick(object sender, RoutedEventArgs e)
         {
-            if (sender is Button button && button.Tag is Order order)
+            // Handle both Button and MenuFlyoutItem triggers
+            Order order = null;
+
+            if (sender is Button button && button.Tag is Order o1)
             {
-                // Load full order details including order items
-                var fullOrder = await ViewModel.GetOrderDetailsAsync(order.Id);
-                if (fullOrder != null)
-                {
-                    var dialog = new Dialogs.OrderDetailDialog(fullOrder);
-                    dialog.XamlRoot = this.XamlRoot;
-                    await dialog.ShowAsync();
-                }
+                order = o1;
+            }
+            else if (sender is MenuFlyoutItem item && item.Tag is Order o2)
+            {
+                order = o2;
+            }
+
+            if (order != null)
+            {
+                var navParams = new CreateOrderPageNavigationParams 
+                { 
+                    ViewModel = ViewModel,
+                    OrderIdToView = order.Id,
+                    IsReadOnly = true
+                };
+                Frame.Navigate(typeof(CreateOrderPage), navParams);
             }
         }
 

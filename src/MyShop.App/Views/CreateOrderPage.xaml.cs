@@ -12,6 +12,13 @@ using MyShop.Core.Models.DTOs;
 
 namespace MyShop.App.Views
 {
+    public class CreateOrderPageNavigationParams
+    {
+        public OrderViewModel ViewModel { get; set; }
+        public int? OrderIdToView { get; set; }
+        public bool IsReadOnly { get; set; }
+    }
+
     public sealed partial class CreateOrderPage : Page
     {
         private OrderViewModel _viewModel;
@@ -39,20 +46,39 @@ namespace MyShop.App.Views
             _orderItems.CollectionChanged += (s, e) => UpdateTotals();
         }
 
-        protected override void OnNavigatedTo(NavigationEventArgs e)
+        protected override async void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
-            if (e.Parameter is OrderViewModel vm)
+
+            OrderViewModel vm = null;
+            int? orderId = null;
+            bool isReadOnly = false;
+
+            if (e.Parameter is OrderViewModel v)
             {
-                _viewModel = vm;
+                vm = v;
             }
-            else
+            else if (e.Parameter is CreateOrderPageNavigationParams args)
             {
-                _viewModel = App.Current.GetService<OrderViewModel>();
+                vm = args.ViewModel;
+                orderId = args.OrderIdToView;
+                isReadOnly = args.IsReadOnly;
             }
 
+            _viewModel = vm ?? App.Current.GetService<OrderViewModel>();
+
             CurrentDateText.Text = DateTime.Now.ToString("MMM dd, yyyy");
-            _ = LoadDataAsync();
+            await LoadDataAsync();
+
+            if (orderId.HasValue)
+            {
+               await LoadOrderForView(orderId.Value);
+            }
+            
+            if (isReadOnly)
+            {
+                SetReadOnlyMode();
+            }
         }
 
         private async Task LoadDataAsync()
@@ -495,29 +521,98 @@ namespace MyShop.App.Views
             {
                 StatusBadgeText.Text = tag;
 
-                // Default Pending Colors use #E0F2F1 and #00796B
-                var bgColor = Windows.UI.Color.FromArgb(255, 224, 242, 241); 
-                var fgColor = Windows.UI.Color.FromArgb(255, 0, 121, 107);
+                // Colors matched from OrderStatusColorConverters.cs
+                // PENDING (Orange)
+                var bgColor = Windows.UI.Color.FromArgb(32, 255, 159, 0); 
+                var fgColor = Windows.UI.Color.FromArgb(255, 255, 159, 0);
 
                 switch (tag)
                 {
-                    case "PROCESSING":
-                        bgColor = Windows.UI.Color.FromArgb(255, 227, 242, 253); // #E3F2FD
-                        fgColor = Windows.UI.Color.FromArgb(255, 13, 71, 161);   // #0D47A1
+                    case "PROCESSING": // Blue
+                        bgColor = Windows.UI.Color.FromArgb(32, 0, 120, 212);
+                        fgColor = Windows.UI.Color.FromArgb(255, 0, 120, 212);
                         break;
-                    case "COMPLETED":
-                        bgColor = Windows.UI.Color.FromArgb(255, 232, 245, 233); // #E8F5E9
-                        fgColor = Windows.UI.Color.FromArgb(255, 46, 125, 50);   // #2E7D32
+                    case "COMPLETED": // Green
+                        bgColor = Windows.UI.Color.FromArgb(32, 5, 150, 105);
+                        fgColor = Windows.UI.Color.FromArgb(255, 5, 150, 105);
                         break;
-                     case "CANCELLED":
-                        bgColor = Windows.UI.Color.FromArgb(255, 255, 235, 238); // #FFEBEE
-                        fgColor = Windows.UI.Color.FromArgb(255, 198, 40, 40);   // #C62828
+                     case "CANCELLED": // Red
+                        bgColor = Windows.UI.Color.FromArgb(32, 220, 53, 69);
+                        fgColor = Windows.UI.Color.FromArgb(255, 220, 53, 69);
                         break;
                 }
 
                 StatusBadgeBorder.Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(bgColor);
                 StatusBadgeText.Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(fgColor);
             }
+        }
+        private async System.Threading.Tasks.Task LoadOrderForView(int orderId)
+        {
+            var order = await _viewModel.GetOrderDetailsAsync(orderId);
+            if (order == null) return;
+
+            // Set Customer
+            _selectedCustomer = order.Customer;
+            CustomerSuggestBox.Text = _selectedCustomer?.Name ?? "Unknown";
+
+            // Set Notes
+            NotesTextBox.Text = order.Notes ?? "";
+
+            // Set Discount
+            if (order.Discount != null)
+            {
+                _selectedDiscount = order.Discount;
+                UpdateDiscountUI();
+            }
+
+            // Set Items
+            _orderItems.Clear();
+            if (order.OrderItems != null)
+            {
+                foreach (var item in order.OrderItems)
+                {
+                    _orderItems.Add(item);
+                }
+            }
+
+            // Set Status
+            foreach(ComboBoxItem item in StatusComboBox.Items)
+            {
+                if (item.Tag is string tag && tag == order.Status.ToString())
+                {
+                    StatusComboBox.SelectedItem = item;
+                    break;
+                }
+            }
+            
+            // Set Date Text
+            CurrentDateText.Text = order.CreatedAt.ToString("MMM dd, yyyy");
+            
+            // Update Totals
+            UpdateTotals();
+        }
+
+        private void SetReadOnlyMode()
+        {
+            PageTitleText.Text = "Order Details";
+            
+            // Disable Header Controls
+            SaveButton.Visibility = Visibility.Collapsed;
+            StatusComboBox.IsEnabled = false;
+
+            // Disable Customer Controls
+            CustomerSuggestBox.IsEnabled = false;
+            AddCustomerButton.Visibility = Visibility.Collapsed;
+            ClearCustomerButton.Visibility = Visibility.Collapsed;
+            NotesTextBox.IsReadOnly = true;
+
+            // Disable Product Controls
+            AddProductButton.Visibility = Visibility.Collapsed;
+            SelectDiscountButton.IsEnabled = false;
+            RemoveDiscountButton.Visibility = Visibility.Collapsed;
+
+            // Switch Item Template to ReadOnly
+            OrderItemsList.ItemTemplate = this.Resources["ReadOnlyOrderItemTemplate"] as DataTemplate;
         }
     }
 }
