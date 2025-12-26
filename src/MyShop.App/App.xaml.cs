@@ -69,6 +69,7 @@ namespace MyShop.App
 
             services.AddTransient<ProductViewModel>();
             services.AddTransient<ProductDetailViewModel>();
+            services.AddTransient<AddProductViewModel>();
             services.AddTransient<ReportsViewModel>();
             services.AddTransient<OrderViewModel>();
 

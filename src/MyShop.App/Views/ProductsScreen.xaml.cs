@@ -42,17 +42,9 @@ namespace MyShop.App.Views
             }
         }
 
-        private async void OnAddProductClick(object sender, RoutedEventArgs e)
+        private void OnAddProductClick(object sender, RoutedEventArgs e)
         {
-            var dialog = new AddProductDialog();
-            dialog.XamlRoot = this.XamlRoot;
-
-            await dialog.ShowAsync();
-
-            if (dialog.NewProduct != null)
-            {
-                await ViewModel.AddProductAsync(dialog.NewProduct);
-            }
+            Frame.Navigate(typeof(AddProductScreen));
         }
 
         private async void OnSearchQuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)

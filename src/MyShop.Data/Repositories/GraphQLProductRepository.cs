@@ -166,6 +166,7 @@ namespace MyShop.Data.Repositories
                             name
                             sku
                             price
+                            costPrice
                             stock
                             categoryId
                             imageUrl
@@ -178,6 +179,7 @@ namespace MyShop.Data.Repositories
                         name = entity.Name,
                         sku = entity.Sku,
                         price = entity.Price,
+                        costPrice = entity.CostPrice,
                         stock = entity.Stock,
                         categoryId = entity.CategoryId,
                         description = entity.Description,
