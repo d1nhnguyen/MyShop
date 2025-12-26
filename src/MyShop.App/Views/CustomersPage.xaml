@@ -165,8 +165,8 @@
             <!-- Search & Date -->
             <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="12">
                 <TextBox PlaceholderText="Search customers..." Width="250" VerticalAlignment="Center" Text="{x:Bind ViewModel.SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                <CalendarDatePicker PlaceholderText="From"/>
-                <CalendarDatePicker PlaceholderText="To"/>
+                <CalendarDatePicker PlaceholderText="From" Date="{x:Bind ViewModel.FromDate, Mode=TwoWay}"/>
+                <CalendarDatePicker PlaceholderText="To" Date="{x:Bind ViewModel.ToDate, Mode=TwoWay}"/>
             </StackPanel>
         </Grid>
 

@@ -25,6 +25,12 @@ namespace MyShop.App.ViewModels
         private string _searchText = string.Empty;
 
         [ObservableProperty]
+        private DateTimeOffset? _fromDate;
+
+        [ObservableProperty]
+        private DateTimeOffset? _toDate;
+
+        [ObservableProperty]
         private string _selectedFilter = "All";
         
         [ObservableProperty]
@@ -78,6 +84,16 @@ namespace MyShop.App.ViewModels
             }
 
             if (!value) IsAllSelected = false;
+        }
+
+        partial void OnFromDateChanged(DateTimeOffset? value)
+        {
+            ApplyFilters();
+        }
+
+        partial void OnToDateChanged(DateTimeOffset? value)
+        {
+            ApplyFilters();
         }
 
         [RelayCommand]
@@ -249,6 +265,19 @@ namespace MyShop.App.ViewModels
                     c.Customer.Name.ToLower().Contains(searchLower) ||
                     (c.Customer.Email?.ToLower().Contains(searchLower) ?? false) ||
                     c.Customer.Phone.Contains(searchLower));
+            }
+
+            // Filter by date range
+            if (FromDate.HasValue)
+            {
+                var fromDateOnly = FromDate.Value.Date;
+                filtered = filtered.Where(c => c.Customer.CreatedAt.Date >= fromDateOnly);
+            }
+
+            if (ToDate.HasValue)
+            {
+                var toDateOnly = ToDate.Value.Date;
+                filtered = filtered.Where(c => c.Customer.CreatedAt.Date <= toDateOnly);
             }
 
             Customers = new ObservableCollection<SelectableCustomer>(filtered);
