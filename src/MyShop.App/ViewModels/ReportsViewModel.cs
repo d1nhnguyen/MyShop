@@ -357,14 +357,16 @@ namespace MyShop.App.ViewModels
                     Name = "Revenue",
                     Values = revenueValues,
                     Fill = new SolidColorPaint(new SKColor(176, 224, 230)), // PowderBlue
-                    Stroke = null
+                    Stroke = null,
+                    MaxBarWidth = 30 
                 },
                 new ColumnSeries<double>
                 {
                     Name = "Profit",
                     Values = profitValues,
                     Fill = new SolidColorPaint(new SKColor(0, 64, 96)), // Dark Blue
-                    Stroke = null
+                    Stroke = null,
+                    MaxBarWidth = 30 
                 }
             };
 

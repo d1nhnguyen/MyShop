@@ -234,7 +234,7 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto" MinWidth="40"/>
-                            <ColumnDefinition Width="Auto" MinWidth="100"/>
+                            <ColumnDefinition Width="Auto" MinWidth="70"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Text="Name" Foreground="Gray" FontSize="12"/>
                         <TextBlock Grid.Column="1" Text="Orders" Foreground="Gray" FontSize="12" HorizontalAlignment="Right"/>
@@ -248,7 +248,7 @@
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="Auto" MinWidth="40"/>
-                                        <ColumnDefinition Width="Auto" MinWidth="100"/>
+                                        <ColumnDefinition Width="Auto" MinWidth="70"/>
                                     </Grid.ColumnDefinitions>
                                     
                                     <StackPanel Orientation="Horizontal" Spacing="8">
