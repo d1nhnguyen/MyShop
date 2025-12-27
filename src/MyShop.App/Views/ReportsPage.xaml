@@ -213,7 +213,7 @@
                         <lvc:CartesianChart Series="{x:Bind ViewModel.ProductsSeries, Mode=OneWay}"
                                             XAxes="{x:Bind ViewModel.ProductsXAxes, Mode=OneWay}"
                                             YAxes="{x:Bind ViewModel.ProductsYAxes, Mode=OneWay}"
-                                            MinWidth="600">
+                                            MinWidth="{x:Bind ViewModel.ProductsChartMinWidth, Mode=OneWay}">
                         </lvc:CartesianChart>
                     </ScrollViewer>
                 </Grid>

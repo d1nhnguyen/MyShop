@@ -146,6 +146,9 @@ namespace MyShop.App.ViewModels
         private IEnumerable<ICartesianAxis> _productsYAxes = Array.Empty<ICartesianAxis>();
 
         [ObservableProperty]
+        private double _productsChartMinWidth = 600;
+
+        [ObservableProperty]
         private IEnumerable<ISeries> _revenueProfitSeries = Array.Empty<ISeries>();
 
         [ObservableProperty]
@@ -272,7 +275,27 @@ namespace MyShop.App.ViewModels
         private void SetupProductsChart(List<ProductSalesData> products)
         {
             var quantityValues = products.Select(p => (double)p.QuantitySold).ToArray();
-            var productNames = products.Select(p => p.ProductName).ToArray();
+            
+            // Show only first word + "..." for labels
+            var productNames = products.Select(p =>
+            {
+                var name = p.ProductName;
+                var firstWord = name.Split(' ').FirstOrDefault() ?? name;
+                
+                // If there are more words, add ellipsis
+                if (name.Contains(' '))
+                {
+                    return firstWord + "...";
+                }
+                
+                // If single word is too long, truncate it
+                if (firstWord.Length > 12)
+                {
+                    return firstWord.Substring(0, 10) + "...";
+                }
+                
+                return firstWord;
+            }).ToArray();
 
             ProductsSeries = new ISeries[]
             {
@@ -301,14 +324,24 @@ namespace MyShop.App.ViewModels
                 new Axis
                 {
                     Labels = productNames,
-                    LabelsRotation = 0, // No rotation to keep it centered
+                    LabelsRotation = 0,
                     LabelsPaint = new SolidColorPaint(SKColors.Gray),
-                    TextSize = 12,
+                    TextSize = 10,
                     MinStep = 1,
                     ForceStepToMin = true,
-                    Padding = new LiveChartsCore.Drawing.Padding(0)
+                    Padding = new LiveChartsCore.Drawing.Padding(0, 15, 0, 0),
+                    // Set max width to force wrapping
+                    MaxLimit = null,
+                    SeparatorsPaint = new SolidColorPaint(new SKColor(200, 200, 200))
+                    {
+                        StrokeThickness = 1
+                    }
                 }
             };
+            
+            // Calculate MinWidth: 80px per product, minimum 600px
+            int productCount = products.Count;
+            ProductsChartMinWidth = Math.Max(600, productCount * 80);
         }
 
         private void SetupRevenueProfitChart(List<RevenueProfit> timeline)
