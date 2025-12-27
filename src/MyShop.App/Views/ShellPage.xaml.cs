@@ -36,9 +36,64 @@ namespace MyShop.App.Views
 
             foreach (var cat in ViewModel.Categories.Where(c => c.Id != 0))
             {
+                // Create a Grid to hold the category name and the menu button
+                var grid = new Grid
+                {
+                    ColumnSpacing = 8
+                };
+                grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+                grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+
+                // Category name TextBlock
+                var textBlock = new TextBlock
+                {
+                    Text = cat.DisplayText,
+                    VerticalAlignment = VerticalAlignment.Center
+                };
+                Grid.SetColumn(textBlock, 0);
+                grid.Children.Add(textBlock);
+
+                // Three dots menu button
+                var menuButton = new Button
+                {
+                    Content = new FontIcon { Glyph = "\uE712", FontSize = 12 }, // Three dots icon
+                    Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Transparent),
+                    BorderThickness = new Thickness(0),
+                    Padding = new Thickness(4),
+                    VerticalAlignment = VerticalAlignment.Center,
+                    Tag = cat.Id
+                };
+
+                // Create MenuFlyout
+                var menuFlyout = new MenuFlyout();
+                
+                var editItem = new MenuFlyoutItem
+                {
+                    Text = "Edit",
+                    Icon = new SymbolIcon(Symbol.Edit),
+                    Tag = cat.Id
+                };
+                editItem.Click += OnEditCategoryClick;
+
+                var deleteItem = new MenuFlyoutItem
+                {
+                    Text = "Delete",
+                    Icon = new SymbolIcon(Symbol.Delete),
+                    Tag = cat.Id
+                };
+                deleteItem.Click += OnDeleteCategoryClick;
+
+                menuFlyout.Items.Add(editItem);
+                menuFlyout.Items.Add(deleteItem);
+                menuButton.Flyout = menuFlyout;
+
+                Grid.SetColumn(menuButton, 1);
+                grid.Children.Add(menuButton);
+
+                // Create NavigationViewItem with custom content
                 var item = new NavigationViewItem
                 {
-                    Content = cat.DisplayText,
+                    Content = grid,
                     Tag = $"Products_{cat.Id}",
                     Icon = new SymbolIcon(Symbol.Folder)
                 };
@@ -115,6 +170,142 @@ namespace MyShop.App.Views
                     if (pageType != null)
                     {
                         ContentFrame.Navigate(pageType, navigationParam);
+                    }
+                }
+            }
+        }
+
+        private async void OnEditCategoryClick(object sender, RoutedEventArgs e)
+        {
+            if (sender is MenuFlyoutItem menuItem && menuItem.Tag is int categoryId)
+            {
+                var category = ViewModel.Categories.FirstOrDefault(c => c.Id == categoryId);
+                if (category == null) return;
+
+                var inputBox = new TextBox
+                {
+                    Text = category.Name,
+                    PlaceholderText = "Enter category name",
+                    Margin = new Thickness(0, 8, 0, 0)
+                };
+
+                var errorText = new TextBlock
+                {
+                    Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Red),
+                    Visibility = Visibility.Collapsed,
+                    Margin = new Thickness(0, 4, 0, 0),
+                    TextWrapping = TextWrapping.Wrap
+                };
+
+                // Move cursor to end of text when dialog opens
+                inputBox.Loaded += (s, args) =>
+                {
+                    inputBox.SelectionStart = inputBox.Text.Length;
+                    inputBox.SelectionLength = 0;
+                };
+
+                var dialog = new ContentDialog
+                {
+                    Title = "Edit Category",
+                    Content = new StackPanel
+                    {
+                        Children =
+                        {
+                            new TextBlock { Text = "Category Name:" },
+                            inputBox,
+                            errorText
+                        }
+                    },
+                    PrimaryButtonText = "Save",
+                    CloseButtonText = "Cancel",
+                    DefaultButton = ContentDialogButton.Primary,
+                    XamlRoot = this.XamlRoot
+                };
+
+                ContentDialogResult result;
+                bool success = false;
+
+                while (!success)
+                {
+                    result = await dialog.ShowAsync();
+
+                    if (result != ContentDialogResult.Primary)
+                    {
+                        break; // User cancelled
+                    }
+
+                    // Validate empty input
+                    if (string.IsNullOrWhiteSpace(inputBox.Text))
+                    {
+                        errorText.Text = "⚠️ Category name cannot be empty.";
+                        errorText.Visibility = Visibility.Visible;
+                        dialog.Hide();
+                        continue; // Retry
+                    }
+
+                    try
+                    {
+                        await ViewModel.UpdateCategoryAsync(categoryId, inputBox.Text.Trim());
+                        success = true;
+                    }
+                    catch (Exception ex)
+                    {
+                        // Show error message inline
+                        errorText.Text = ex.Message.Contains("already exists") 
+                            ? "⚠️ Category name already exists. Please choose a different name."
+                            : $"⚠️ Error: {ex.Message}";
+                        errorText.Visibility = Visibility.Visible;
+                        
+                        // Keep dialog open for retry
+                        dialog.Hide();
+                    }
+                }
+            }
+        }
+
+        private async void OnDeleteCategoryClick(object sender, RoutedEventArgs e)
+        {
+            if (sender is MenuFlyoutItem menuItem && menuItem.Tag is int categoryId)
+            {
+                var category = ViewModel.Categories.FirstOrDefault(c => c.Id == categoryId);
+                if (category == null) return;
+
+                var dialog = new ContentDialog
+                {
+                    Title = "Delete Category",
+                    Content = $"Are you sure you want to delete '{category.Name}'?\n\n⚠️ WARNING: All products in this category ({category.Count} products) will also be permanently deleted!",
+                    PrimaryButtonText = "Delete",
+                    CloseButtonText = "Cancel",
+                    DefaultButton = ContentDialogButton.Close,
+                    XamlRoot = this.XamlRoot
+                };
+
+                var primaryButtonStyle = new Style(typeof(Button));
+                primaryButtonStyle.Setters.Add(new Setter(Button.BackgroundProperty, new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Red)));
+                primaryButtonStyle.Setters.Add(new Setter(Button.ForegroundProperty, new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.White)));
+                dialog.PrimaryButtonStyle = primaryButtonStyle;
+
+                var result = await dialog.ShowAsync();
+
+                if (result == ContentDialogResult.Primary)
+                {
+                    try
+                    {
+                        await ViewModel.DeleteCategoryAsync(categoryId);
+                        
+                        // Navigate to "All Products" to refresh the ProductsScreen
+                        ContentFrame.Navigate(typeof(ProductsScreen), 0);
+                    }
+                    catch (Exception ex)
+                    {
+                        var errorDialog = new ContentDialog
+                        {
+                            Title = "Error",
+                            Content = $"Failed to delete category: {ex.Message}",
+                            CloseButtonText = "OK",
+                            XamlRoot = this.XamlRoot
+                        };
+                        await errorDialog.ShowAsync();
                     }
                 }
             }
