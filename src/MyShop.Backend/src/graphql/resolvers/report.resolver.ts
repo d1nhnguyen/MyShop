@@ -316,5 +316,87 @@ export const reportResolvers = {
           orders: data.orders,
         }));
     },
+
+    // 5. All Staff Performance
+    allStaffPerformance: async (_: any, { input }: any, context: Context) => {
+      requireAuth(context);
+
+      const { startDate, endDate } = input;
+
+      console.log('[Staff Performance] Query params:', { startDate, endDate });
+
+      // Get all completed orders in date range with staff info
+      const orders = await context.prisma.order.findMany({
+        where: {
+          createdAt: { gte: new Date(startDate), lte: new Date(endDate) }, // Changed from completedAt to createdAt
+          status: 'COMPLETED',
+        },
+        include: {
+          createdBy: true, // User who created the order (staff)
+          orderItems: {
+            include: { product: true },
+          },
+        },
+      });
+
+      console.log('[Staff Performance] Found orders:', orders.length);
+
+      // Group by staff (only STAFF role)
+      const staffSales = new Map<number, { username: string; email: string | null; orders: number; revenue: Prisma.Decimal; cost: Prisma.Decimal }>();
+
+      for (const order of orders) {
+        const staffId = order.userId;
+        const staff = order.createdBy;
+
+        if (!staff) {
+          console.log('[Staff Performance] Skipping order - no staff info');
+          continue;
+        }
+
+        // Only include STAFF role users
+        if (staff.role !== 'STAFF') {
+          console.log(`[Staff Performance] Skipping user ${staff.username} - role: ${staff.role}`);
+          continue;
+        }
+
+        let orderCost = new Prisma.Decimal(0);
+        for (const item of order.orderItems) {
+          const cost = item.product.costPrice || new Prisma.Decimal(0);
+          orderCost = orderCost.add(cost.mul(item.quantity));
+        }
+
+        const existing = staffSales.get(staffId);
+        if (existing) {
+          existing.orders += 1;
+          existing.revenue = existing.revenue.add(order.total);
+          existing.cost = existing.cost.add(orderCost);
+        } else {
+          staffSales.set(staffId, {
+            username: staff.username,
+            email: staff.email,
+            orders: 1,
+            revenue: new Prisma.Decimal(order.total),
+            cost: orderCost,
+          });
+        }
+      }
+
+      console.log('[Staff Performance] Staff count:', staffSales.size);
+
+      // Return ALL staff sorted by revenue
+      const result = Array.from(staffSales.entries())
+        .sort((a, b) => b[1].revenue.comparedTo(a[1].revenue))
+        .map(([staffId, data]) => ({
+          staffId,
+          username: data.username,
+          email: data.email,
+          totalOrders: data.orders,
+          totalRevenue: data.revenue,
+          totalProfit: data.revenue.sub(data.cost),
+        }));
+
+      console.log('[Staff Performance] Returning staff:', result.length);
+      return result;
+    },
   },
 };
