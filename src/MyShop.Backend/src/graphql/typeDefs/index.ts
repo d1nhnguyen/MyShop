@@ -505,6 +505,20 @@ export const typeDefs = gql`
     orders: Int!
   }
 
+  input StaffPerformanceInput {
+    startDate: DateTime!
+    endDate: DateTime!
+  }
+
+  type StaffPerformanceData {
+    staffId: Int!
+    username: String!
+    email: String
+    totalOrders: Int!
+    totalRevenue: Decimal!
+    totalProfit: Decimal!
+  }
+
   # ==================== QUERIES ====================
   type Query {
     # Auth
@@ -562,6 +576,7 @@ export const typeDefs = gql`
     topProductsByQuantity(input: TopProductsInput!): [ProductSalesData!]!
     topCustomers(input: TopCustomersInput!): [CustomerSalesData!]!
     revenueAndProfitTimeline(input: TimelineInput!): [RevenueProfit!]!
+    allStaffPerformance(input: StaffPerformanceInput!): [StaffPerformanceData!]!
 
     # Commissions
     getCommissions(filter: CommissionFilterInput, pagination: PaginationInput): PaginatedCommissions!

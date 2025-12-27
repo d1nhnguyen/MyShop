@@ -8,6 +8,7 @@ using Microsoft.UI;
 using Microsoft.UI.Xaml.Media;
 using MyShop.App.ViewModels.Base;
 using MyShop.Core.Interfaces.Repositories;
+using MyShop.Core.Interfaces.Services;
 using MyShop.Core.Models;
 using SkiaSharp;
 using System;
@@ -23,6 +24,9 @@ namespace MyShop.App.ViewModels
         public string CurrentDateString => DateTime.Now.ToString("MMM d, yyyy");
 
         private readonly IReportRepository _reportRepository;
+        private readonly IAuthService _authService;
+        private readonly IAuthorizationService _authorizationService;
+        
         private PeriodType _selectedPeriod = PeriodType.WEEKLY;
         private DateTimeOffset? _startDate = DateTimeOffset.Now.AddDays(-7);
         private DateTimeOffset? _endDate = DateTimeOffset.Now;
@@ -42,9 +46,21 @@ namespace MyShop.App.ViewModels
         [ObservableProperty]
         private bool _isBusy;
 
-        public ReportsViewModel(IReportRepository reportRepository)
+        // Role-based properties
+        public User? CurrentUser => _authService.CurrentUser;
+        public UserRole UserRole => CurrentUser?.Role ?? UserRole.STAFF;
+        public bool IsAdmin => _authorizationService.IsAuthorized(UserRole.ADMIN);
+        public bool IsStaff => !IsAdmin;
+
+        public ReportsViewModel(
+            IReportRepository reportRepository,
+            IAuthService authService,
+            IAuthorizationService authorizationService)
         {
             _reportRepository = reportRepository;
+            _authService = authService;
+            _authorizationService = authorizationService;
+            
             LoadReportCommand = new AsyncRelayCommand(LoadReportAsync);
             
             // Initialize default dates
@@ -146,12 +162,18 @@ namespace MyShop.App.ViewModels
         private IEnumerable<ICartesianAxis> _productsYAxes = Array.Empty<ICartesianAxis>();
 
         [ObservableProperty]
+        private double _productsChartMinWidth = 600;
+
+        [ObservableProperty]
         private IEnumerable<ISeries> _revenueProfitSeries = Array.Empty<ISeries>();
 
         [ObservableProperty]
         private IEnumerable<ICartesianAxis> _revenueProfitXAxes = Array.Empty<ICartesianAxis>();
 
         public ObservableCollection<CustomerSalesData> TopCustomers => _topCustomers;
+        
+        private ObservableCollection<StaffPerformanceData> _allStaff = new();
+        public ObservableCollection<StaffPerformanceData> AllStaff => _allStaff;
 
         public ObservableCollection<PeriodType> Periods { get; } = new ObservableCollection<PeriodType>(Enum.GetValues(typeof(PeriodType)).Cast<PeriodType>());
 
@@ -250,8 +272,28 @@ namespace MyShop.App.ViewModels
                 var customers = await _reportRepository.GetTopCustomersAsync(start, end);
                 _topCustomers.Clear();
                 foreach (var c in customers) _topCustomers.Add(c);
+                
+                // 4. Load All Staff Performance
+                try
+                {
+                    System.Diagnostics.Debug.WriteLine($"[ReportsViewModel] Loading staff performance from {start} to {end}");
+                    var staff = await _reportRepository.GetAllStaffPerformanceAsync(start, end);
+                    System.Diagnostics.Debug.WriteLine($"[ReportsViewModel] Loaded {staff.Count} staff members");
+                    
+                    _allStaff.Clear();
+                    foreach (var s in staff)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"[ReportsViewModel] Staff: {s.Username}, Orders: {s.TotalOrders}, Revenue: {s.TotalRevenue}");
+                        _allStaff.Add(s);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[ReportsViewModel] Error loading staff: {ex.Message}");
+                    System.Diagnostics.Debug.WriteLine($"[ReportsViewModel] Stack trace: {ex.StackTrace}");
+                }
 
-                // 4. Load Revenue/Profit Timeline Chart (Column Chart)
+                // 5. Load Revenue/Profit Timeline Chart (Column Chart)
                 var timelineGrouping = TimelineGrouping.DAY;
                 if (_selectedPeriod == PeriodType.MONTHLY || _selectedPeriod == PeriodType.YEARLY) timelineGrouping = TimelineGrouping.MONTH;
                 
@@ -272,7 +314,27 @@ namespace MyShop.App.ViewModels
         private void SetupProductsChart(List<ProductSalesData> products)
         {
             var quantityValues = products.Select(p => (double)p.QuantitySold).ToArray();
-            var productNames = products.Select(p => p.ProductName).ToArray();
+            
+            // Show only first word + "..." for labels
+            var productNames = products.Select(p =>
+            {
+                var name = p.ProductName;
+                var firstWord = name.Split(' ').FirstOrDefault() ?? name;
+                
+                // If there are more words, add ellipsis
+                if (name.Contains(' '))
+                {
+                    return firstWord + "...";
+                }
+                
+                // If single word is too long, truncate it
+                if (firstWord.Length > 12)
+                {
+                    return firstWord.Substring(0, 10) + "...";
+                }
+                
+                return firstWord;
+            }).ToArray();
 
             ProductsSeries = new ISeries[]
             {
@@ -301,14 +363,24 @@ namespace MyShop.App.ViewModels
                 new Axis
                 {
                     Labels = productNames,
-                    LabelsRotation = 0, // No rotation to keep it centered
+                    LabelsRotation = 0,
                     LabelsPaint = new SolidColorPaint(SKColors.Gray),
-                    TextSize = 12,
+                    TextSize = 10,
                     MinStep = 1,
                     ForceStepToMin = true,
-                    Padding = new LiveChartsCore.Drawing.Padding(0)
+                    Padding = new LiveChartsCore.Drawing.Padding(0, 15, 0, 0),
+                    // Set max width to force wrapping
+                    MaxLimit = null,
+                    SeparatorsPaint = new SolidColorPaint(new SKColor(200, 200, 200))
+                    {
+                        StrokeThickness = 1
+                    }
                 }
             };
+            
+            // Calculate MinWidth: 80px per product, minimum 600px
+            int productCount = products.Count;
+            ProductsChartMinWidth = Math.Max(600, productCount * 80);
         }
 
         private void SetupRevenueProfitChart(List<RevenueProfit> timeline)
@@ -317,23 +389,33 @@ namespace MyShop.App.ViewModels
             var profitValues = timeline.Select(t => (double)t.Profit).ToArray();
             var labels = timeline.Select(t => t.Date).ToArray();
 
-            RevenueProfitSeries = new ISeries[]
+            // Build series list based on user role
+            var seriesList = new List<ISeries>
             {
                 new ColumnSeries<double>
                 {
                     Name = "Revenue",
                     Values = revenueValues,
-                    Fill = new SolidColorPaint(new SKColor(176, 224, 230)), // PowderBlue
-                    Stroke = null
-                },
-                new ColumnSeries<double>
+                    Fill = new SolidColorPaint(new SKColor(150, 200, 215)), // PowderBlue
+                    Stroke = null,
+                    MaxBarWidth = 30 
+                }
+            };
+
+            // Only show Profit for ADMIN users
+            if (IsAdmin)
+            {
+                seriesList.Add(new ColumnSeries<double>
                 {
                     Name = "Profit",
                     Values = profitValues,
                     Fill = new SolidColorPaint(new SKColor(0, 64, 96)), // Dark Blue
-                    Stroke = null
-                }
-            };
+                    Stroke = null,
+                    MaxBarWidth = 30 
+                });
+            }
+
+            RevenueProfitSeries = seriesList.ToArray();
 
             RevenueProfitXAxes = new Axis[]
             {
