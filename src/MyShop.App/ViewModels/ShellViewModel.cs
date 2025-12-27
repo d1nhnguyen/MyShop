@@ -26,7 +26,6 @@ namespace MyShop.App.ViewModels
             _authService = authService;
             _authorizationService = authorizationService;
             _productRepository = productRepository;
-            // GIỮ LẠI DÒNG NÀY TỪ MAIN
             _categoryRepository = categoryRepository; 
 
             LogoutCommand = new RelayCommand(_ => ExecuteLogout());
@@ -51,20 +50,15 @@ namespace MyShop.App.ViewModels
         {
             try
             {
-                // Load real categories from database
                 var categories = await _categoryRepository.GetAllAsync();
                 var products = await _productRepository.GetAllAsync();
                 
-                // Switch to UI thread if necessary (though WinUI 3 usually handles this if awaited correctly)
-                // But let's be safe.
                 
                 var stats = new List<CategoryStat>
                 {
                     new CategoryStat { Id = 0, Name = "All Products", Count = products.Count }
                 };
 
-                // GIỮ LẠI LOGIC TỪ MAIN (Có thể giữ comment của bạn nếu cần)
-                // Add real categories with product counts
                 foreach (var category in categories)
                 {
                     stats.Add(new CategoryStat
