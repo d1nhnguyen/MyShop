@@ -213,13 +213,13 @@ namespace MyShop.App.ViewModels
                 switch (SelectedPriceFilter)
                 {
                     case PriceFilter.Low:
-                        filteredOrders = filteredOrders.Where(o => o.Total < 1000000).ToList();
+                        filteredOrders = filteredOrders.Where(o => o.Total < 100).ToList();
                         break;
                     case PriceFilter.Medium:
-                        filteredOrders = filteredOrders.Where(o => o.Total >= 1000000 && o.Total <= 5000000).ToList();
+                        filteredOrders = filteredOrders.Where(o => o.Total >= 100 && o.Total <= 500).ToList();
                         break;
                     case PriceFilter.High:
-                        filteredOrders = filteredOrders.Where(o => o.Total > 5000000).ToList();
+                        filteredOrders = filteredOrders.Where(o => o.Total > 500).ToList();
                         break;
                 }
 

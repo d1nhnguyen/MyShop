@@ -176,9 +176,9 @@
                 </ComboBox>
                 <ComboBox PlaceholderText="Price" SelectionChanged="OnPriceFilterChanged" Width="160" SelectedIndex="0">
                     <ComboBoxItem Content="All" Tag="All"/>
-                    <ComboBoxItem Content="Under 1 million" Tag="Low"/>
-                    <ComboBoxItem Content="1 million - 5 million" Tag="Medium"/>
-                    <ComboBoxItem Content="Above 5 million" Tag="High"/>
+                    <ComboBoxItem Content="Under $100" Tag="Low"/>
+                    <ComboBoxItem Content="$100 - $500" Tag="Medium"/>
+                    <ComboBoxItem Content="Above $500" Tag="High"/>
                 </ComboBox>
             </StackPanel>
 
