@@ -13,6 +13,9 @@ namespace MyShop.App.Views;
 public sealed partial class Dashboard : Page
 {
     public DashboardViewModel ViewModel { get; }
+    
+    // Static property to preserve period selection across navigation
+    private static string LastSelectedPeriod = "WEEKLY";
 
     public Dashboard()
     {
@@ -26,8 +29,22 @@ public sealed partial class Dashboard : Page
     {
         base.OnNavigatedTo(e);
         
+        // Restore last selected period BEFORE loading data
+        ViewModel.SelectedPeriod = LastSelectedPeriod;
+        
         // Load data when navigating to the page
         await ViewModel.LoadDashboardDataCommand.ExecuteAsync(null);
+        
+        // Subscribe to period changes to save them
+        ViewModel.PropertyChanged += ViewModel_PropertyChanged;
+    }
+
+    private void ViewModel_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(ViewModel.SelectedPeriod))
+        {
+            LastSelectedPeriod = ViewModel.SelectedPeriod;
+        }
     }
 
     private void OnReportClick(object sender, RoutedEventArgs e)
