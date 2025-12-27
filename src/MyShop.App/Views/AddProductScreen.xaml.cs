@@ -133,6 +133,9 @@ namespace MyShop.App.Views
                 // Save product
                 await ViewModel.AddProductAsync(newProduct);
 
+                // Reload categories in ShellPage to update counts in sidebar
+                await ReloadShellCategories();
+
                 // Navigate back
                 Frame.GoBack();
             }
@@ -154,6 +157,32 @@ namespace MyShop.App.Views
         private void OnCancelClick(object sender, RoutedEventArgs e)
         {
             Frame.GoBack();
+        }
+
+        private async System.Threading.Tasks.Task ReloadShellCategories()
+        {
+            // Find the ShellPage in the navigation stack and reload its categories
+            var frame = this.Frame;
+            while (frame != null)
+            {
+                if (frame.Content is ShellPage shellPage)
+                {
+                    await shellPage.ViewModel.LoadCategoriesAsync();
+                    break;
+                }
+                // Try to get parent frame
+                var parent = Microsoft.UI.Xaml.Media.VisualTreeHelper.GetParent(frame);
+                frame = null;
+                while (parent != null)
+                {
+                    if (parent is Microsoft.UI.Xaml.Controls.Frame parentFrame)
+                    {
+                        frame = parentFrame;
+                        break;
+                    }
+                    parent = Microsoft.UI.Xaml.Media.VisualTreeHelper.GetParent(parent);
+                }
+            }
         }
     }
 }

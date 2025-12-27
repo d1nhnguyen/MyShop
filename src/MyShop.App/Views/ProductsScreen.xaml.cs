@@ -24,11 +24,11 @@ namespace MyShop.App.Views
         {
             base.OnNavigatedTo(e);
 
-            // Ensure products are loaded if this is the first visit
-            if (ViewModel.Products.Count == 0)
-            {
-                await ViewModel.LoadProductsAsync();
-            }
+            // Always reload products when navigating to this page (in case of edits/deletes from detail screen)
+            await ViewModel.LoadProductsAsync();
+            
+            // Reload categories to update sidebar counts
+            await ReloadShellCategories();
 
             // Check if a specific Category ID was passed
             if (e.Parameter is int categoryId)
@@ -61,25 +61,18 @@ namespace MyShop.App.Views
             }
         }
 
-        private async void OnEditProductClick(object sender, RoutedEventArgs e)
+        private void OnEditProductClick(object sender, RoutedEventArgs e)
         {
-            if (sender is Button button && button.Tag is Product productToEdit)
+            if (sender is MenuFlyoutItem menuItem && menuItem.Tag is Product productToEdit)
             {
-                var dialog = new EditProductDialog(productToEdit);
-                dialog.XamlRoot = this.XamlRoot;
-
-                await dialog.ShowAsync();
-
-                if (dialog.UpdatedProduct != null)
-                {
-                    await ViewModel.UpdateProductAsync(dialog.UpdatedProduct);
-                }
+                // Navigate to ProductDetailScreen with edit mode enabled
+                Frame.Navigate(typeof(ProductDetailScreen), new { Product = productToEdit, StartInEditMode = true });
             }
         }
 
         private async void OnDeleteProductClick(object sender, RoutedEventArgs e)
         {
-            if (sender is Button button && button.Tag is Product productToDelete)
+            if (sender is MenuFlyoutItem menuItem && menuItem.Tag is Product productToDelete)
             {
                 var dialog = new ContentDialog
                 {
@@ -100,7 +93,51 @@ namespace MyShop.App.Views
 
                 if (result == ContentDialogResult.Primary)
                 {
-                    await ViewModel.DeleteProductAsync(productToDelete.Id);
+                    try
+                    {
+                        await ViewModel.DeleteProductAsync(productToDelete.Id);
+                        
+                        // Reload categories in ShellPage to update counts in sidebar
+                        await ReloadShellCategories();
+                    }
+                    catch (Exception ex)
+                    {
+                        // Show error dialog
+                        var errorDialog = new ContentDialog
+                        {
+                            Title = "Delete Failed",
+                            Content = ex.Message,
+                            CloseButtonText = "OK",
+                            XamlRoot = this.XamlRoot
+                        };
+                        await errorDialog.ShowAsync();
+                    }
+                }
+            }
+        }
+
+        private async System.Threading.Tasks.Task ReloadShellCategories()
+        {
+            // Find the ShellPage in the navigation stack and reload its categories
+            var frame = this.Frame;
+            while (frame != null)
+            {
+                if (frame.Content is ShellPage shellPage)
+                {
+                    await shellPage.ViewModel.LoadCategoriesAsync();
+                    break;
+                }
+                // Try to get parent frame
+                var parent = Microsoft.UI.Xaml.Media.VisualTreeHelper.GetParent(frame);
+                frame = null;
+                while (parent != null)
+                {
+                    if (parent is Microsoft.UI.Xaml.Controls.Frame parentFrame)
+                    {
+                        frame = parentFrame;
+                        break;
+                    }
+                    parent = Microsoft.UI.Xaml.Media.VisualTreeHelper.GetParent(parent);
                 }
             }
         }

@@ -282,5 +282,26 @@ namespace MyShop.App.ViewModels
                 IsBusy = false;
             }
         }
+
+        [RelayCommand]
+        private async Task DeleteProduct()
+        {
+            if (IsBusy || CurrentProduct == null) return;
+
+            try
+            {
+                IsBusy = true;
+                await _productRepository.DeleteAsync(CurrentProduct.Id);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Delete failed: {ex.Message}");
+                throw; // Re-throw to let the UI handle the error
+            }
+            finally
+            {
+                IsBusy = false;
+            }
+        }
     }
 }

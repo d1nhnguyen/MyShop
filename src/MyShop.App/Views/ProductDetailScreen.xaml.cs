@@ -1,3 +1,4 @@
+using System;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,9 +21,37 @@ namespace MyShop.App.Views
         {
             base.OnNavigatedTo(e);
 
-            if (e.Parameter is Product product)
+            Product product = null;
+            bool startInEditMode = false;
+
+            // Handle different parameter types
+            if (e.Parameter is Product directProduct)
+            {
+                product = directProduct;
+            }
+            else if (e.Parameter != null)
+            {
+                // Handle anonymous object with Product and StartInEditMode
+                var paramType = e.Parameter.GetType();
+                var productProp = paramType.GetProperty("Product");
+                var editModeProp = paramType.GetProperty("StartInEditMode");
+                
+                if (productProp != null)
+                    product = productProp.GetValue(e.Parameter) as Product;
+                
+                if (editModeProp != null)
+                    startInEditMode = (bool)editModeProp.GetValue(e.Parameter);
+            }
+
+            if (product != null)
             {
                 await ViewModel.LoadProduct(product);
+                
+                // Enter edit mode if requested
+                if (startInEditMode)
+                {
+                    ViewModel.EnterEditModeCommand.Execute(null);
+                }
             }
 
             // Update initial button text
@@ -46,6 +75,9 @@ namespace MyShop.App.Views
             if (ViewModel.IsEditMode)
             {
                 await ViewModel.SaveChangesCommand.ExecuteAsync(null);
+                
+                // Reload categories in case product changed category
+                await ReloadShellCategories();
             }
             else
             {
@@ -57,6 +89,81 @@ namespace MyShop.App.Views
         {
             // Navigate back to Products screen
             Frame.GoBack();
+        }
+
+        private async void OnDeleteClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+        {
+            if (ViewModel.CurrentProduct == null) return;
+
+            var dialog = new ContentDialog
+            {
+                Title = "Delete Product",
+                Content = $"Are you sure you want to permanently delete '{ViewModel.CurrentProduct.Name}'?",
+                PrimaryButtonText = "Delete",
+                CloseButtonText = "Cancel",
+                DefaultButton = ContentDialogButton.Close,
+                XamlRoot = this.XamlRoot
+            };
+
+            // Style the delete button as red
+            var primaryButtonStyle = new Microsoft.UI.Xaml.Style(typeof(Microsoft.UI.Xaml.Controls.Button));
+            primaryButtonStyle.Setters.Add(new Microsoft.UI.Xaml.Setter(Microsoft.UI.Xaml.Controls.Button.BackgroundProperty, new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Red)));
+            primaryButtonStyle.Setters.Add(new Microsoft.UI.Xaml.Setter(Microsoft.UI.Xaml.Controls.Button.ForegroundProperty, new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.White)));
+            dialog.PrimaryButtonStyle = primaryButtonStyle;
+
+            var result = await dialog.ShowAsync();
+
+            if (result == ContentDialogResult.Primary)
+            {
+                try
+                {
+                    await ViewModel.DeleteProductCommand.ExecuteAsync(null);
+                    
+                    // Reload categories in ShellPage to update counts in sidebar
+                    await ReloadShellCategories();
+                    
+                    // Navigate back to Products screen after successful deletion
+                    Frame.GoBack();
+                }
+                catch (Exception ex)
+                {
+                    // Show error dialog
+                    var errorDialog = new ContentDialog
+                    {
+                        Title = "Error",
+                        Content = $"Failed to delete product: {ex.Message}",
+                        CloseButtonText = "OK",
+                        XamlRoot = this.XamlRoot
+                    };
+                    await errorDialog.ShowAsync();
+                }
+            }
+        }
+
+        private async System.Threading.Tasks.Task ReloadShellCategories()
+        {
+            // Find the ShellPage in the navigation stack and reload its categories
+            var frame = this.Frame;
+            while (frame != null)
+            {
+                if (frame.Content is ShellPage shellPage)
+                {
+                    await shellPage.ViewModel.LoadCategoriesAsync();
+                    break;
+                }
+                // Try to get parent frame
+                var parent = Microsoft.UI.Xaml.Media.VisualTreeHelper.GetParent(frame);
+                frame = null;
+                while (parent != null)
+                {
+                    if (parent is Microsoft.UI.Xaml.Controls.Frame parentFrame)
+                    {
+                        frame = parentFrame;
+                        break;
+                    }
+                    parent = Microsoft.UI.Xaml.Media.VisualTreeHelper.GetParent(parent);
+                }
+            }
         }
     }
 }
