@@ -26,29 +26,64 @@ namespace MyShop.App.Views
 
         private async void AddStaff_Click(object sender, RoutedEventArgs e)
         {
+            var nameBox = new TextBox { Header = "Username", Margin = new Thickness(0, 0, 0, 8), IsSpellCheckEnabled = false };
+            var emailBox = new TextBox { Header = "Email", Margin = new Thickness(0, 0, 0, 8), IsSpellCheckEnabled = false };
+            var passwordBox = new PasswordBox { Header = "Initial Password", Margin = new Thickness(0, 0, 0, 8) };
+            var errorText = new TextBlock 
+            { 
+                Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Red),
+                Margin = new Thickness(0, 8, 0, 0),
+                TextWrapping = TextWrapping.Wrap,
+                Visibility = Visibility.Collapsed
+            };
+
+            var stack = new StackPanel();
+            stack.Children.Add(nameBox);
+            stack.Children.Add(emailBox);
+            stack.Children.Add(passwordBox);
+            stack.Children.Add(errorText);
+
             var dialog = new ContentDialog
             {
                 Title = "Add New Staff Member",
+                Content = stack,
                 PrimaryButtonText = "Create account",
                 CloseButtonText = "Cancel",
                 DefaultButton = ContentDialogButton.Primary,
                 XamlRoot = this.XamlRoot
             };
 
-            var nameBox = new TextBox { Header = "Username", Margin = new Thickness(0, 0, 0, 8) };
-            var emailBox = new TextBox { Header = "Email", Margin = new Thickness(0, 0, 0, 8) };
-            var passwordBox = new PasswordBox { Header = "Initial Password", Margin = new Thickness(0, 0, 0, 8) };
-            var roleCombo = new ComboBox { Header = "Role", HorizontalAlignment = HorizontalAlignment.Stretch };
-            roleCombo.Items.Add(UserRole.STAFF);
-            roleCombo.Items.Add(UserRole.ADMIN);
-            roleCombo.SelectedIndex = 0;
+            dialog.Closing += async (s, args) =>
+            {
+                if (args.Result == ContentDialogResult.Primary)
+                {
+                    var deferral = args.GetDeferral();
+                    try
+                    {
+                        string username = nameBox.Text.Trim();
+                        string email = emailBox.Text.Trim();
+                        string password = passwordBox.Password;
 
-            var stack = new StackPanel();
-            stack.Children.Add(nameBox);
-            stack.Children.Add(emailBox);
-            stack.Children.Add(passwordBox);
-            stack.Children.Add(roleCombo);
-            dialog.Content = stack;
+                        string? error = null;
+                        if (string.IsNullOrWhiteSpace(username)) error = "Username is required.";
+                        else if (string.IsNullOrWhiteSpace(email)) error = "Email is required.";
+                        else if (!System.Text.RegularExpressions.Regex.IsMatch(email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$")) error = "Invalid email format.";
+                        else if (password.Length < 6) error = "Password must be at least 6 characters long.";
+                        else if (!await ViewModel.IsUsernameAvailableAsync(username)) error = "Username is already taken.";
+
+                        if (error != null)
+                        {
+                            args.Cancel = true;
+                            errorText.Text = error;
+                            errorText.Visibility = Visibility.Visible;
+                        }
+                    }
+                    finally
+                    {
+                        deferral.Complete();
+                    }
+                }
+            };
 
             var result = await dialog.ShowAsync();
 
@@ -56,10 +91,10 @@ namespace MyShop.App.Views
             {
                 var user = new User
                 {
-                    Username = nameBox.Text,
-                    Email = emailBox.Text,
+                    Username = nameBox.Text.Trim(),
+                    Email = emailBox.Text.Trim(),
                     PasswordHash = passwordBox.Password,
-                    Role = (UserRole)roleCombo.SelectedItem
+                    Role = UserRole.STAFF
                 };
 
                 await ViewModel.AddUserAsync(user);
@@ -81,13 +116,15 @@ namespace MyShop.App.Views
                 XamlRoot = this.XamlRoot
             };
 
-            var emailBox = new TextBox { Header = "Email", Text = user.Email ?? "", Margin = new Thickness(0, 0, 0, 8) };
+            var emailBox = new TextBox { Header = "Email", Text = user.Email ?? "", Margin = new Thickness(0, 0, 0, 8), IsSpellCheckEnabled = false };
+            var errorText = new TextBlock 
+            { 
+                Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Red),
+                Margin = new Thickness(0, 8, 0, 0),
+                TextWrapping = TextWrapping.Wrap,
+                Visibility = Visibility.Collapsed
+            };
             
-            var roleCombo = new ComboBox { Header = "Role", HorizontalAlignment = HorizontalAlignment.Stretch, Margin = new Thickness(0, 0, 0, 8) };
-            roleCombo.Items.Add(UserRole.STAFF);
-            roleCombo.Items.Add(UserRole.ADMIN);
-            roleCombo.SelectedItem = user.Role;
-
             var activeToggle = new ToggleSwitch 
             { 
                 Header = "Account Status", 
@@ -98,16 +135,33 @@ namespace MyShop.App.Views
 
             var stack = new StackPanel();
             stack.Children.Add(emailBox);
-            stack.Children.Add(roleCombo);
             stack.Children.Add(activeToggle);
+            stack.Children.Add(errorText);
             dialog.Content = stack;
+
+            dialog.Closing += (s, args) =>
+            {
+                if (args.Result == ContentDialogResult.Primary)
+                {
+                    string email = emailBox.Text.Trim();
+                    string? error = null;
+                    if (string.IsNullOrWhiteSpace(email)) error = "Email is required.";
+                    else if (!System.Text.RegularExpressions.Regex.IsMatch(email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$")) error = "Invalid email format.";
+
+                    if (error != null)
+                    {
+                        args.Cancel = true;
+                        errorText.Text = error;
+                        errorText.Visibility = Visibility.Visible;
+                    }
+                }
+            };
 
             var result = await dialog.ShowAsync();
 
             if (result == ContentDialogResult.Primary)
             {
-                user.Email = emailBox.Text;
-                user.Role = (UserRole)roleCombo.SelectedItem;
+                user.Email = emailBox.Text.Trim();
                 user.IsActive = activeToggle.IsOn;
 
                 await ViewModel.UpdateUserAsync(user);

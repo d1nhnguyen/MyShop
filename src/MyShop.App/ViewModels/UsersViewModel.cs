@@ -109,5 +109,18 @@ namespace MyShop.App.ViewModels
                 return false;
             }
         }
+        public async Task<bool> IsUsernameAvailableAsync(string username)
+        {
+            try
+            {
+                var user = await _userRepository.GetByUsernameAsync(username);
+                return user == null;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error checking username availability: {ex.Message}");
+                return false; // Default to blocked on error for safety
+            }
+        }
     }
 }

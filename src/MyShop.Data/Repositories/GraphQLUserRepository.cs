@@ -5,6 +5,8 @@ using MyShop.Core.Services;
 using MyShop.Data.Repositories.Base;
 using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace MyShop.Data.Repositories
@@ -81,6 +83,13 @@ namespace MyShop.Data.Repositories
             };
 
             var response = await _graphQLService.Client.SendQueryAsync<UserByUsernameResponse>(request);
+            
+            if (response.Errors != null && response.Errors.Length > 0)
+            {
+                var error = string.Join(", ", response.Errors.Select(e => e.Message));
+                throw new Exception($"GraphQL error: {error}");
+            }
+
             return response.Data?.UserByUsername;
         }
 
@@ -169,7 +178,7 @@ namespace MyShop.Data.Repositories
         private class UserResponse { public User? User { get; set; } }
         private class UsersResponse { public UserListResponse? Users { get; set; } }
         private class UserListResponse { public List<User>? Users { get; set; } public int Total { get; set; } }
-        private class UserByUsernameResponse { public User? UserByUsername { get; set; } }
+        private class UserByUsernameResponse { [JsonPropertyName("userByUsername")] public User? UserByUsername { get; set; } }
         private class CreateUserResponse { public User? CreateUser { get; set; } }
         private class UpdateUserResponse { public User? UpdateUser { get; set; } }
     }
