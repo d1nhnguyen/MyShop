@@ -138,7 +138,7 @@ namespace MyShop.Data.Repositories
             var request = new GraphQLRequest
             {
                 Query = @"
-                    mutation CreateDiscount($input: DiscountInput!) {
+                    mutation CreateDiscount($input: CreateDiscountInput!) {
                         createDiscount(input: $input) {
                             id
                             code
@@ -159,14 +159,15 @@ namespace MyShop.Data.Repositories
                     input = new
                     {
                         code = entity.Code,
+                        name = entity.Name,
                         description = entity.Description,
                         type = entity.Type.ToString(),
                         value = entity.Value,
                         maxDiscount = entity.MaxDiscount,
                         minPurchase = entity.MinPurchase,
                         startDate = entity.StartDate,
-                        endDate = entity.EndDate,
-                        isActive = entity.IsActive
+                        endDate = entity.EndDate
+                        // Note: isActive is not in CreateDiscountInput, it's managed by backend
                     }
                 }
             };
@@ -180,7 +181,7 @@ namespace MyShop.Data.Repositories
             var request = new GraphQLRequest
             {
                 Query = @"
-                    mutation UpdateDiscount($id: Int!, $input: DiscountInput!) {
+                    mutation UpdateDiscount($id: Int!, $input: UpdateDiscountInput!) {
                         updateDiscount(id: $id, input: $input) {
                             id
                         }
@@ -191,6 +192,7 @@ namespace MyShop.Data.Repositories
                     input = new
                     {
                         code = entity.Code,
+                        name = entity.Name,
                         description = entity.Description,
                         type = entity.Type.ToString(),
                         value = entity.Value,
