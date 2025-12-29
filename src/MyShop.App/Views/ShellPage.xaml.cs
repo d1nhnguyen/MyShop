@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using MyShop.App.ViewModels;
+using MyShop.Core.Interfaces.Services;
 using System;
 using System.Linq;
 
@@ -10,14 +11,17 @@ namespace MyShop.App.Views
     public sealed partial class ShellPage : Page
     {
         public ShellViewModel ViewModel { get; }
+        private readonly IOnboardingService _onboardingService;
 
         public ShellPage()
         {
             this.InitializeComponent();
+            _onboardingService = App.Current.Services.GetRequiredService<IOnboardingService>();
             ViewModel = App.Current.Services.GetRequiredService<ShellViewModel>();
             ViewModel.LogoutRequested += OnLogoutRequested;
 
             NavView.SelectionChanged += NavView_SelectionChanged;
+            NavView.ItemInvoked += NavView_ItemInvoked;
             NavView.Loaded += NavView_Loaded;
 
             ViewModel.Categories.CollectionChanged += Categories_CollectionChanged;
@@ -118,6 +122,52 @@ namespace MyShop.App.Views
             {
                 RefreshCategoryMenuItems();
             }
+
+            CheckOnboardingAsync();
+        }
+
+        private async void CheckOnboardingAsync()
+        {
+            string username = ViewModel.CurrentUser?.Username ?? "unknown";
+            if (!_onboardingService.IsOnboardingCompleted(username))
+            {
+                ShowOnboardingDialog();
+            }
+        }
+
+        private async void ShowOnboardingDialog()
+        {
+            string username = ViewModel.CurrentUser?.Username ?? "unknown";
+            var onboardingDialog = new Dialogs.OnboardingDialog(ViewModel.UserRole)
+            {
+                XamlRoot = this.XamlRoot
+            };
+
+            onboardingDialog.SecondaryButtonClick += (s, args) =>
+            {
+                var flipView = onboardingDialog.FindName("OnboardingFlipView") as FlipView;
+                if (flipView != null)
+                {
+                    if (flipView.SelectedIndex < flipView.Items.Count - 1)
+                    {
+                        // Prevent closing and move to next slide
+                        args.Cancel = true;
+                        flipView.SelectedIndex++;
+                    }
+                    else
+                    {
+                        // On last slide, allow closing and mark as completed
+                        _onboardingService.MarkOnboardingAsCompleted(username);
+                    }
+                }
+            };
+
+            onboardingDialog.PrimaryButtonClick += (s, args) =>
+            {
+                _onboardingService.MarkOnboardingAsCompleted(username);
+            };
+
+            await onboardingDialog.ShowAsync();
         }
 
         public void SetSidebarSelectionWithoutNavigation(string tag)
@@ -193,7 +243,6 @@ namespace MyShop.App.Views
                                 pageType = typeof(ReportsPage);
                                 break;
                             case "Users":
-                                // STEP 2: Điều hướng đến trang quản lý nhân viên
                                 pageType = typeof(UsersPage);
                                 break;
                         }
@@ -203,6 +252,17 @@ namespace MyShop.App.Views
                     {
                         ContentFrame.Navigate(pageType, navigationParam);
                     }
+                }
+            }
+        }
+
+        private void NavView_ItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
+        {
+            if (args.InvokedItemContainer is NavigationViewItem item)
+            {
+                if (item.Tag?.ToString() == "Help")
+                {
+                    ShowOnboardingDialog();
                 }
             }
         }
@@ -269,7 +329,7 @@ namespace MyShop.App.Views
                     // Validate empty input
                     if (string.IsNullOrWhiteSpace(inputBox.Text))
                     {
-                        errorText.Text = "⚠️ Category name cannot be empty.";
+                        errorText.Text = "Category name cannot be empty.";
                         errorText.Visibility = Visibility.Visible;
                         dialog.Hide();
                         continue; // Retry
@@ -279,13 +339,19 @@ namespace MyShop.App.Views
                     {
                         await ViewModel.UpdateCategoryAsync(categoryId, inputBox.Text.Trim());
                         success = true;
+                        
+                        // Refresh ProductsScreen if it's currently displayed
+                        if (ContentFrame.Content is ProductsScreen productsScreen)
+                        {
+                            await productsScreen.ViewModel.LoadProductsAsync();
+                        }
                     }
                     catch (Exception ex)
                     {
                         // Show error message inline
                         errorText.Text = ex.Message.Contains("already exists") 
-                            ? "⚠️ Category name already exists. Please choose a different name."
-                            : $"⚠️ Error: {ex.Message}";
+                            ? "Category name already exists. Please choose a different name."
+                            : $"Error: {ex.Message}";
                         errorText.Visibility = Visibility.Visible;
                         
                         // Keep dialog open for retry

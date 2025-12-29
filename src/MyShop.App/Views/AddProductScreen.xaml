@@ -151,16 +151,16 @@
                             </StackPanel>
                         </Grid>
 
-                        <!-- Regular Price & Sale Price -->
+                        <!-- Cost Price & Sale Price -->
                         <Grid ColumnSpacing="16">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
 
-                            <!-- Regular Price (CostPrice) -->
+                            <!-- Cost Price (CostPrice) -->
                             <StackPanel Grid.Column="0">
-                                <TextBlock Text="Regular Price" FontWeight="SemiBold" FontSize="14" Margin="0,0,0,8"/>
+                                <TextBlock Text="Cost Price" FontWeight="SemiBold" FontSize="14" Margin="0,0,0,8"/>
                                 <TextBox x:Name="CostPriceBox" 
                                          PlaceholderText="0"
                                          Background="White" BorderBrush="#E5E7EB" BorderThickness="1" Padding="12" CornerRadius="6"/>
