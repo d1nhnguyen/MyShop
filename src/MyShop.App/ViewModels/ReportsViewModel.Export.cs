@@ -173,11 +173,11 @@ namespace MyShop.App.ViewModels
             {
                 sb.AppendLine("<h2>Staff Performance</h2>");
                 sb.AppendLine("<table>");
-                sb.AppendLine("<thead><tr><th>ID</th><th>Staff</th><th>Email</th><th class='text-right'>Orders</th><th class='text-right'>Revenue</th><th class='text-right'>Profit</th></tr></thead>");
+                sb.AppendLine("<thead><tr><th>ID</th><th>Staff</th><th>Email</th><th class='text-right'>Orders</th><th class='text-right'>Revenue</th><th class='text-right'>Profit</th><th class='text-right'>Commission</th></tr></thead>");
                 sb.AppendLine("<tbody>");
                 foreach (var s in staff)
                 {
-                    sb.AppendLine($"<tr><td>{s.StaffId}</td><td>{s.Username}</td><td>{s.Email}</td><td class='text-right'>{s.TotalOrders}</td><td class='text-right'>${s.TotalRevenue:N2}</td><td class='text-right'>${s.TotalProfit:N2}</td></tr>");
+                    sb.AppendLine($"<tr><td>{s.StaffId}</td><td>{s.Username}</td><td>{s.Email}</td><td class='text-right'>{s.TotalOrders}</td><td class='text-right'>${s.TotalRevenue:N2}</td><td class='text-right'>${s.TotalProfit:N2}</td><td class='text-right'>${s.TotalCommission:N2}</td></tr>");
                 }
                 sb.AppendLine("</tbody></table>");
             }

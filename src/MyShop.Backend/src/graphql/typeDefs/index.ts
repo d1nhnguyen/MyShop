@@ -518,6 +518,7 @@ export const typeDefs = gql`
     totalOrders: Int!
     totalRevenue: Decimal!
     totalProfit: Decimal!
+    totalCommission: Decimal!
   }
 
   # ==================== QUERIES ====================
