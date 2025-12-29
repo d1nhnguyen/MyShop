@@ -143,7 +143,7 @@ namespace MyShop.App.Views
                 XamlRoot = this.XamlRoot
             };
 
-            onboardingDialog.PrimaryButtonClick += (s, args) =>
+            onboardingDialog.SecondaryButtonClick += (s, args) =>
             {
                 var flipView = onboardingDialog.FindName("OnboardingFlipView") as FlipView;
                 if (flipView != null)
@@ -162,7 +162,7 @@ namespace MyShop.App.Views
                 }
             };
 
-            onboardingDialog.CloseButtonClick += (s, args) =>
+            onboardingDialog.PrimaryButtonClick += (s, args) =>
             {
                 _onboardingService.MarkOnboardingAsCompleted(username);
             };
