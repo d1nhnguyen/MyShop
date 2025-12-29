@@ -90,7 +90,8 @@ namespace MyShop.Data.Repositories
             {
                 Query = @"
                     query GetOrders {
-                        orders(pagination: { pageSize: 100 }) {
+                        orders(pagination: { pageSize: 10000 }) {
+                            total
                             orders {
                                 id
                                 orderNumber
