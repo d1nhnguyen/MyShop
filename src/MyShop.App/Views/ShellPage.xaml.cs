@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using MyShop.App.ViewModels;
+using MyShop.Core.Interfaces.Services;
 using System;
 using System.Linq;
 
@@ -10,10 +11,12 @@ namespace MyShop.App.Views
     public sealed partial class ShellPage : Page
     {
         public ShellViewModel ViewModel { get; }
+        private readonly IOnboardingService _onboardingService;
 
         public ShellPage()
         {
             this.InitializeComponent();
+            _onboardingService = App.Current.Services.GetRequiredService<IOnboardingService>();
             ViewModel = App.Current.Services.GetRequiredService<ShellViewModel>();
             ViewModel.LogoutRequested += OnLogoutRequested;
 
@@ -117,6 +120,45 @@ namespace MyShop.App.Views
             if (ViewModel.Categories.Count > 0)
             {
                 RefreshCategoryMenuItems();
+            }
+
+            CheckOnboardingAsync();
+        }
+
+        private async void CheckOnboardingAsync()
+        {
+            if (!_onboardingService.IsOnboardingCompleted)
+            {
+                var onboardingDialog = new Dialogs.OnboardingDialog
+                {
+                    XamlRoot = this.XamlRoot
+                };
+
+                onboardingDialog.PrimaryButtonClick += (s, args) =>
+                {
+                    var flipView = onboardingDialog.FindName("OnboardingFlipView") as FlipView;
+                    if (flipView != null)
+                    {
+                        if (flipView.SelectedIndex < flipView.Items.Count - 1)
+                        {
+                            // Prevent closing and move to next slide
+                            args.Cancel = true;
+                            flipView.SelectedIndex++;
+                        }
+                        else
+                        {
+                            // On last slide, allow closing and mark as completed
+                            _onboardingService.MarkOnboardingAsCompleted();
+                        }
+                    }
+                };
+
+                onboardingDialog.CloseButtonClick += (s, args) =>
+                {
+                    _onboardingService.MarkOnboardingAsCompleted();
+                };
+
+                await onboardingDialog.ShowAsync();
             }
         }
 

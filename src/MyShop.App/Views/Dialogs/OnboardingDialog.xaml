@@ -1,0 +1,65 @@
+<ContentDialog
+    x:Class="MyShop.App.Views.Dialogs.OnboardingDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Title="Welcome to MyShop"
+    PrimaryButtonText="Next"
+    CloseButtonText="Skip"
+    DefaultButton="Primary"
+    RequestedTheme="Dark">
+
+    <Grid Width="500" Height="400">
+        <FlipView x:Name="OnboardingFlipView" SelectionChanged="OnboardingFlipView_SelectionChanged">
+            <!-- Slide 1: Welcome -->
+            <FlipViewItem>
+                <StackPanel Spacing="20" VerticalAlignment="Center">
+                    <FontIcon Glyph="&#xE735;" FontSize="60" Foreground="Gold"/>
+                    <TextBlock Text="Welcome to MyShop!" FontSize="24" FontWeight="Bold" HorizontalAlignment="Center"/>
+                    <TextBlock Text="Your all-in-one solution for managing products, orders, and customers efficiently." 
+                               TextWrapping="Wrap" TextAlignment="Center" FontSize="16" Opacity="0.8"/>
+                </StackPanel>
+            </FlipViewItem>
+
+            <!-- Slide 2: Products -->
+            <FlipViewItem>
+                <StackPanel Spacing="20" VerticalAlignment="Center">
+                    <FontIcon Glyph="&#xE7BF;" FontSize="60" Foreground="LightBlue"/>
+                    <TextBlock Text="Manage Products" FontSize="24" FontWeight="Bold" HorizontalAlignment="Center"/>
+                    <TextBlock Text="Easily add, edit, and categorize your products. Keep track of stock and pricing in real-time." 
+                               TextWrapping="Wrap" TextAlignment="Center" FontSize="16" Opacity="0.8"/>
+                </StackPanel>
+            </FlipViewItem>
+
+            <!-- Slide 3: Orders -->
+            <FlipViewItem>
+                <StackPanel Spacing="20" VerticalAlignment="Center">
+                    <FontIcon Glyph="&#xE8A1;" FontSize="60" Foreground="LightGreen"/>
+                    <TextBlock Text="Streamline Orders" FontSize="24" FontWeight="Bold" HorizontalAlignment="Center"/>
+                    <TextBlock Text="Process customer orders quickly. View order history and track fulfillment status with ease." 
+                               TextWrapping="Wrap" TextAlignment="Center" FontSize="16" Opacity="0.8"/>
+                </StackPanel>
+            </FlipViewItem>
+
+            <!-- Slide 4: Reports -->
+            <FlipViewItem>
+                <StackPanel Spacing="20" VerticalAlignment="Center">
+                    <FontIcon Glyph="&#xE9D2;" FontSize="60" Foreground="MediumPurple"/>
+                    <TextBlock Text="Insightful Reports" FontSize="24" FontWeight="Bold" HorizontalAlignment="Center"/>
+                    <TextBlock Text="Visualize your business growth with detailed charts and stats on sales, revenue, and more." 
+                               TextWrapping="Wrap" TextAlignment="Center" FontSize="16" Opacity="0.8"/>
+                </StackPanel>
+            </FlipViewItem>
+        </FlipView>
+
+        <!-- Step Indicator -->
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,10">
+            <Ellipse x:Name="Indicator1" Width="8" Height="8" Fill="White" Margin="4" Opacity="1"/>
+            <Ellipse x:Name="Indicator2" Width="8" Height="8" Fill="White" Margin="4" Opacity="0.3"/>
+            <Ellipse x:Name="Indicator3" Width="8" Height="8" Fill="White" Margin="4" Opacity="0.3"/>
+            <Ellipse x:Name="Indicator4" Width="8" Height="8" Fill="White" Margin="4" Opacity="0.3"/>
+        </StackPanel>
+    </Grid>
+</ContentDialog>
