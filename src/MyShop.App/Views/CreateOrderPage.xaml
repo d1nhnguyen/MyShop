@@ -15,6 +15,8 @@
         <converters:OrderStatusToForegroundConverter x:Key="StatusToForegroundConverter"/>
         <converters:OrderStatusToBackgroundConverter x:Key="StatusToBackgroundConverter"/>
         <converters:OrderStatusToTextConverter x:Key="StatusToTextConverter"/>
+        <converters:DiscountTypeToTextConverter x:Key="DiscountTypeToTextConverter"/>
+        <converters:DiscountValueDisplayConverter x:Key="DiscountValueDisplayConverter"/>
         <converters:DiscountDisplayConverter x:Key="DiscountDisplayConverter"/>
         <converters:DiscountTypeDisplayConverter x:Key="DiscountTypeDisplayConverter"/>
 
@@ -61,17 +63,19 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                <StackPanel Spacing="2">
-                    <TextBlock Text="{x:Bind Name}" FontWeight="SemiBold" Foreground="#1A1A1A"/>
-                    <StackPanel Orientation="Horizontal" Spacing="6">
-                         <Border Background="#F0F0F0" CornerRadius="4" Padding="6,2">
-                            <TextBlock Text="{x:Bind Code}" FontSize="11" FontFamily="Consolas" Foreground="#333333"/>
-                         </Border>
-                         <TextBlock Text="{x:Bind Type, Converter={StaticResource DiscountTypeDisplayConverter}}" FontSize="12" Foreground="#666666" VerticalAlignment="Center"/>
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBlock Text="{x:Bind Name}" FontWeight="SemiBold" Foreground="#1A1A1A"/>
+                        <Border Background="#2196F3" CornerRadius="4" Padding="6,2">
+                            <TextBlock Text="{x:Bind Type, Converter={StaticResource DiscountTypeToTextConverter}}" FontSize="10" Foreground="White" FontWeight="SemiBold"/>
+                        </Border>
+                        <Border Background="#FF9800" CornerRadius="4" Padding="6,2" Visibility="{x:Bind MemberOnly}">
+                            <TextBlock Text="Member Only" FontSize="10" Foreground="White" FontWeight="SemiBold"/>
+                        </Border>
                     </StackPanel>
-                    <TextBlock Text="{x:Bind Description}" FontSize="12" Foreground="#888888" TextTrimming="CharacterEllipsis" MaxLines="1" Margin="0,2,0,0"/>
+                    <TextBlock Text="{x:Bind Code}" FontSize="12" Foreground="#666666" Margin="0,4,0,0"/>
+                    <TextBlock Text="{x:Bind Converter={StaticResource DiscountValueDisplayConverter}}" FontSize="13" FontWeight="Bold" Foreground="#00796B" Margin="0,4,0,0"/>
                 </StackPanel>
-                <TextBlock Grid.Column="1" Text="{x:Bind Converter={StaticResource DiscountDisplayConverter}}" FontWeight="Bold" FontSize="15" VerticalAlignment="Center" Foreground="#00796B"/>
             </Grid>
         </DataTemplate>
 

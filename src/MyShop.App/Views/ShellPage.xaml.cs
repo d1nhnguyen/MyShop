@@ -239,6 +239,9 @@ namespace MyShop.App.Views
                             case "Customers":
                             pageType = typeof(CustomersPage);
                             break;
+                        case "Discounts":
+                                pageType = typeof(DiscountsPage);
+                                break;
                         case "Reports":
                                 pageType = typeof(ReportsPage);
                                 break;

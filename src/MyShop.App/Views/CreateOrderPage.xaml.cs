@@ -308,10 +308,63 @@ namespace MyShop.App.Views
                 MaxHeight = 400
             };
 
-            listView.ItemClick += (s, args) =>
+            listView.ItemClick += async (s, args) =>
             {
                 if (args.ClickedItem is Discount selected)
                 {
+                    // Check if discount is member-only and customer is not a member
+                    if (selected.MemberOnly && (_selectedCustomer == null || !_selectedCustomer.IsMember))
+                    {
+                        dialog.Hide();
+
+                        var warningDialog = new ContentDialog
+                        {
+                            XamlRoot = this.XamlRoot,
+                            Title = "Member Only Discount",
+                            Content = "This discount is only available for members. Please select a member customer first.",
+                            CloseButtonText = "OK"
+                        };
+                        await warningDialog.ShowAsync();
+                        return;
+                    }
+
+                    // Check minimum purchase requirement
+                    decimal currentSubtotal = _orderItems.Sum(i => i.Total);
+                    if (selected.MinPurchase.HasValue && currentSubtotal < selected.MinPurchase.Value)
+                    {
+                        dialog.Hide();
+
+                        var warningDialog = new ContentDialog
+                        {
+                            XamlRoot = this.XamlRoot,
+                            Title = "Minimum Purchase Required",
+                            Content = $"This discount requires a minimum purchase of {selected.MinPurchase.Value:N0} ₫.\nYour current subtotal is {currentSubtotal:N0} ₫.",
+                            CloseButtonText = "OK"
+                        };
+                        await warningDialog.ShowAsync();
+                        return;
+                    }
+
+                    // Check wholesale minimum quantity
+                    if (selected.Type == DiscountType.WHOLESALE_DISCOUNT && selected.WholesaleMinQty.HasValue)
+                    {
+                        int totalQuantity = _orderItems.Sum(i => i.Quantity);
+                        if (totalQuantity < selected.WholesaleMinQty.Value)
+                        {
+                            dialog.Hide();
+
+                            var warningDialog = new ContentDialog
+                            {
+                                XamlRoot = this.XamlRoot,
+                                Title = "Minimum Quantity Required",
+                                Content = $"This wholesale discount requires a minimum quantity of {selected.WholesaleMinQty.Value} items.\nYour current total quantity is {totalQuantity}.",
+                                CloseButtonText = "OK"
+                            };
+                            await warningDialog.ShowAsync();
+                            return;
+                        }
+                    }
+
                     _selectedDiscount = selected;
                     dialog.Hide();
                     UpdateDiscountUI();
@@ -359,17 +412,52 @@ namespace MyShop.App.Views
 
             if (_selectedDiscount != null)
             {
-                if (_selectedDiscount.Type == DiscountType.PERCENTAGE)
+                // Debug log
+                System.Diagnostics.Debug.WriteLine($"Discount: {_selectedDiscount.Name}, Type: {_selectedDiscount.Type}, Value: {_selectedDiscount.Value}, Subtotal: {subtotal}");
+
+                // Check minimum purchase requirement
+                bool meetsMinPurchase = !_selectedDiscount.MinPurchase.HasValue || subtotal >= _selectedDiscount.MinPurchase.Value;
+
+                if (meetsMinPurchase)
                 {
-                    discountAmount = subtotal * (_selectedDiscount.Value / 100);
-                    if (_selectedDiscount.MaxDiscount.HasValue && discountAmount > _selectedDiscount.MaxDiscount.Value)
+                    switch (_selectedDiscount.Type)
                     {
-                        discountAmount = _selectedDiscount.MaxDiscount.Value;
+                        case DiscountType.PERCENTAGE:
+                        case DiscountType.MEMBER_DISCOUNT:
+                            // Value is stored as percentage (e.g., 30 for 30%)
+                            discountAmount = subtotal * _selectedDiscount.Value / 100m;
+                            System.Diagnostics.Debug.WriteLine($"PERCENTAGE: {subtotal} * {_selectedDiscount.Value} / 100 = {discountAmount}");
+                            // Apply max discount cap if specified
+                            if (_selectedDiscount.MaxDiscount.HasValue && discountAmount > _selectedDiscount.MaxDiscount.Value)
+                            {
+                                discountAmount = _selectedDiscount.MaxDiscount.Value;
+                            }
+                            break;
+
+                        case DiscountType.FIXED_AMOUNT:
+                            discountAmount = _selectedDiscount.Value;
+                            break;
+
+                        case DiscountType.WHOLESALE_DISCOUNT:
+                            // Check if total quantity meets wholesale minimum
+                            int totalQuantity = _orderItems.Sum(i => i.Quantity);
+                            if (_selectedDiscount.WholesaleMinQty.HasValue && totalQuantity >= _selectedDiscount.WholesaleMinQty.Value)
+                            {
+                                // Value is stored as percentage (e.g., 30 for 30%)
+                                discountAmount = subtotal * _selectedDiscount.Value / 100m;
+                                if (_selectedDiscount.MaxDiscount.HasValue && discountAmount > _selectedDiscount.MaxDiscount.Value)
+                                {
+                                    discountAmount = _selectedDiscount.MaxDiscount.Value;
+                                }
+                            }
+                            break;
+
+                        case DiscountType.BUY_X_GET_Y:
+                            // This type needs product-level calculation, for now apply fixed value
+                            // TODO: Implement proper Buy X Get Y logic at product level
+                            discountAmount = _selectedDiscount.Value;
+                            break;
                     }
-                }
-                else if (_selectedDiscount.Type == DiscountType.FIXED_AMOUNT)
-                {
-                    discountAmount = _selectedDiscount.Value;
                 }
             }
 
@@ -519,12 +607,20 @@ namespace MyShop.App.Views
                 return;
             }
 
-            var selectedStatus = MyShop.Core.Models.OrderStatus.PENDING;
-            if (StatusComboBox.SelectedItem is ComboBoxItem item && item.Tag is string tag)
+            // Validate member-only discount
+            if (_selectedDiscount != null && _selectedDiscount.MemberOnly)
             {
-                if (Enum.TryParse<MyShop.Core.Models.OrderStatus>(tag, out var parsed))
+                if (_selectedCustomer == null || !_selectedCustomer.IsMember)
                 {
-                    selectedStatus = parsed;
+                    var errorDialog = new ContentDialog
+                    {
+                        Title = "Validation Error",
+                        Content = "The selected discount is only available for members. Please select a member customer or remove the discount.",
+                        CloseButtonText = "OK",
+                        XamlRoot = this.XamlRoot
+                    };
+                    await errorDialog.ShowAsync();
+                    return;
                 }
             }
 
@@ -535,12 +631,25 @@ namespace MyShop.App.Views
                 CustomerId = _selectedCustomer?.Id,
                 DiscountId = _selectedDiscount?.Id,
                 Notes = NotesTextBox.Text,
-                Status = selectedStatus,
                 OrderItems = _orderItems.ToList(),
                 CreatedAt = _editingOrderId.HasValue ? _originalCreatedAt : DateTime.Now,
                 UpdatedAt = DateTime.Now,
                 OrderNumber = _editingOrderId.HasValue ? _originalOrderNumber : "ORD-" + DateTime.Now.Ticks.ToString().Substring(10)
             };
+
+            // Only set status when editing (for UpdateOrder mutation)
+            if (_editingOrderId.HasValue)
+            {
+                var selectedStatus = MyShop.Core.Models.OrderStatus.PENDING;
+                if (StatusComboBox.SelectedItem is ComboBoxItem item && item.Tag is string tag)
+                {
+                    if (Enum.TryParse<MyShop.Core.Models.OrderStatus>(tag, out var parsed))
+                    {
+                        selectedStatus = parsed;
+                    }
+                }
+                newOrder.Status = selectedStatus;
+            }
 
             if (_editingOrderId.HasValue)
             {
