@@ -376,10 +376,10 @@ namespace MyShop.App.Views
             decimal total = subtotal - discountAmount;
             if (total < 0) total = 0;
 
-            // Calculate commission based on total (USD)
+            // Calculate commission based on subtotal (real value of goods sold)
             // 5% for orders >= $1000, 3% otherwise
-            decimal commissionRate = total >= 1000 ? 0.05m : 0.03m;
-            decimal commissionAmount = total * commissionRate;
+            decimal commissionRate = subtotal >= 1000 ? 0.05m : 0.03m;
+            decimal commissionAmount = subtotal * commissionRate;
 
             SubtotalText.Text = $"${subtotal:N2}";
             DiscountAmountText.Text = $"-${discountAmount:N2}";
