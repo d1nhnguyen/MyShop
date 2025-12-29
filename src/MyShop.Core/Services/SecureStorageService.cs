@@ -5,7 +5,7 @@ using System;
 using System.IO;
 using System.Text.Json;
 
-namespace MyShop.App.Services
+namespace MyShop.Core.Services
 {
     /// <summary>
     /// Provides secure dual-storage for license data (Registry + AppData backup).

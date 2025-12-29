@@ -3,7 +3,7 @@ using System;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace MyShop.App.Services
+namespace MyShop.Core.Services
 {
     /// <summary>
     /// Provides AES-256-CBC encryption and HMAC-SHA256 hashing for license protection.

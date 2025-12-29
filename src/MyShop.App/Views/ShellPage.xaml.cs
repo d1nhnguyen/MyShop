@@ -3,6 +3,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using MyShop.App.ViewModels;
 using MyShop.Core.Interfaces.Services;
+using MyShop.Core.Services;
 using System;
 using System.Linq;
 
@@ -223,10 +224,36 @@ namespace MyShop.App.Views
             }
         }
 
-        private async System.Threading.Tasks.Task ShowActivationDialog()
+        public async System.Threading.Tasks.Task ShowActivationDialog()
         {
+            var licenseService = App.Current.Services.GetRequiredService<ILicenseService>();
+            var fingerprintService = App.Current.Services.GetRequiredService<IFingerprintService>();
+            var machineId = fingerprintService.GetMachineSignature();
+
+            var machineIdBox = new TextBox
+            {
+                Text = machineId,
+                IsReadOnly = true,
+                Header = "Your Machine ID (send this to developer):",
+                Margin = new Thickness(0, 0, 0, 16)
+            };
+
+            var copyBtn = new Button
+            {
+                Content = "Copy ID",
+                HorizontalAlignment = HorizontalAlignment.Right,
+                Margin = new Thickness(0, -50, 0, 16)
+            };
+            copyBtn.Click += (s, e) =>
+            {
+                var package = new Windows.ApplicationModel.DataTransfer.DataPackage();
+                package.SetText(machineId);
+                Windows.ApplicationModel.DataTransfer.Clipboard.SetContent(package);
+            };
+
             var inputBox = new TextBox
             {
+                Header = "Enter License Key:",
                 PlaceholderText = "XXXX-XXXX-XXXX-XXXX",
                 MaxLength = 19,
                 Margin = new Thickness(0, 8, 0, 0)
@@ -234,16 +261,17 @@ namespace MyShop.App.Views
 
             var dialog = new ContentDialog
             {
-                Title = "Activate License",
+                Title = "Activate MyShop License",
                 Content = new StackPanel
                 {
                     Children =
                     {
-                        new TextBlock { Text = "Enter your license key:" },
+                        machineIdBox,
+                        copyBtn,
                         inputBox
                     }
                 },
-                PrimaryButtonText = "Activate",
+                PrimaryButtonText = "Activate Now",
                 CloseButtonText = "Cancel",
                 DefaultButton = ContentDialogButton.Primary,
                 XamlRoot = this.XamlRoot
@@ -253,8 +281,7 @@ namespace MyShop.App.Views
 
             if (result == ContentDialogResult.Primary)
             {
-                // Attempt activation (placeholder for actual implementation)
-                var licenseService = App.Current.Services.GetRequiredService<ILicenseService>();
+                // Attempt activation
                 bool activated = licenseService.ActivateLicense(inputBox.Text.Trim());
 
                 if (activated)
