@@ -21,6 +21,7 @@ namespace MyShop.App.Views
             ViewModel.LogoutRequested += OnLogoutRequested;
 
             NavView.SelectionChanged += NavView_SelectionChanged;
+            NavView.ItemInvoked += NavView_ItemInvoked;
             NavView.Loaded += NavView_Loaded;
 
             ViewModel.Categories.CollectionChanged += Categories_CollectionChanged;
@@ -127,39 +128,46 @@ namespace MyShop.App.Views
 
         private async void CheckOnboardingAsync()
         {
-            if (!_onboardingService.IsOnboardingCompleted)
+            string username = ViewModel.CurrentUser?.Username ?? "unknown";
+            if (!_onboardingService.IsOnboardingCompleted(username))
             {
-                var onboardingDialog = new Dialogs.OnboardingDialog
-                {
-                    XamlRoot = this.XamlRoot
-                };
-
-                onboardingDialog.PrimaryButtonClick += (s, args) =>
-                {
-                    var flipView = onboardingDialog.FindName("OnboardingFlipView") as FlipView;
-                    if (flipView != null)
-                    {
-                        if (flipView.SelectedIndex < flipView.Items.Count - 1)
-                        {
-                            // Prevent closing and move to next slide
-                            args.Cancel = true;
-                            flipView.SelectedIndex++;
-                        }
-                        else
-                        {
-                            // On last slide, allow closing and mark as completed
-                            _onboardingService.MarkOnboardingAsCompleted();
-                        }
-                    }
-                };
-
-                onboardingDialog.CloseButtonClick += (s, args) =>
-                {
-                    _onboardingService.MarkOnboardingAsCompleted();
-                };
-
-                await onboardingDialog.ShowAsync();
+                ShowOnboardingDialog();
             }
+        }
+
+        private async void ShowOnboardingDialog()
+        {
+            string username = ViewModel.CurrentUser?.Username ?? "unknown";
+            var onboardingDialog = new Dialogs.OnboardingDialog(ViewModel.UserRole)
+            {
+                XamlRoot = this.XamlRoot
+            };
+
+            onboardingDialog.PrimaryButtonClick += (s, args) =>
+            {
+                var flipView = onboardingDialog.FindName("OnboardingFlipView") as FlipView;
+                if (flipView != null)
+                {
+                    if (flipView.SelectedIndex < flipView.Items.Count - 1)
+                    {
+                        // Prevent closing and move to next slide
+                        args.Cancel = true;
+                        flipView.SelectedIndex++;
+                    }
+                    else
+                    {
+                        // On last slide, allow closing and mark as completed
+                        _onboardingService.MarkOnboardingAsCompleted(username);
+                    }
+                }
+            };
+
+            onboardingDialog.CloseButtonClick += (s, args) =>
+            {
+                _onboardingService.MarkOnboardingAsCompleted(username);
+            };
+
+            await onboardingDialog.ShowAsync();
         }
 
         public void SetSidebarSelectionWithoutNavigation(string tag)
@@ -245,6 +253,17 @@ namespace MyShop.App.Views
                     {
                         ContentFrame.Navigate(pageType, navigationParam);
                     }
+                }
+            }
+        }
+
+        private void NavView_ItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
+        {
+            if (args.InvokedItemContainer is NavigationViewItem item)
+            {
+                if (item.Tag?.ToString() == "Help")
+                {
+                    ShowOnboardingDialog();
                 }
             }
         }

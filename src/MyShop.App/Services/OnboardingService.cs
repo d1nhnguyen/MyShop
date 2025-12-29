@@ -7,13 +7,17 @@ namespace MyShop.App.Services
     {
         private const string OnboardingCompletedKey = "OnboardingCompleted";
 
-        public bool IsOnboardingCompleted => 
-            ApplicationData.Current.LocalSettings.Values.ContainsKey(OnboardingCompletedKey) && 
-            (bool)ApplicationData.Current.LocalSettings.Values[OnboardingCompletedKey];
-
-        public void MarkOnboardingAsCompleted()
+        public bool IsOnboardingCompleted(string username)
         {
-            ApplicationData.Current.LocalSettings.Values[OnboardingCompletedKey] = true;
+            string key = $"{OnboardingCompletedKey}_{username}";
+            return ApplicationData.Current.LocalSettings.Values.ContainsKey(key) && 
+                   (bool)ApplicationData.Current.LocalSettings.Values[key];
+        }
+
+        public void MarkOnboardingAsCompleted(string username)
+        {
+            string key = $"{OnboardingCompletedKey}_{username}";
+            ApplicationData.Current.LocalSettings.Values[key] = true;
         }
     }
 }
