@@ -238,5 +238,226 @@ namespace MyShop.App.ViewModels
             sb.AppendLine("</body></html>");
             return sb.ToString();
         }
+
+        public async Task ExportSingleOrderAsync(Order order)
+        {
+            if (order == null)
+            {
+                ErrorMessage = "No order to export.";
+                return;
+            }
+
+            try
+            {
+                IsBusy = true;
+
+                var html = GenerateInvoiceHtml(order);
+
+                var tempPath = System.IO.Path.Combine(
+                    System.IO.Path.GetTempPath(),
+                    $"Invoice_{order.OrderNumber}_{DateTime.Now:yyyyMMdd_HHmmss}.html"
+                );
+                await System.IO.File.WriteAllTextAsync(tempPath, html);
+
+                var psi = new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = tempPath,
+                    UseShellExecute = true
+                };
+                System.Diagnostics.Process.Start(psi);
+
+                System.Diagnostics.Debug.WriteLine($"Invoice opened: {tempPath}");
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"Failed to export invoice: {ex.Message}";
+                System.Diagnostics.Debug.WriteLine($"Error exporting invoice: {ex.Message}");
+            }
+            finally
+            {
+                IsBusy = false;
+            }
+        }
+
+        private string GenerateInvoiceHtml(Order order)
+        {
+            var sb = new StringBuilder();
+
+            var customerName = order.Customer?.Name ?? "Guest";
+            var customerPhone = order.Customer?.Phone ?? "N/A";
+            var customerEmail = order.Customer?.Email ?? "N/A";
+            var customerAddress = order.Customer?.Address ?? "N/A";
+
+            var statusText = order.Status switch
+            {
+                OrderStatus.PENDING => "Pending",
+                OrderStatus.PROCESSING => "Processing",
+                OrderStatus.COMPLETED => "Completed",
+                OrderStatus.CANCELLED => "Cancelled",
+                _ => order.Status.ToString()
+            };
+
+            var statusClass = order.Status switch
+            {
+                OrderStatus.PENDING => "status-pending",
+                OrderStatus.PROCESSING => "status-processing",
+                OrderStatus.COMPLETED => "status-completed",
+                OrderStatus.CANCELLED => "status-cancelled",
+                _ => ""
+            };
+
+            sb.AppendLine("<!DOCTYPE html>");
+            sb.AppendLine("<html><head>");
+            sb.AppendLine("<meta charset='utf-8'>");
+            sb.AppendLine($"<title>Invoice - {order.OrderNumber}</title>");
+
+            // CSS Styles - Invoice Style
+            sb.AppendLine("<style>");
+            sb.AppendLine("@media print { @page { margin: 1cm; size: A4; } }");
+            sb.AppendLine("body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }");
+            sb.AppendLine(".invoice { max-width: 800px; margin: 0 auto; background: white; padding: 40px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }");
+            sb.AppendLine(".header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 2px solid #003F62; }");
+            sb.AppendLine(".logo { font-size: 32px; font-weight: bold; color: #003F62; }");
+            sb.AppendLine(".invoice-title { text-align: right; }");
+            sb.AppendLine(".invoice-title h1 { margin: 0; color: #003F62; font-size: 28px; }");
+            sb.AppendLine(".invoice-title .invoice-number { font-size: 16px; color: #666; margin-top: 5px; }");
+            sb.AppendLine(".status { padding: 6px 16px; border-radius: 4px; font-size: 14px; font-weight: 600; display: inline-block; margin-top: 10px; }");
+            sb.AppendLine(".status-pending { background: rgba(255,159,0,0.2); color: #d97706; }");
+            sb.AppendLine(".status-processing { background: rgba(0,120,212,0.2); color: #0078d4; }");
+            sb.AppendLine(".status-completed { background: rgba(5,150,105,0.2); color: #059669; }");
+            sb.AppendLine(".status-cancelled { background: rgba(220,53,69,0.2); color: #dc3545; }");
+            sb.AppendLine(".info-section { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 40px; }");
+            sb.AppendLine(".info-box h3 { margin: 0 0 15px 0; color: #003F62; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }");
+            sb.AppendLine(".info-box p { margin: 5px 0; color: #333; font-size: 14px; }");
+            sb.AppendLine(".info-box .label { color: #888; }");
+            sb.AppendLine("table { width: 100%; border-collapse: collapse; margin: 20px 0; }");
+            sb.AppendLine("thead { background: #003F62; color: white; }");
+            sb.AppendLine("th { padding: 15px; text-align: left; font-weight: 600; }");
+            sb.AppendLine("td { padding: 12px 15px; border-bottom: 1px solid #e0e0e0; }");
+            sb.AppendLine("tbody tr:nth-child(even) { background: #fafafa; }");
+            sb.AppendLine(".text-right { text-align: right; }");
+            sb.AppendLine(".text-center { text-align: center; }");
+            sb.AppendLine(".totals { margin-top: 30px; display: flex; justify-content: flex-end; }");
+            sb.AppendLine(".totals-box { width: 300px; }");
+            sb.AppendLine(".totals-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; }");
+            sb.AppendLine(".totals-row.total { border-top: 2px solid #003F62; border-bottom: none; padding-top: 15px; margin-top: 10px; }");
+            sb.AppendLine(".totals-row.total .label, .totals-row.total .value { font-size: 20px; font-weight: bold; color: #003F62; }");
+            sb.AppendLine(".totals-row .label { color: #666; }");
+            sb.AppendLine(".totals-row .value { font-weight: 600; }");
+            sb.AppendLine(".discount { color: #27AE60; }");
+            sb.AppendLine(".footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee; text-align: center; color: #888; font-size: 12px; }");
+            sb.AppendLine("@media print { body { background: white; } .invoice { box-shadow: none; padding: 0; } }");
+            sb.AppendLine("</style>");
+            sb.AppendLine("</head><body>");
+            sb.AppendLine("<div class='invoice'>");
+
+            // Header
+            sb.AppendLine("<div class='header'>");
+            sb.AppendLine("<div class='logo'>MyShop</div>");
+            sb.AppendLine("<div class='invoice-title'>");
+            sb.AppendLine("<h1>INVOICE</h1>");
+            sb.AppendLine($"<div class='invoice-number'>#{order.OrderNumber}</div>");
+            sb.AppendLine($"<span class='status {statusClass}'>{statusText}</span>");
+            sb.AppendLine("</div>");
+            sb.AppendLine("</div>");
+
+            // Info Section
+            sb.AppendLine("<div class='info-section'>");
+            
+            // Customer Info
+            sb.AppendLine("<div class='info-box'>");
+            sb.AppendLine("<h3>Bill To</h3>");
+            sb.AppendLine($"<p><strong>{customerName}</strong></p>");
+            sb.AppendLine($"<p><span class='label'>Phone:</span> {customerPhone}</p>");
+            sb.AppendLine($"<p><span class='label'>Email:</span> {customerEmail}</p>");
+            if (!string.IsNullOrEmpty(order.Customer?.Address))
+            {
+                sb.AppendLine($"<p><span class='label'>Address:</span> {customerAddress}</p>");
+            }
+            sb.AppendLine("</div>");
+
+            // Order Info
+            sb.AppendLine("<div class='info-box'>");
+            sb.AppendLine("<h3>Order Details</h3>");
+            sb.AppendLine($"<p><span class='label'>Order Date:</span> {order.CreatedAt:MMM dd, yyyy}</p>");
+            sb.AppendLine($"<p><span class='label'>Order Time:</span> {order.CreatedAt:HH:mm}</p>");
+            if (order.Discount != null)
+            {
+                sb.AppendLine($"<p><span class='label'>Discount Code:</span> <strong>{order.Discount.Code}</strong></p>");
+            }
+            if (!string.IsNullOrEmpty(order.Notes))
+            {
+                sb.AppendLine($"<p><span class='label'>Notes:</span> {order.Notes}</p>");
+            }
+            sb.AppendLine("</div>");
+            sb.AppendLine("</div>");
+
+            // Items Table
+            sb.AppendLine("<table>");
+            sb.AppendLine("<thead><tr>");
+            sb.AppendLine("<th>#</th>");
+            sb.AppendLine("<th>Product</th>");
+            sb.AppendLine("<th>SKU</th>");
+            sb.AppendLine("<th class='text-center'>Qty</th>");
+            sb.AppendLine("<th class='text-right'>Unit Price</th>");
+            sb.AppendLine("<th class='text-right'>Total</th>");
+            sb.AppendLine("</tr></thead>");
+            sb.AppendLine("<tbody>");
+
+            int index = 1;
+            foreach (var item in order.OrderItems ?? new List<OrderItem>())
+            {
+                var productName = item.Product?.Name ?? "Unknown Product";
+                var productSku = item.Product?.Sku ?? "N/A";
+
+                sb.AppendLine("<tr>");
+                sb.AppendLine($"<td>{index++}</td>");
+                sb.AppendLine($"<td>{productName}</td>");
+                sb.AppendLine($"<td>{productSku}</td>");
+                sb.AppendLine($"<td class='text-center'>{item.Quantity}</td>");
+                sb.AppendLine($"<td class='text-right'>${item.UnitPrice:N2}</td>");
+                sb.AppendLine($"<td class='text-right'><strong>${item.Total:N2}</strong></td>");
+                sb.AppendLine("</tr>");
+            }
+
+            sb.AppendLine("</tbody>");
+            sb.AppendLine("</table>");
+
+            // Totals
+            sb.AppendLine("<div class='totals'>");
+            sb.AppendLine("<div class='totals-box'>");
+            sb.AppendLine($"<div class='totals-row'><span class='label'>Subtotal</span><span class='value'>${order.Subtotal:N2}</span></div>");
+            
+            if (order.DiscountAmount > 0)
+            {
+                var discountDesc = order.Discount?.Name ?? "Discount";
+                sb.AppendLine($"<div class='totals-row'><span class='label'>{discountDesc}</span><span class='value discount'>-${order.DiscountAmount:N2}</span></div>");
+            }
+
+            if (order.TaxAmount > 0)
+            {
+                sb.AppendLine($"<div class='totals-row'><span class='label'>Tax</span><span class='value'>${order.TaxAmount:N2}</span></div>");
+            }
+
+            sb.AppendLine($"<div class='totals-row total'><span class='label'>Total</span><span class='value'>${order.Total:N2}</span></div>");
+            sb.AppendLine("</div>");
+            sb.AppendLine("</div>");
+
+            // Footer
+            sb.AppendLine("<div class='footer'>");
+            sb.AppendLine("<p>Thank you for your business!</p>");
+            sb.AppendLine($"<p>Generated on {DateTime.Now:MMM dd, yyyy HH:mm}</p>");
+            sb.AppendLine("</div>");
+
+            sb.AppendLine("</div>");
+
+            // Auto-print
+            sb.AppendLine("<script>");
+            sb.AppendLine("window.onload = function() { window.print(); };");
+            sb.AppendLine("</script>");
+
+            sb.AppendLine("</body></html>");
+            return sb.ToString();
+        }
     }
 }
