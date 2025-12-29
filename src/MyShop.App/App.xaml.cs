@@ -6,6 +6,7 @@ using MyShop.Core.Services;
 using MyShop.Data.Repositories;
 using MyShop.App.ViewModels;
 using MyShop.App.Services;
+using MyShop.Core.Services;
 using System;
 using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;

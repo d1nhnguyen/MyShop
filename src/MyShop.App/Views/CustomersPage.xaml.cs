@@ -3,6 +3,8 @@ using System.Linq;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using MyShop.App.ViewModels;
+using MyShop.Core.Interfaces.Services;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace MyShop.App.Views
 {
@@ -18,6 +20,13 @@ namespace MyShop.App.Views
 
         private async void NewCustomerButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
+            // Check license before allowing customer creation
+            var licenseService = App.Current.Services.GetService<ILicenseService>();
+            if (licenseService != null && !licenseService.IsFeatureAllowed("AddCustomer"))
+            {
+                await ShowTrialExpiredDialog("Add Customer");
+                return;
+            }
             var dialog = new ContentDialog
             {
                 XamlRoot = this.XamlRoot,
@@ -76,6 +85,13 @@ namespace MyShop.App.Views
 
         private async void EditCustomer_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
+            // Check license before allowing customer editing
+            var licenseService = App.Current.Services.GetService<ILicenseService>();
+            if (licenseService != null && !licenseService.IsFeatureAllowed("EditCustomer"))
+            {
+                await ShowTrialExpiredDialog("Edit Customer");
+                return;
+            }
             if (sender is MenuFlyoutItem menuItem && menuItem.Tag is SelectableCustomer wrapper)
             {
                 var customer = wrapper.Customer;
@@ -148,6 +164,13 @@ namespace MyShop.App.Views
 
         private async void DeleteCustomer_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
+            // Check license before allowing customer deletion
+            var licenseService = App.Current.Services.GetService<ILicenseService>();
+            if (licenseService != null && !licenseService.IsFeatureAllowed("DeleteCustomer"))
+            {
+                await ShowTrialExpiredDialog("Delete Customer");
+                return;
+            }
             if (sender is MenuFlyoutItem menuItem && menuItem.Tag is SelectableCustomer wrapper)
             {
                 var customer = wrapper.Customer;
@@ -173,6 +196,13 @@ namespace MyShop.App.Views
 
         private async void DeleteSelected_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
+            // Check license before allowing bulk deletion
+            var licenseService = App.Current.Services.GetService<ILicenseService>();
+            if (licenseService != null && !licenseService.IsFeatureAllowed("DeleteCustomer"))
+            {
+                await ShowTrialExpiredDialog("Delete Customers");
+                return;
+            }
             // Case 1: Enter Selection Mode
             if (!ViewModel.IsSelectionMode)
             {
@@ -228,6 +258,48 @@ namespace MyShop.App.Views
             if (sender is RadioButton radio && radio.Tag is string filterValue)
             {
                 ViewModel.SelectedFilter = filterValue;
+            }
+        }
+
+        private async System.Threading.Tasks.Task ShowTrialExpiredDialog(string featureName)
+        {
+            var dialog = new ContentDialog
+            {
+                Title = "Trial Expired",
+                Content = $"Your 15-day trial period has expired. The feature '{featureName}' is restricted to the full version.\n\nPlease activate your license to continue using all management features.",
+                PrimaryButtonText = "Activate Now",
+                CloseButtonText = "Maybe Later",
+                DefaultButton = ContentDialogButton.Primary,
+                XamlRoot = this.XamlRoot
+            };
+
+            var result = await dialog.ShowAsync();
+
+            if (result == ContentDialogResult.Primary)
+            {
+                // This assumes ShellPage.ShowActivationDialog is static or accessible.
+                // Since it's not, we'll just navigate to help or show a contact message.
+                // Better approach: Find ShellPage and call it.
+                var frame = this.Frame;
+                while (frame != null)
+                {
+                    if (frame.Content is ShellPage shellPage)
+                    {
+                        await shellPage.ShowActivationDialog();
+                        break;
+                    }
+                    var parent = Microsoft.UI.Xaml.Media.VisualTreeHelper.GetParent(frame);
+                    frame = null;
+                    while (parent != null)
+                    {
+                        if (parent is Microsoft.UI.Xaml.Controls.Frame parentFrame)
+                        {
+                            frame = parentFrame;
+                            break;
+                        }
+                        parent = Microsoft.UI.Xaml.Media.VisualTreeHelper.GetParent(parent);
+                    }
+                }
             }
         }
     }

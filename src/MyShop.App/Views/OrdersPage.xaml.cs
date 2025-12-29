@@ -120,6 +120,13 @@ namespace MyShop.App.Views
 
         private async void OnEditOrderClick(object sender, RoutedEventArgs e)
         {
+            // Check license before allowing order editing
+            var licenseService = App.Current.Services.GetRequiredService<ILicenseService>();
+            if (!licenseService.IsFeatureAllowed("EditOrder"))
+            {
+                await ShowTrialExpiredDialog("Edit Order");
+                return;
+            }
              // Handle both Button and MenuFlyoutItem triggers
             Order order = null;
 
@@ -160,6 +167,13 @@ namespace MyShop.App.Views
 
         private async void OnCancelOrderClick(object sender, RoutedEventArgs e)
         {
+            // Check license before allowing order cancellation
+            var licenseService = App.Current.Services.GetRequiredService<ILicenseService>();
+            if (!licenseService.IsFeatureAllowed("CancelOrder"))
+            {
+                await ShowTrialExpiredDialog("Delete Order");
+                return;
+            }
             // Handle both Button and MenuFlyoutItem triggers
             Order order = null;
 

@@ -82,8 +82,16 @@ namespace MyShop.App.Views
             }
         }
 
-        private void OnEditProductClick(object sender, RoutedEventArgs e)
+        private async void OnEditProductClick(object sender, RoutedEventArgs e)
         {
+            // Check license before allowing product editing
+            var licenseService = App.Current.Services.GetRequiredService<ILicenseService>();
+            if (!licenseService.IsFeatureAllowed("EditProduct"))
+            {
+                await ShowTrialExpiredDialog("Edit Product");
+                return;
+            }
+
             if (sender is MenuFlyoutItem menuItem && menuItem.Tag is Product productToEdit)
             {
                 // Navigate to ProductDetailScreen with edit mode enabled
@@ -93,6 +101,14 @@ namespace MyShop.App.Views
 
         private async void OnDeleteProductClick(object sender, RoutedEventArgs e)
         {
+            // Check license before allowing product deletion
+            var licenseService = App.Current.Services.GetRequiredService<ILicenseService>();
+            if (!licenseService.IsFeatureAllowed("DeleteProduct"))
+            {
+                await ShowTrialExpiredDialog("Delete Product");
+                return;
+            }
+
             if (sender is MenuFlyoutItem menuItem && menuItem.Tag is Product productToDelete)
             {
                 var dialog = new ContentDialog
@@ -254,6 +270,14 @@ namespace MyShop.App.Views
 
         private async void OnAddCategoryClick(object sender, RoutedEventArgs e)
         {
+            // Check license before allowing category creation
+            var licenseService = App.Current.Services.GetRequiredService<ILicenseService>();
+            if (!licenseService.IsFeatureAllowed("AddCategory"))
+            {
+                await ShowTrialExpiredDialog("Add Category");
+                return;
+            }
+
             var dialog = new Dialogs.AddCategoryDialog();
             dialog.XamlRoot = this.XamlRoot;
 

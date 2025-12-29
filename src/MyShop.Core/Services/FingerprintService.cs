@@ -4,7 +4,7 @@ using System.Management;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace MyShop.App.Services
+namespace MyShop.Core.Services
 {
     /// <summary>
     /// Generates unique machine fingerprints using hardware identifiers.
