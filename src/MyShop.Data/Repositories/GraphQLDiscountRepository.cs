@@ -32,8 +32,15 @@ namespace MyShop.Data.Repositories
                             value
                             maxDiscount
                             minPurchase
+                            buyQuantity
+                            getQuantity
                             startDate
                             endDate
+                            usageLimit
+                            usageCount
+                            applicableToAll
+                            memberOnly
+                            wholesaleMinQty
                             isActive
                             createdAt
                             updatedAt
@@ -62,8 +69,15 @@ namespace MyShop.Data.Repositories
                                 value
                                 maxDiscount
                                 minPurchase
+                                buyQuantity
+                                getQuantity
                                 startDate
                                 endDate
+                                usageLimit
+                                usageCount
+                                applicableToAll
+                                memberOnly
+                                wholesaleMinQty
                                 isActive
                             }
                         }
@@ -95,8 +109,15 @@ namespace MyShop.Data.Repositories
                             value
                             maxDiscount
                             minPurchase
+                            buyQuantity
+                            getQuantity
                             startDate
                             endDate
+                            usageLimit
+                            usageCount
+                            applicableToAll
+                            memberOnly
+                            wholesaleMinQty
                             isActive
                         }
                     }"
@@ -121,8 +142,15 @@ namespace MyShop.Data.Repositories
                             value
                             maxDiscount
                             minPurchase
+                            buyQuantity
+                            getQuantity
                             startDate
                             endDate
+                            usageLimit
+                            usageCount
+                            applicableToAll
+                            memberOnly
+                            wholesaleMinQty
                             isActive
                         }
                     }",
@@ -165,8 +193,14 @@ namespace MyShop.Data.Repositories
                         value = entity.Value,
                         maxDiscount = entity.MaxDiscount,
                         minPurchase = entity.MinPurchase,
+                        buyQuantity = entity.BuyQuantity,
+                        getQuantity = entity.GetQuantity,
                         startDate = entity.StartDate,
-                        endDate = entity.EndDate
+                        endDate = entity.EndDate,
+                        usageLimit = entity.UsageLimit,
+                        applicableToAll = entity.ApplicableToAll,
+                        memberOnly = entity.MemberOnly,
+                        wholesaleMinQty = entity.WholesaleMinQty
                         // Note: isActive is not in CreateDiscountInput, it's managed by backend
                     }
                 }
@@ -198,9 +232,15 @@ namespace MyShop.Data.Repositories
                         value = entity.Value,
                         maxDiscount = entity.MaxDiscount,
                         minPurchase = entity.MinPurchase,
+                        buyQuantity = entity.BuyQuantity,
+                        getQuantity = entity.GetQuantity,
                         startDate = entity.StartDate,
                         endDate = entity.EndDate,
-                        isActive = entity.IsActive
+                        usageLimit = entity.UsageLimit,
+                        isActive = entity.IsActive,
+                        applicableToAll = entity.ApplicableToAll,
+                        memberOnly = entity.MemberOnly,
+                        wholesaleMinQty = entity.WholesaleMinQty
                     }
                 }
             };

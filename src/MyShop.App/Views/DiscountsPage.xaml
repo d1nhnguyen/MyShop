@@ -17,6 +17,8 @@
         <converters:RoleToVisibilityConverter x:Key="RoleToVisibilityConverter"/>
         <converters:StatusLabelConverter x:Key="StatusLabelConverter"/>
         <converters:StatusToColorConverter x:Key="StatusToColorConverter"/>
+        <converters:DiscountStatusLabelConverter x:Key="DiscountStatusLabelConverter"/>
+        <converters:DiscountStatusToColorConverter x:Key="DiscountStatusToColorConverter"/>
 
         <Style x:Key="TabRadioButtonStyle" TargetType="RadioButton">
             <Setter Property="Background" Value="Transparent"/>
@@ -238,8 +240,8 @@
                             <TextBlock Grid.Column="5" Text="{Binding Discount.EndDate, Converter={StaticResource DateFormatConverter}}" VerticalAlignment="Center"/>
 
                             <Border Grid.Column="6" VerticalAlignment="Center" HorizontalAlignment="Left" CornerRadius="4" Padding="8,4"
-                                    Background="{Binding Discount.IsActive, Converter={StaticResource StatusToColorConverter}}">
-                                <TextBlock Text="{Binding Discount.IsActive, Converter={StaticResource StatusLabelConverter}}"
+                                    Background="{Binding Discount, Converter={StaticResource DiscountStatusToColorConverter}}">
+                                <TextBlock Text="{Binding Discount, Converter={StaticResource DiscountStatusLabelConverter}}"
                                            FontSize="12"
                                            FontWeight="Medium"
                                            Foreground="White"/>

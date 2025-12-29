@@ -278,10 +278,26 @@ namespace MyShop.App.Views
                 MaxHeight = 400
             };
 
-            listView.ItemClick += (s, args) =>
+            listView.ItemClick += async (s, args) =>
             {
                 if (args.ClickedItem is Discount selected)
                 {
+                    // Check if discount is member-only and customer is not a member
+                    if (selected.MemberOnly && (_selectedCustomer == null || !_selectedCustomer.IsMember))
+                    {
+                        dialog.Hide();
+
+                        var warningDialog = new ContentDialog
+                        {
+                            XamlRoot = this.XamlRoot,
+                            Title = "Member Only Discount",
+                            Content = "This discount is only available for members. Please select a member customer first.",
+                            CloseButtonText = "OK"
+                        };
+                        await warningDialog.ShowAsync();
+                        return;
+                    }
+
                     _selectedDiscount = selected;
                     dialog.Hide();
                     UpdateDiscountUI();
@@ -478,6 +494,23 @@ namespace MyShop.App.Views
                 };
                 await errorDialog.ShowAsync();
                 return;
+            }
+
+            // Validate member-only discount
+            if (_selectedDiscount != null && _selectedDiscount.MemberOnly)
+            {
+                if (_selectedCustomer == null || !_selectedCustomer.IsMember)
+                {
+                    var errorDialog = new ContentDialog
+                    {
+                        Title = "Validation Error",
+                        Content = "The selected discount is only available for members. Please select a member customer or remove the discount.",
+                        CloseButtonText = "OK",
+                        XamlRoot = this.XamlRoot
+                    };
+                    await errorDialog.ShowAsync();
+                    return;
+                }
             }
 
             var selectedStatus = MyShop.Core.Models.OrderStatus.PENDING;

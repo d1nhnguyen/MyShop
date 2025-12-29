@@ -56,6 +56,12 @@ namespace MyShop.App.Views
             var startDatePicker = new CalendarDatePicker { Header = "Start Date (Optional)", PlaceholderText = "Select date" };
             var endDatePicker = new CalendarDatePicker { Header = "End Date (Optional)", PlaceholderText = "Select date" };
 
+            var memberOnlyCheckBox = new CheckBox
+            {
+                Content = "Member Only",
+                IsChecked = false
+            };
+
             stackPanel.Children.Add(errorText);
             stackPanel.Children.Add(codeBox);
             stackPanel.Children.Add(nameBox);
@@ -66,6 +72,7 @@ namespace MyShop.App.Views
             stackPanel.Children.Add(maxDiscountBox);
             stackPanel.Children.Add(startDatePicker);
             stackPanel.Children.Add(endDatePicker);
+            stackPanel.Children.Add(memberOnlyCheckBox);
 
             var dialog = new ContentDialog
             {
@@ -127,7 +134,8 @@ namespace MyShop.App.Views
                         MinPurchase = minPurchaseBox.Value > 0 ? (decimal?)minPurchaseBox.Value : null,
                         MaxDiscount = maxDiscountBox.Value > 0 ? (decimal?)maxDiscountBox.Value : null,
                         StartDate = startDatePicker.Date?.DateTime,
-                        EndDate = endDatePicker.Date?.DateTime
+                        EndDate = endDatePicker.Date?.DateTime,
+                        MemberOnly = memberOnlyCheckBox.IsChecked ?? false
                         // IsActive is set by backend (defaults to true)
                     };
 
@@ -228,6 +236,7 @@ namespace MyShop.App.Views
                 AddDetailField(mainStack, "Discount Value", FormatValue(discount.Type, discount.Value));
                 AddDetailField(mainStack, "Minimum Purchase", discount.MinPurchase.HasValue ? $"₫{discount.MinPurchase.Value:N0}" : "No minimum");
                 AddDetailField(mainStack, "Maximum Discount", discount.MaxDiscount.HasValue ? $"₫{discount.MaxDiscount.Value:N0}" : "No limit");
+                AddDetailField(mainStack, "Member Only", discount.MemberOnly ? "Yes" : "No");
 
                 // Date Information Section
                 AddSectionHeader(mainStack, "Validity Period");
@@ -386,6 +395,12 @@ namespace MyShop.App.Views
                 activeSwitch.Resources["ToggleSwitchFillOnPointerOver"] = new Microsoft.UI.Xaml.Media.SolidColorBrush(colorHover);
                 activeSwitch.Resources["ToggleSwitchFillOnPressed"] = new Microsoft.UI.Xaml.Media.SolidColorBrush(colorPressed);
 
+                var memberOnlyCheckBox = new CheckBox
+                {
+                    Content = "Member Only",
+                    IsChecked = discount.MemberOnly
+                };
+
                 stackPanel.Children.Add(errorText);
                 stackPanel.Children.Add(codeBox);
                 stackPanel.Children.Add(nameBox);
@@ -396,6 +411,7 @@ namespace MyShop.App.Views
                 stackPanel.Children.Add(maxDiscountBox);
                 stackPanel.Children.Add(startDatePicker);
                 stackPanel.Children.Add(endDatePicker);
+                stackPanel.Children.Add(memberOnlyCheckBox);
                 stackPanel.Children.Add(activeSwitch);
 
                 var dialog = new ContentDialog
@@ -461,6 +477,7 @@ namespace MyShop.App.Views
                             StartDate = startDatePicker.Date?.DateTime,
                             EndDate = endDatePicker.Date?.DateTime,
                             IsActive = activeSwitch.IsOn,
+                            MemberOnly = memberOnlyCheckBox.IsChecked ?? false,
                             CreatedAt = discount.CreatedAt,
                             UpdatedAt = DateTime.UtcNow,
                             UsageCount = discount.UsageCount

@@ -58,12 +58,18 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <StackPanel>
-                    <TextBlock Text="{x:Bind Name}" FontWeight="SemiBold" Foreground="#1A1A1A"/>
-                    <TextBlock Text="Coupon Code" FontSize="12" Foreground="#666666"/>
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBlock Text="{x:Bind Name}" FontWeight="SemiBold" Foreground="#1A1A1A"/>
+                        <Border Background="#FF9800" CornerRadius="4" Padding="6,2" Visibility="{x:Bind MemberOnly}">
+                            <TextBlock Text="Member Only" FontSize="10" Foreground="White" FontWeight="SemiBold"/>
+                        </Border>
+                    </StackPanel>
+                    <TextBlock Text="{x:Bind Code}" FontSize="12" Foreground="#666666"/>
                 </StackPanel>
-                <TextBlock Grid.Column="1" Text="{x:Bind Value, Converter={StaticResource CurrencyConverter}}" FontWeight="Bold" VerticalAlignment="Center" Foreground="#00796B"/>
+                <TextBlock Grid.Column="2" Text="{x:Bind Value, Converter={StaticResource CurrencyConverter}}" FontWeight="Bold" VerticalAlignment="Center" Foreground="#00796B" Margin="12,0,0,0"/>
             </Grid>
         </DataTemplate>
 
