@@ -16,6 +16,7 @@
         <converters:StringToImageSourceConverter x:Key="StringToImageSourceConverter" />
         <converters:StockToWidthConverter x:Key="StockToWidthConverter" />
         <converters:CurrencyConverter x:Key="CurrencyConverter" />
+        <converters:RoleToHeightConverter x:Key="RoleToHeightConverter" />
     </Page.Resources>
 
     <Grid Padding="24">
@@ -123,7 +124,7 @@
         <ScrollViewer Grid.Row="2">
             <ItemsRepeater ItemsSource="{x:Bind ViewModel.Products, Mode=OneWay}" Margin="0,0,0,16">
                 <ItemsRepeater.Layout>
-                    <UniformGridLayout MinItemWidth="300" MinItemHeight="300" ItemsStretch="Fill" MinColumnSpacing="16" MinRowSpacing="16"/>
+                    <UniformGridLayout MinItemWidth="300" MinItemHeight="{x:Bind ViewModel.IsAdmin, Converter={StaticResource RoleToHeightConverter}, Mode=OneWay}" ItemsStretch="Fill" MinColumnSpacing="16" MinRowSpacing="16"/>
                 </ItemsRepeater.Layout>
                 <ItemsRepeater.ItemTemplate>
                     <DataTemplate x:DataType="models:Product">
@@ -132,7 +133,7 @@
                             <Grid Background="White" CornerRadius="12" Padding="20" BorderBrush="#E5E7EB" BorderThickness="1">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
 
