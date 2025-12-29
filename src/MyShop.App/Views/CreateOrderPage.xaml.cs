@@ -102,14 +102,14 @@ namespace MyShop.App.Views
 
             if (orderId.HasValue)
             {
-               await LoadOrderForView(orderId.Value);
-               
                if (isEditMode)
                {
                    _editingOrderId = orderId.Value;
                    PageTitleText.Text = "Edit Order";
                    SaveButton.Content = new TextBlock { Text = "Update Order", FontWeight = Microsoft.UI.Text.FontWeights.SemiBold };
                }
+
+               await LoadOrderForView(orderId.Value);
             }
             else
             {
