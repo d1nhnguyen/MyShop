@@ -151,7 +151,7 @@
 
                 <StackPanel Spacing="12">
                     <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
-                        <TextBlock x:Name="PageTitleText" Text="New Order" FontSize="24" FontWeight="Bold" Foreground="{ThemeResource TextFillColorPrimaryBrush}"/>
+                        <TextBlock x:Name="PageTitleText" Text="New Order" FontSize="30" FontWeight="Bold" Foreground="#0C2B4E"/>
                         <Border x:Name="StatusBadgeBorder" CornerRadius="4" Padding="8,4" Background="#20FF9F00" VerticalAlignment="Center">
                             <TextBlock x:Name="StatusBadgeText" Text="PENDING" FontSize="12" FontWeight="SemiBold" Foreground="#FFFF9F00"/>
                         </Border>
