@@ -53,6 +53,11 @@ namespace MyShop.Data.Repositories
                                 id
                                 code
                                 name
+                                value
+                                type
+                                maxDiscount
+                                minPurchase
+                                isActive
                             }
                             orderItems {
                                 id

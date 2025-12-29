@@ -428,8 +428,11 @@ export const orderResolvers = {
               where: { id: itemToDelete.id },
             });
           }
+        }
 
-          // Recalculate order totals
+        // Recalculate totals if items or discount changed
+        if ((input.items && Array.isArray(input.items)) || input.discountId !== undefined) {
+          // Calculate subtotal from DB items (safest source of truth)
           const updatedItems = await tx.orderItem.findMany({
             where: { orderId: id },
           });
@@ -448,16 +451,17 @@ export const orderResolvers = {
             if (discount && discount.isActive) {
               if (discount.type === 'PERCENTAGE') {
                 discountAmount = subtotal.mul(discount.value).div(100);
-                if (discount.maxDiscount && discountAmount.greaterThan(discount.maxDiscount)) {
+                if (discount.maxDiscount && discountAmount.gt(discount.maxDiscount)) {
                   discountAmount = discount.maxDiscount;
                 }
-              } else {
+              } else if (discount.type === 'FIXED_AMOUNT') {
                 discountAmount = discount.value;
               }
             }
           }
 
-          const total = subtotal.sub(discountAmount);
+          const taxAmount = existingOrder.taxAmount ? new Prisma.Decimal(existingOrder.taxAmount) : new Prisma.Decimal(0);
+          const total = subtotal.sub(discountAmount).add(taxAmount);
 
           updateData.subtotal = subtotal;
           updateData.discountAmount = discountAmount;
