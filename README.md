@@ -308,3 +308,17 @@ Verify Docker is running and the container is UP:
 - `Interfaces/Services/ICustomerService.cs`
 - `Interfaces/Services/IDiscountService.cs`
 - `Interfaces/Strategies/IDiscountStrategy.cs`
+
+## 🧪 Running Tests
+
+To ensure the application logic works correctly, you can run the unit tests included in the solution. We recommend cleaning and rebuilding the project before running tests to ensure all dependencies are up to date.
+
+Run the following commands from the project root:
+
+```bash
+# 1. Clean previous build artifacts
+dotnet clean 
+# 2. Build the solution to check for compilation errors
+dotnet build
+# 3. Execute all unit tests
+dotnet test
