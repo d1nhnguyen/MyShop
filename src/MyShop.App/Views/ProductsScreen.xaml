@@ -178,9 +178,9 @@
                             <!-- Stats Box -->
                             <Border Grid.Row="2" BorderBrush="#E5E7EB" BorderThickness="1" CornerRadius="8" Padding="16,12">
                                 <StackPanel Spacing="12">
-                                    <!-- Regular Price (Admin Only) -->
+                                    <!-- Cost Price (Admin Only) -->
                                     <Grid Visibility="{Binding ElementName=PageRoot, Path=ViewModel.IsAdmin, Mode=OneWay}">
-                                        <TextBlock Text="Regular Price" Foreground="#374151" FontSize="14"/>
+                                        <TextBlock Text="Cost Price" Foreground="#374151" FontSize="14"/>
                                         <TextBlock Text="{x:Bind CostPrice, Converter={StaticResource CurrencyConverter}, FallbackValue='N/A'}" 
                                                    HorizontalAlignment="Right" Foreground="#059669" FontSize="14" FontWeight="Medium"/>
                                     </Grid>
