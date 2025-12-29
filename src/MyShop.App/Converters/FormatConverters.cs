@@ -61,3 +61,52 @@ public class DateTimeToRelativeConverter : IValueConverter
         throw new NotImplementedException();
     }
 }
+
+/// <summary>
+/// Converts Discount object to formatted value string
+/// </summary>
+public class DiscountDisplayConverter : IValueConverter
+{
+    public object? Convert(object value, Type targetType, object parameter, string language)
+    {
+        if (value is MyShop.Core.Models.Discount discount)
+        {
+            if (discount.Type == MyShop.Core.Models.DiscountType.PERCENTAGE)
+            {
+                return $"{discount.Value:G29}%"; 
+            }
+            return $"${discount.Value:N2}";
+        }
+        return "";
+    }
+
+    public object? ConvertBack(object value, Type targetType, object parameter, string language)
+    {
+        throw new NotImplementedException();
+    }
+}
+
+public class DiscountTypeDisplayConverter : IValueConverter
+{
+    public object? Convert(object value, Type targetType, object parameter, string language)
+    {
+        if (value is MyShop.Core.Models.DiscountType type)
+        {
+            return type switch
+            {
+                MyShop.Core.Models.DiscountType.PERCENTAGE => "Percentage",
+                MyShop.Core.Models.DiscountType.FIXED_AMOUNT => "Fixed Amount",
+                MyShop.Core.Models.DiscountType.BUY_X_GET_Y => "Buy X Get Y",
+                MyShop.Core.Models.DiscountType.MEMBER_DISCOUNT => "Member Discount",
+                MyShop.Core.Models.DiscountType.WHOLESALE_DISCOUNT => "Wholesale Discount",
+                _ => type.ToString()
+            };
+        }
+        return "";
+    }
+
+    public object? ConvertBack(object value, Type targetType, object parameter, string language)
+    {
+        throw new NotImplementedException();
+    }
+}

@@ -15,6 +15,8 @@
         <converters:OrderStatusToForegroundConverter x:Key="StatusToForegroundConverter"/>
         <converters:OrderStatusToBackgroundConverter x:Key="StatusToBackgroundConverter"/>
         <converters:OrderStatusToTextConverter x:Key="StatusToTextConverter"/>
+        <converters:DiscountDisplayConverter x:Key="DiscountDisplayConverter"/>
+        <converters:DiscountTypeDisplayConverter x:Key="DiscountTypeDisplayConverter"/>
 
         <Style x:Key="SectionHeaderStyle" TargetType="TextBlock">
             <Setter Property="FontSize" Value="16"/>
@@ -54,16 +56,22 @@
         </Style>
 
         <DataTemplate x:Key="DiscountSelectionTemplate" x:DataType="models:Discount">
-            <Grid Padding="12" Background="Transparent">
+            <Grid Padding="12" Background="Transparent" ColumnSpacing="12">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                <StackPanel>
+                <StackPanel Spacing="2">
                     <TextBlock Text="{x:Bind Name}" FontWeight="SemiBold" Foreground="#1A1A1A"/>
-                    <TextBlock Text="Coupon Code" FontSize="12" Foreground="#666666"/>
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                         <Border Background="#F0F0F0" CornerRadius="4" Padding="6,2">
+                            <TextBlock Text="{x:Bind Code}" FontSize="11" FontFamily="Consolas" Foreground="#333333"/>
+                         </Border>
+                         <TextBlock Text="{x:Bind Type, Converter={StaticResource DiscountTypeDisplayConverter}}" FontSize="12" Foreground="#666666" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <TextBlock Text="{x:Bind Description}" FontSize="12" Foreground="#888888" TextTrimming="CharacterEllipsis" MaxLines="1" Margin="0,2,0,0"/>
                 </StackPanel>
-                <TextBlock Grid.Column="1" Text="{x:Bind Value, Converter={StaticResource CurrencyConverter}}" FontWeight="Bold" VerticalAlignment="Center" Foreground="#00796B"/>
+                <TextBlock Grid.Column="1" Text="{x:Bind Converter={StaticResource DiscountDisplayConverter}}" FontWeight="Bold" FontSize="15" VerticalAlignment="Center" Foreground="#00796B"/>
             </Grid>
         </DataTemplate>
 
