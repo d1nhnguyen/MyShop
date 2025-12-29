@@ -10,7 +10,7 @@
     xmlns:models="using:MyShop.Core.Models"
     xmlns:converters="using:MyShop.App.Converters"
     mc:Ignorable="d"
-    Background="#F5F5F5">
+    Background="#F5F7FA">
 
     <Page.Resources>
         <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
@@ -32,7 +32,7 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <StackPanel>
-                    <TextBlock Text="Reports" FontSize="24" FontWeight="Bold" Foreground="{ThemeResource TextFillColorPrimaryBrush}"/>
+                    <TextBlock Text="Reports" FontSize="30" FontWeight="Bold" Foreground="#0C2B4E"/>
                     <TextBlock Text="Home > Reports" 
                                FontSize="14" 
                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
