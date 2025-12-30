@@ -148,6 +148,7 @@ namespace MyShop.App.Views
             HideDebugMenuItems();
         }
 
+
         private async Task CheckLicenseStatusAsync()
         {
             var status = ViewModel.GetLicenseStatus();
