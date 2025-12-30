@@ -1101,5 +1101,14 @@ namespace MyShop.App.Views
             var discount = CalculateDiscountAmount();
             return subtotal - discount;
         }
+
+        private async System.Threading.Tasks.Task ShowTrialExpiredDialog(string featureName)
+        {
+            var shell = ShellPage.Instance;
+            if (shell != null)
+            {
+                await shell.ShowTrialExpiredDialog(featureName);
+            }
+        }
     }
 }
