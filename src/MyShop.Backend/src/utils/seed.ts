@@ -490,6 +490,17 @@ async function seed() {
       { name: 'Elizabeth Martinez', email: 'liz.martinez@example.com', phone: '0900123456', address: '741 Spruce Ct, Atlanta, GA', isMember: true, memberSince: new Date('2024-07-20') },
       { name: 'James Anderson', email: 'james.a@example.com', phone: '0911234567', address: '852 Willow Way, Phoenix, AZ', isMember: false },
       { name: 'Linda Taylor', email: 'linda.t@example.com', phone: '0912345678', address: '963 Aspen Pl, Portland, OR', isMember: false },
+      // New customers
+      { name: 'Christopher Lee', email: 'chris.lee@example.com', phone: '0913456789', address: '159 Valley Rd, Austin, TX', isMember: true, memberSince: new Date('2024-04-12') },
+      { name: 'Patricia White', email: 'pat.white@example.com', phone: '0914567890', address: '753 Hill St, Nashville, TN', isMember: false },
+      { name: 'Daniel Harris', email: 'dan.harris@example.com', phone: '0915678901', address: '951 Lake Dr, Detroit, MI', isMember: true, memberSince: new Date('2024-08-05') },
+      { name: 'Nancy Clark', email: 'nancy.clark@example.com', phone: '0916789012', address: '357 River Ln, Minneapolis, MN', isMember: false },
+      { name: 'Matthew Lewis', email: 'matt.lewis@example.com', phone: '0917890123', address: '486 Forest Ave, Tampa, FL', isMember: true, memberSince: new Date('2024-09-18') },
+      { name: 'Karen Walker', email: 'karen.w@example.com', phone: '0918901234', address: '624 Mountain Rd, Cleveland, OH', isMember: false },
+      { name: 'Thomas Hall', email: 'tom.hall@example.com', phone: '0919012345', address: '792 Beach Blvd, San Diego, CA', isMember: true, memberSince: new Date('2024-01-25') },
+      { name: 'Betty Allen', email: 'betty.allen@example.com', phone: '0920123456', address: '135 Park Ave, Philadelphia, PA', isMember: false },
+      { name: 'Charles Young', email: 'charles.y@example.com', phone: '0921234567', address: '246 Garden St, Charlotte, NC', isMember: true, memberSince: new Date('2024-06-30') },
+      { name: 'Sandra King', email: 'sandra.king@example.com', phone: '0922345678', address: '864 Sunset Dr, Indianapolis, IN', isMember: true, memberSince: new Date('2024-03-08') },
     ];
     const customers: Customer[] = [];
     for (const cus of customerData) {
@@ -559,6 +570,27 @@ async function seed() {
       }
       console.log(`Created ${numberOfOrdersToSeed} orders`);
       console.log(`Created ${completedOrdersCount} commissions for completed orders`);
+
+      // Update customer totalSpent based on completed orders
+      console.log('Updating customer totalSpent...');
+      for (const customer of customers) {
+        const completedOrders = await prisma.order.findMany({
+          where: {
+            customerId: customer.id,
+            status: 'COMPLETED',
+          },
+        });
+
+        const totalSpent = completedOrders.reduce((sum, order) => {
+          return sum + Number(order.total);
+        }, 0);
+
+        await prisma.customer.update({
+          where: { id: customer.id },
+          data: { totalSpent: new Prisma.Decimal(totalSpent) },
+        });
+      }
+      console.log('Customer totalSpent updated successfully');
     }
 
     // 7. License
