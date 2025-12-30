@@ -132,8 +132,16 @@ namespace MyShop.App.ViewModels
                             CostPrice = row.CostPrice ?? 0,
                             Stock = row.Stock,
                             MinStock = row.MinStock,
-                            ImageUrl = row.ImageUrl,
-                            CategoryId = row.CategoryId!.Value
+                            CategoryId = row.CategoryId!.Value,
+                            Images = !string.IsNullOrWhiteSpace(row.ImageUrl) 
+                                ? row.ImageUrl.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries)
+                                      .Select((url, index) => new ProductImage 
+                                      { 
+                                          ImageUrl = url.Trim(), 
+                                          DisplayOrder = index, 
+                                          IsMain = index == 0 
+                                      }).ToList()
+                                : new System.Collections.Generic.List<ProductImage>()
                         };
 
                         var result = await _productRepository.AddAsync(product);
