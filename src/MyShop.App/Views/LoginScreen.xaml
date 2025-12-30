@@ -72,10 +72,49 @@
                          PlaceholderText="Enter username"
                          BorderBrush="#E0E0E0"/>
 
-                <PasswordBox Header="Password" 
-                             Password="{x:Bind ViewModel.Password, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
-                             PlaceholderText="Enter password"
-                             BorderBrush="#E0E0E0"/>
+                <!-- Custom Password Field with reliable reveal button -->
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    
+                    <TextBlock Text="Password" 
+                               Style="{StaticResource BodyTextBlockStyle}"
+                               Margin="0,0,0,8"/>
+                    
+                    <Grid Grid.Row="1">
+                        <!-- Hidden PasswordBox (shown when password is hidden) -->
+                        <PasswordBox x:Name="PasswordHidden"
+                                     Password="{x:Bind ViewModel.Password, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                     PlaceholderText="Enter password"
+                                     PasswordRevealMode="Hidden"
+                                     BorderBrush="#E0E0E0"
+                                     Visibility="{x:Bind IsPasswordVisible, Mode=OneWay, Converter={StaticResource BoolToVisibilityReverseConverter}}"/>
+                        
+                        <!-- Visible TextBox (shown when password is revealed) -->
+                        <TextBox x:Name="PasswordVisible"
+                                 Text="{x:Bind ViewModel.Password, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 PlaceholderText="Enter password"
+                                 BorderBrush="#E0E0E0"
+                                 Visibility="{x:Bind IsPasswordVisible, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                        
+                        <!-- Toggle Button for reveal -->
+                        <Button x:Name="RevealButton"
+                                Click="RevealButton_Click"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Stretch"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                Padding="10,0"
+                                Margin="0,1,1,1">
+                            <FontIcon x:Name="RevealIcon" 
+                                      Glyph="&#xE7B3;" 
+                                      FontSize="14"
+                                      Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                        </Button>
+                    </Grid>
+                </Grid>
 
                 <CheckBox Content="Remember me" 
                           IsChecked="{x:Bind ViewModel.RememberMe, Mode=TwoWay}" />
