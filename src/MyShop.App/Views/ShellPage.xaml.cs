@@ -6,6 +6,7 @@ using MyShop.Core.Interfaces.Services;
 using MyShop.Core.Services;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace MyShop.App.Views
 {
@@ -139,15 +140,16 @@ namespace MyShop.App.Views
             ViewModel.InitializeLicense();
 
             // Check license status and show appropriate dialog
-            CheckLicenseStatus();
+            await CheckLicenseStatusAsync();
 
-            CheckOnboardingAsync();
+            await CheckOnboardingAsync();
 
             // Hide debug menu items in Release builds
             HideDebugMenuItems();
         }
 
-        private async void CheckLicenseStatus()
+
+        private async Task CheckLicenseStatusAsync()
         {
             var status = ViewModel.GetLicenseStatus();
 
@@ -183,7 +185,7 @@ namespace MyShop.App.Views
             }
         }
 
-        private async System.Threading.Tasks.Task ShowLicenseErrorDialog(string title, string message, bool isCritical)
+        private async Task ShowLicenseErrorDialog(string title, string message, bool isCritical)
         {
             var dialog = new ContentDialog
             {
@@ -214,7 +216,7 @@ namespace MyShop.App.Views
                 {
                     // Reload license and recheck
                     ViewModel.InitializeLicense();
-                    CheckLicenseStatus();
+                    await CheckLicenseStatusAsync();
                 }
                 else if (result == ContentDialogResult.Secondary)
                 {
@@ -222,7 +224,7 @@ namespace MyShop.App.Views
                     // Force reset and re-initialize
                     ViewModel.DebugResetTrial();
                     ViewModel.InitializeLicense();
-                    CheckLicenseStatus();
+                    await CheckLicenseStatusAsync();
 #endif
                 }
                 else
@@ -238,7 +240,7 @@ namespace MyShop.App.Views
             }
         }
 
-        public async System.Threading.Tasks.Task ShowTrialExpiredDialog(string featureName)
+        public async Task ShowTrialExpiredDialog(string featureName)
         {
             var dialog = new ContentDialog
             {
@@ -258,7 +260,7 @@ namespace MyShop.App.Views
             }
         }
 
-        public async System.Threading.Tasks.Task ShowActivationDialog()
+        public async Task ShowActivationDialog()
         {
             var licenseService = App.Current.Services.GetRequiredService<ILicenseService>();
             var fingerprintService = App.Current.Services.GetRequiredService<IFingerprintService>();
@@ -345,16 +347,16 @@ namespace MyShop.App.Views
             }
         }
 
-        private async void CheckOnboardingAsync()
+        private async Task CheckOnboardingAsync()
         {
             string username = ViewModel.CurrentUser?.Username ?? "unknown";
             if (!_onboardingService.IsOnboardingCompleted(username))
             {
-                ShowOnboardingDialog();
+                await ShowOnboardingDialogAsync();
             }
         }
 
-        private async void ShowOnboardingDialog()
+        private async Task ShowOnboardingDialogAsync()
         {
             string username = ViewModel.CurrentUser?.Username ?? "unknown";
             var onboardingDialog = new Dialogs.OnboardingDialog(ViewModel.UserRole)
@@ -388,6 +390,10 @@ namespace MyShop.App.Views
                 }
             };
 
+            onboardingDialog.PrimaryButtonClick += (s, args) =>
+            {
+                _onboardingService.MarkOnboardingAsCompleted(username);
+            };
             await onboardingDialog.ShowAsync();
         }
 
@@ -524,9 +530,16 @@ namespace MyShop.App.Views
         {
             if (args.InvokedItemContainer is NavigationViewItem item)
             {
-                if (item.Tag?.ToString() == "Help")
+                var tag = item.Tag?.ToString();
+                if (tag == "Help")
                 {
-                    ShowOnboardingDialog();
+                    _ = ShowOnboardingDialogAsync();
+                }
+                else if (tag == "Trial")
+                {
+#if !DEBUG
+                    _ = ShowActivationDialog();
+#endif
                 }
             }
         }
@@ -728,7 +741,7 @@ namespace MyShop.App.Views
             await dialog.ShowAsync();
 
             // Re-check license status
-            CheckLicenseStatus();
+            await CheckLicenseStatusAsync();
 #else
             await System.Threading.Tasks.Task.CompletedTask;
 #endif
