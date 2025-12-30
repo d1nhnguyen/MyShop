@@ -76,7 +76,11 @@ export const orderResolvers = {
           discount: true,
           orderItems: {
             include: {
-              product: true,
+              product: {
+                include: {
+                  images: true,
+                } as any,
+              },
             },
           },
         },

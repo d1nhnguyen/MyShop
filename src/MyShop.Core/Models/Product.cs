@@ -53,8 +53,15 @@ namespace MyShop.Core.Models
         public List<ProductImage> Images { get; set; } = new();
 
         // Computed property for main image
+        // Computed property for main image
         [NotMapped]
-        public string? MainImage => Images?.FirstOrDefault(i => i.IsMain)?.ImageUrl 
-                                    ?? Images?.FirstOrDefault()?.ImageUrl;
+        private string? _mainImage;
+
+        [NotMapped]
+        public string? MainImage 
+        { 
+            get => _mainImage ?? Images?.FirstOrDefault(i => i.IsMain)?.ImageUrl ?? Images?.FirstOrDefault()?.ImageUrl;
+            set => _mainImage = value;
+        }
     }
 }

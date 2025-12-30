@@ -18,6 +18,7 @@
         <converters:DiscountValueConverter x:Key="DiscountValueConverter"/>
         <converters:DiscountTypeDisplayConverter x:Key="DiscountTypeToTextConverter"/>
         <converters:DiscountValueDisplayConverter x:Key="DiscountValueDisplayConverter"/>
+        <converters:StringToImageSourceConverter x:Key="StringToImageSourceConverter"/>
 
         <Style x:Key="SectionHeaderStyle" TargetType="TextBlock">
             <Setter Property="FontSize" Value="16"/>
@@ -116,7 +117,7 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <Border Width="40" Height="40" CornerRadius="4" Background="#F5F5F5" Margin="0,0,12,0">
-                        <FontIcon Glyph="&#xE7F4;" Foreground="#CCCCCC"/>
+                        <Image Source="{x:Bind Product.MainImage, Converter={StaticResource StringToImageSourceConverter}}" Stretch="UniformToFill"/>
                     </Border>
                     <TextBlock Grid.Column="1" Text="{x:Bind Product.Name}" VerticalAlignment="Center" FontWeight="Medium" TextTrimming="CharacterEllipsis"/>
                 </Grid>
@@ -298,10 +299,9 @@
                                 </Grid.ColumnDefinitions>
 
                                 <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
-                                    <!-- Image Placeholder -->
+                                    <!-- Product Image -->
                                     <Border Width="40" Height="40" Background="#F0F0F0" CornerRadius="4">
-                                         <FontIcon Glyph="&#xE74C;" FontSize="16" Foreground="#CCCCCC" 
-                                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        <Image Source="{x:Bind Product.MainImage, Converter={StaticResource StringToImageSourceConverter}}" Stretch="UniformToFill"/>
                                     </Border>
                                     <TextBlock Text="{x:Bind Product.Name}" VerticalAlignment="Center" FontWeight="Medium" TextTrimming="CharacterEllipsis"/>
                                 </StackPanel>
