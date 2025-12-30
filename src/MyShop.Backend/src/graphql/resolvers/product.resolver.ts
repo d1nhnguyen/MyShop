@@ -383,11 +383,43 @@ export const productResolvers = {
         where: { id: parent.categoryId },
       });
     },
-    mainImage: (parent: any) => {
-      // Prioritize image with isMain = true
-      const mainImg = parent.images?.find((img: any) => img.isMain);
-      // Fallback: get first image if no main image
-      return mainImg?.imageUrl || parent.images?.[0]?.imageUrl || null;
+    images: async (parent: any, _: any, context: Context) => {
+      // If images are already included (and is array), return them
+      if (parent.images && Array.isArray(parent.images)) return parent.images;
+
+      // Otherwise fetch from database
+      return context.prisma.productImage.findMany({
+        where: { productId: parent.id },
+        orderBy: [
+          { isMain: 'desc' },
+          { displayOrder: 'asc' },
+        ],
+      });
+    },
+    mainImage: async (parent: any, _: any, context: Context) => {
+      // 1. Try to get from parent.images if available
+      if (parent.images && Array.isArray(parent.images)) {
+        const mainImg = parent.images.find((img: any) => img.isMain);
+        return mainImg?.imageUrl || parent.images[0]?.imageUrl || null;
+      }
+
+      // 2. Fetch directly from database if not in parent (Lazy Load)
+      const mainImg = await context.prisma.productImage.findFirst({
+        where: {
+          productId: parent.id,
+          isMain: true
+        },
+      });
+
+      if (mainImg) return mainImg.imageUrl;
+
+      // 3. Fallback to any first image
+      const firstImg = await context.prisma.productImage.findFirst({
+        where: { productId: parent.id },
+        orderBy: { displayOrder: 'asc' }
+      });
+
+      return firstImg?.imageUrl || null;
     },
   },
 };

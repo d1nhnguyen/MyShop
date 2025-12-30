@@ -978,6 +978,7 @@ namespace MyShop.App.Views
                     var product = _availableProducts.FirstOrDefault(p => p.Id == draftItem.ProductId);
                     if (product != null)
                     {
+                        System.Diagnostics.Debug.WriteLine($"OrderItem: Product={product?.Name}, MainImage={product?.MainImage ?? "NULL"}");
                         _orderItems.Add(new OrderItem
                         {
                             ProductId = draftItem.ProductId,
