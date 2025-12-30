@@ -351,7 +351,7 @@ namespace MyShop.App.Views
                         {
                             XamlRoot = this.XamlRoot,
                             Title = "Minimum Purchase Required",
-                            Content = $"This discount requires a minimum purchase of {selected.MinPurchase.Value:N0} ₫.\nYour current subtotal is {currentSubtotal:N0} ₫.",
+                            Content = $"This discount requires a minimum purchase of ${selected.MinPurchase.Value:N2}.\nYour current subtotal is ${currentSubtotal:N2}.",
                             CloseButtonText = "OK"
                         };
                         await warningDialog.ShowAsync();
@@ -1080,9 +1080,16 @@ namespace MyShop.App.Views
             if (_selectedDiscount == null) return 0;
             var subtotal = _orderItems.Sum(i => i.Total);
             
+            // Check minimum purchase requirement
+            if (_selectedDiscount.MinPurchase.HasValue && subtotal < _selectedDiscount.MinPurchase.Value)
+            {
+                return 0; // Discount not applicable
+            }
+            
             if (_selectedDiscount.Type == DiscountType.PERCENTAGE)
             {
                 var discountAmt = subtotal * (_selectedDiscount.Value / 100);
+                // Apply max discount cap if specified
                 if (_selectedDiscount.MaxDiscount.HasValue && discountAmt > _selectedDiscount.MaxDiscount.Value)
                 {
                     discountAmt = _selectedDiscount.MaxDiscount.Value;

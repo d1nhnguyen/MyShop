@@ -235,8 +235,8 @@ namespace MyShop.App.Views
                 // Value Information Section
                 AddSectionHeader(mainStack, "Value & Limits");
                 AddDetailField(mainStack, "Discount Value", FormatValue(discount.Type, discount.Value));
-                AddDetailField(mainStack, "Minimum Purchase", discount.MinPurchase.HasValue ? $"₫{discount.MinPurchase.Value:N0}" : "No minimum");
-                AddDetailField(mainStack, "Maximum Discount", discount.MaxDiscount.HasValue ? $"₫{discount.MaxDiscount.Value:N0}" : "No limit");
+                AddDetailField(mainStack, "Minimum Purchase", discount.MinPurchase.HasValue ? $"${discount.MinPurchase.Value:N2}" : "No minimum");
+                AddDetailField(mainStack, "Maximum Discount", discount.MaxDiscount.HasValue ? $"${discount.MaxDiscount.Value:N2}" : "No limit");
                 AddDetailField(mainStack, "Member Only", discount.MemberOnly ? "Yes" : "No");
 
                 // Date Information Section
@@ -332,7 +332,7 @@ namespace MyShop.App.Views
             return type switch
             {
                 DiscountType.PERCENTAGE => $"{value}%",
-                DiscountType.FIXED_AMOUNT => $"₫{value:N0}",
+                DiscountType.FIXED_AMOUNT => $"${value:N2}",
                 _ => value.ToString()
             };
         }
