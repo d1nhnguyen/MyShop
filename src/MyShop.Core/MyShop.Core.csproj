@@ -10,8 +10,6 @@
   <ItemGroup>
     <Folder Include="Helpers\" />
     <Folder Include="Interfaces\Factories\" />
-    <Folder Include="Interfaces\Strategies\" />
-    <Folder Include="Services\" />
   </ItemGroup>
 
   <ItemGroup>

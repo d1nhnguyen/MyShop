@@ -428,9 +428,9 @@ namespace MyShop.Data.Repositories
             return response.Data?.Orders?.Total ?? 0;
         }
 
-        private class OrderResponse { public Order? Order { get; set; } }
-        private class OrdersResponse { public OrdersQueryResult? Orders { get; set; } }
-        private class OrdersQueryResult
+        public class OrderResponse { public Order? Order { get; set; } }
+        public class OrdersResponse { public OrdersQueryResult? Orders { get; set; } }
+        public class OrdersQueryResult
         {
             public List<Order>? Orders { get; set; }
             public int Total { get; set; }
@@ -438,6 +438,6 @@ namespace MyShop.Data.Repositories
             public int PageSize { get; set; }
             public int TotalPages { get; set; }
         }
-        private class CreateOrderResponse { public Order? CreateOrder { get; set; } }
+        public class CreateOrderResponse { public Order? CreateOrder { get; set; } }
     }
 }
