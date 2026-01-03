@@ -34,17 +34,13 @@ A modern desktop application for managing products, orders, customers, and gener
 - **Print System**: Generate professional PDF invoices and reports
 
 ### Advanced Features
-- **GraphQL API**: Modern, efficient data fetching with flexible queries
-- **Auto-Save**: Automatic data persistence when creating orders and adding products
-- **Advanced Search & Filtering**: Multi-criteria search with customizable sorting (ascending/descending)
-- **Discount System**: Flexible promotion management with member-exclusive deals
-- **Commission System**: Automatic sales commission calculation based on KPI performance
-- **Trial Mode**: 15-day full-feature trial period with registration after expiry
-- **MVVM Architecture**: Clean separation of concerns for maintainable code
-- **Dependency Injection**: Modular, testable, and loosely-coupled components
-- **Onboarding System**: Interactive first-time user guidance
-- **Database Backup/Restore**: Built-in data protection and recovery tools
-- **Code Obfuscation**: Protection against reverse engineering
+- **Auto-Save**: Automatic draft saving when creating orders to prevent data loss.
+- **Discount System**: Flexible promotion management including member-exclusive deals.
+- **Commission System**: Automatic sales commission calculation based on order completion.
+- **Trial Mode**: 15-day full-feature trial period logic with hardware binding.
+- **Printing System**: Generate clean, print-ready HTML invoices and reports.
+- **Database Backup**: Support for database backup via PostgreSQL tools.
+- **Onboarding System**: Interactive first-time user guidance.
 
 ### Role-Based Access Control (RBAC)
 Three distinct user roles with different permissions:
