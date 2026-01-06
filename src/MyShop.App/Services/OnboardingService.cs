@@ -1,23 +1,34 @@
 using MyShop.Core.Interfaces.Services;
-using Windows.Storage;
+using MyShop.Core.Services;
+using System.Collections.Generic;
 
 namespace MyShop.App.Services
 {
     public class OnboardingService : IOnboardingService
     {
-        private const string OnboardingCompletedKey = "OnboardingCompleted";
+        private const string FileName = "onboarding.json";
+        private OnboardingData _data;
+
+        public OnboardingService()
+        {
+            _data = LocalStorageHelper.Load<OnboardingData>(FileName) ?? new OnboardingData();
+        }
 
         public bool IsOnboardingCompleted(string username)
-        {
-            string key = $"{OnboardingCompletedKey}_{username}";
-            return ApplicationData.Current.LocalSettings.Values.ContainsKey(key) && 
-                   (bool)ApplicationData.Current.LocalSettings.Values[key];
-        }
+            => _data.CompletedUsers.Contains(username);
 
         public void MarkOnboardingAsCompleted(string username)
         {
-            string key = $"{OnboardingCompletedKey}_{username}";
-            ApplicationData.Current.LocalSettings.Values[key] = true;
+            if (!_data.CompletedUsers.Contains(username))
+            {
+                _data.CompletedUsers.Add(username);
+                LocalStorageHelper.Save(FileName, _data);
+            }
+        }
+
+        private class OnboardingData
+        {
+            public HashSet<string> CompletedUsers { get; set; } = new();
         }
     }
 }

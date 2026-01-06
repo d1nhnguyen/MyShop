@@ -1,6 +1,6 @@
 using System;
 using System.Text.Json;
-using Windows.Storage;
+using MyShop.Core.Services;
 
 namespace MyShop.App.Services
 {
@@ -14,19 +14,12 @@ namespace MyShop.App.Services
 
     public class DraftService : IDraftService
     {
-        private readonly ApplicationDataContainer _localSettings;
-
-        public DraftService()
-        {
-            _localSettings = ApplicationData.Current.LocalSettings;
-        }
-
         public void SaveDraft<T>(string key, T data)
         {
             try
             {
                 var json = JsonSerializer.Serialize(data);
-                _localSettings.Values[key] = json;
+                LocalStorageHelper.SetValue(key, json);
             }
             catch (Exception ex)
             {
@@ -38,7 +31,8 @@ namespace MyShop.App.Services
         {
             try
             {
-                if (_localSettings.Values.TryGetValue(key, out var value) && value is string json)
+                var json = LocalStorageHelper.GetValue(key);
+                if (!string.IsNullOrEmpty(json))
                 {
                     return JsonSerializer.Deserialize<T>(json);
                 }
@@ -55,7 +49,7 @@ namespace MyShop.App.Services
         {
             try
             {
-                _localSettings.Values.Remove(key);
+                LocalStorageHelper.SetValue(key, null);
             }
             catch (Exception ex)
             {
@@ -65,7 +59,7 @@ namespace MyShop.App.Services
 
         public bool HasDraft(string key)
         {
-            return _localSettings.Values.ContainsKey(key);
+            return LocalStorageHelper.GetValue(key) != null;
         }
     }
 }

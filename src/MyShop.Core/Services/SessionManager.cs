@@ -1,63 +1,41 @@
-using MyShop.Core.Interfaces.Services;
+﻿using MyShop.Core.Interfaces.Services;
 using MyShop.Core.Models;
-using Windows.Storage;
 using System.Text.Json;
 
 namespace MyShop.Core.Services
 {
     public class SessionManager : ISessionManager
     {
-        private const string TokenKey = "AuthToken";
-        private const string UserKey = "CurrentUser";
-        private readonly ApplicationDataContainer _localSettings;
+        private const string FileName = "session.json";
         private readonly GraphQLService _graphQLService;
+        private SessionData _sessionData;
 
         public SessionManager(GraphQLService graphQLService)
         {
             _graphQLService = graphQLService;
-            _localSettings = ApplicationData.Current.LocalSettings;
-            LoadSession();
+            _sessionData = LocalStorageHelper.Load<SessionData>(FileName) ?? new SessionData();
+            
+            Token = _sessionData.Token;
+            CurrentUser = _sessionData.User;
+            
+            if (IsAuthenticated)
+            {
+                _graphQLService.SetAuthToken(Token);
+            }
         }
 
         public User? CurrentUser { get; set; }
         public string? Token { get; set; }
         public bool IsAuthenticated => !string.IsNullOrEmpty(Token);
-        public bool IsSessionPersisted => _localSettings.Values.ContainsKey(TokenKey);
+        public bool IsSessionPersisted => !string.IsNullOrEmpty(_sessionData.Token);
 
         public void ClearSession()
         {
             Token = null;
             CurrentUser = null;
-            _localSettings.Values.Remove(TokenKey);
-            _localSettings.Values.Remove(UserKey);
-            _localSettings.Values.Remove("LastOpenedPage"); // Clear last opened page on logout
-
+            _sessionData = new SessionData();
+            LocalStorageHelper.Delete(FileName);
             _graphQLService.SetAuthToken(null);
-        }
-
-        private void LoadSession()
-        {
-            if (_localSettings.Values.TryGetValue(TokenKey, out object? tokenValue))
-            {
-                Token = tokenValue as string;
-            }
-
-            if (_localSettings.Values.TryGetValue(UserKey, out object? userValue) && userValue is string userJson)
-            {
-                try
-                {
-                    CurrentUser = JsonSerializer.Deserialize<User>(userJson);
-                }
-                catch
-                {
-                    CurrentUser = null;
-                }
-            }
-
-            if (IsAuthenticated)
-            {
-                _graphQLService.SetAuthToken(Token);
-            }
         }
 
         public void SaveSession(string token, User user, bool rememberMe)
@@ -67,11 +45,18 @@ namespace MyShop.Core.Services
 
             if (rememberMe)
             {
-                _localSettings.Values[TokenKey] = token;
-                _localSettings.Values[UserKey] = JsonSerializer.Serialize(user);
+                _sessionData.Token = token;
+                _sessionData.User = user;
+                LocalStorageHelper.Save(FileName, _sessionData);
             }
 
             _graphQLService.SetAuthToken(token);
+        }
+
+        private class SessionData
+        {
+            public string? Token { get; set; }
+            public User? User { get; set; }
         }
     }
 }

@@ -5,34 +5,25 @@
     <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
     <RootNamespace>MyShop.App</RootNamespace>
     <ApplicationManifest>app.manifest</ApplicationManifest>
-    <Platforms>x86;x64;ARM64;AnyCPU</Platforms>
-    <RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
-    <PublishProfile>win-$(Platform).pubxml</PublishProfile>
     <UseWinUI>true</UseWinUI>
-    <EnableMsixTooling>true</EnableMsixTooling>
     <Nullable>enable</Nullable>
+    <Platforms>x64</Platforms>
+    <PlatformTarget>x64</PlatformTarget>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <WindowsPackageType>None</WindowsPackageType>
+    <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+    <SelfContained>true</SelfContained>
+    <EnableMsixTooling>true</EnableMsixTooling>
+    <DefineConstants>DISABLE_XAML_GENERATED_MAIN</DefineConstants>
+    <StartupObject>MyShop.App.Program</StartupObject>
+    <PublishReadyToRun>true</PublishReadyToRun>
+    <PublishTrimmed>false</PublishTrimmed>
   </PropertyGroup>
+
   <ItemGroup>
-    <Content Remove="Assets\Square44x44Logo.altform-lightunplated_targetsize-16.png" />
-    <Content Remove="Assets\Square44x44Logo.altform-lightunplated_targetsize-24.png" />
-    <Content Remove="Assets\Square44x44Logo.altform-lightunplated_targetsize-256.png" />
-    <Content Remove="Assets\Square44x44Logo.altform-lightunplated_targetsize-32.png" />
-    <Content Remove="Assets\Square44x44Logo.altform-lightunplated_targetsize-48.png" />
-    <Content Remove="Assets\Square44x44Logo.altform-unplated_targetsize-16.png" />
-    <Content Remove="Assets\Square44x44Logo.altform-unplated_targetsize-24.png" />
-    <Content Remove="Assets\Square44x44Logo.altform-unplated_targetsize-256.png" />
-    <Content Remove="Assets\Square44x44Logo.altform-unplated_targetsize-32.png" />
-    <Content Remove="Assets\Square44x44Logo.altform-unplated_targetsize-48.png" />
-    <Content Remove="Assets\Square44x44Logo.scale-100.png" />
-    <Content Remove="Assets\Square44x44Logo.scale-125.png" />
-    <Content Remove="Assets\Square44x44Logo.scale-150.png" />
-    <Content Remove="Assets\Square44x44Logo.scale-200.png" />
-    <Content Remove="Assets\Square44x44Logo.scale-400.png" />
-    <Content Remove="Assets\Square44x44Logo.targetsize-16.png" />
-    <Content Remove="Assets\Square44x44Logo.targetsize-24.png" />
-    <Content Remove="Assets\Square44x44Logo.targetsize-256.png" />
-    <Content Remove="Assets\Square44x44Logo.targetsize-32.png" />
-    <Content Remove="Assets\Square44x44Logo.targetsize-48.png" />
+    <Page Update="MainWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <None Remove="Views\Dialogs\AddProductDialog.xaml" />

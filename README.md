@@ -189,7 +189,6 @@ Use one of the pre-seeded accounts:
 | Username | Password | Role | Description |
 |----------|----------|------|-------------|
 | `admin` | `Admin@123456` | **ADMIN** | Full system access |
-| `manager1` | `Password@123` | **MANAGER** | Operations management |
 | `staff1` | `Password@123` | **STAFF** | Sales representative |
 
 **Note:** If the backend is not running on `localhost:4000`, click the **Config** button on the login screen to set a custom server URL.

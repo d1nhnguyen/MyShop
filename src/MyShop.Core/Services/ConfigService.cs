@@ -1,74 +1,52 @@
-using MyShop.Core.Interfaces.Services;
-using Windows.Storage;
+﻿using MyShop.Core.Interfaces.Services;
+using System.Text.Json;
 
 namespace MyShop.Core.Services
 {
     public class ConfigService : IConfigService
     {
-        private const string ServerUrlKey = "ServerUrl";
+        private const string FileName = "config.json";
         private const string DefaultServerUrl = "http://localhost:4000/graphql";
-        private const string DatabaseNameKey = "DatabaseName";
         private const string DefaultDatabaseName = "myshop_db";
-        private const string LastOpenedPageKey = "LastOpenedPage";
-
-        private readonly ApplicationDataContainer _localSettings;
+        
+        private ConfigData _config;
 
         public ConfigService()
         {
-            _localSettings = ApplicationData.Current.LocalSettings;
-
-            //_localSettings.Values.Remove(LastOpenedPageKey);
+            _config = LocalStorageHelper.Load<ConfigData>(FileName) ?? new ConfigData();
         }
 
-        public string GetServerUrl()
-        {
-            if (_localSettings.Values.TryGetValue(ServerUrlKey, out object? value))
-            {
-                if (value is string url)
-                {
-                    return url;
-                }
-            }
-            return DefaultServerUrl;
-        }
+        public string GetServerUrl() 
+            => string.IsNullOrEmpty(_config.ServerUrl) ? DefaultServerUrl : _config.ServerUrl;
 
         public void SaveServerUrl(string url)
         {
-            _localSettings.Values[ServerUrlKey] = url;
+            _config.ServerUrl = url;
+            LocalStorageHelper.Save(FileName, _config);
         }
 
-        public string GetDatabaseName()
-        {
-            if (_localSettings.Values.TryGetValue(DatabaseNameKey, out object? value))
-            {
-                if (value is string dbName)
-                {
-                    return dbName;
-                }
-            }
-            return DefaultDatabaseName;
-        }
+        public string GetDatabaseName() 
+            => string.IsNullOrEmpty(_config.DatabaseName) ? DefaultDatabaseName : _config.DatabaseName;
 
         public void SaveDatabaseName(string dbName)
         {
-            _localSettings.Values[DatabaseNameKey] = dbName;
+            _config.DatabaseName = dbName;
+            LocalStorageHelper.Save(FileName, _config);
         }
 
-        public string? GetLastOpenedPage()
-        {
-            if (_localSettings.Values.TryGetValue(LastOpenedPageKey, out object? value))
-            {
-                if (value is string pageTag)
-                {
-                    return pageTag;
-                }
-            }
-            return null;
-        }
+        public string? GetLastOpenedPage() => _config.LastOpenedPage;
 
         public void SaveLastOpenedPage(string pageTag)
         {
-            _localSettings.Values[LastOpenedPageKey] = pageTag;
+            _config.LastOpenedPage = pageTag;
+            LocalStorageHelper.Save(FileName, _config);
+        }
+
+        private class ConfigData
+        {
+            public string? ServerUrl { get; set; }
+            public string? DatabaseName { get; set; }
+            public string? LastOpenedPage { get; set; }
         }
     }
 }
