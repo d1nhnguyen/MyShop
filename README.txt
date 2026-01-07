@@ -83,8 +83,7 @@ TABLE OF CONTENTS
 8. Testing
 9. Troubleshooting
 10. Team Resources
-11. Developer Resources (Installer & License Key)
-12. License
+11. License
 
 --------------------------------------------------------------------------------
 
@@ -109,7 +108,7 @@ FEATURES
 - Onboarding System: Interactive first-time user guidance.
 
 ### Role-Based Access Control (RBAC)
-Three distinct user roles with different permissions:
+Two distinct user roles with different permissions:
 
 1. ADMIN - Full System Access
    - Complete control over products, categories, and pricing (including purchase prices)
@@ -347,9 +346,6 @@ TROUBLESHOOTING
 
 TEAM RESOURCES
 ==============
-- Team Work Division: docs/team-work-division.md
-- Feature Development Guide: feature-development.md
-- Security & RBAC Guide: docs/security-and-rbac.md
 - RBAC Implementation: RBAC.md
 - Trial System: TrialSystem.md
 
