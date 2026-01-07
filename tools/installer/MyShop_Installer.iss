@@ -36,28 +36,18 @@ Source: ".\Deploy_MyShop\publish\*"; DestDir: "{app}"; Flags: ignoreversion recu
 ; 👉 QUAN TRỌNG: DestDir phải có thêm \Backend_Deploy để khớp với code C#
 Source: ".\Deploy_MyShop\Backend_Deploy\*"; DestDir: "{app}\Backend_Deploy"; Flags: ignoreversion recursesubdirs createallsubdirs
 
-; 3. COPY DATABASE FILES
+; 3. COPY FILE DATABASE & HƯỚNG DẪN
 Source: ".\Deploy_MyShop\Database.sql"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\Deploy_MyShop\SETUP_DATABASE.bat"; DestDir: "{app}"; Flags: ignoreversion
-
-; 4. COPY DOCUMENTATION FILES
 Source: ".\Deploy_MyShop\tutorial.txt"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\Deploy_MyShop\DATABASE_SETUP_GUIDE.md"; DestDir: "{app}"; Flags: ignoreversion isreadme
-Source: ".\Deploy_MyShop\DATABASE_INFO.md"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
 Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
-Name: "{group}\Setup Database"; Filename: "{app}\SETUP_DATABASE.bat"; IconFilename: "{sys}\shell32.dll"; IconIndex: 165; Comment: "Tự động setup database"
-Name: "{group}\Hướng dẫn cài đặt"; Filename: "{app}\tutorial.txt"; Comment: "Hướng dẫn chi tiết"
-Name: "{group}\Database Setup Guide"; Filename: "{app}\DATABASE_SETUP_GUIDE.md"; Comment: "Tài liệu setup database"
 Name: "{group}\{cm:UninstallProgram,{#MyAppName}}"; Filename: "{uninstallexe}"
 Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
 
 [Run]
-; Hiển thị hướng dẫn setup database ngay sau khi cài
-Filename: "{app}\DATABASE_SETUP_GUIDE.md"; Description: "Xem hướng dẫn setup Database"; Flags: postinstall shellexec skipifsilent unchecked
-; Mở file tutorial chi tiết
-Filename: "{app}\tutorial.txt"; Description: "Xem hướng dẫn chi tiết"; Flags: postinstall shellexec skipifsilent unchecked
+; Mở file hướng dẫn cài DB ngay sau khi cài xong
+Filename: "{app}\tutorial.txt"; Description: "Xem hướng dẫn cài đặt Database"; Flags: postinstall shellexec skipifsilent
 ; Chạy App
 Filename: "{app}\{#MyAppExeName}"; Description: "Chạy ứng dụng MyShop"; Flags: nowait postinstall skipifsilent
 
