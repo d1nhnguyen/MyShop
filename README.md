@@ -1,189 +1,210 @@
-MYSHOP - E-COMMERCE MANAGEMENT SYSTEM
-=====================================
+# MyShop - E-commerce Management System
 
-A modern desktop application for managing products, orders, customers, and generating business reports. Built with a Modern Fullstack Architecture using WinUI 3 (Frontend) and Node.js (Express) + GraphQL (Backend).
+A modern desktop application for managing products, orders, customers, and generating business reports. Built with a **Modern Fullstack Architecture** using **WinUI 3 (Frontend)** and **Node.js (Express) + GraphQL (Backend)**.
 
-Tech Stack: .NET 8.0 | Node.js 18+ | PostgreSQL 15
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+![.NET 8.0](https://img.shields.io/badge/.NET-8.0-blue)
+![Node.js](https://img.shields.io/badge/Node.js-18+-green)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-blue)
 
---------------------------------------------------------------------------------
 
-DEMO
-====
+---
 
-Youtube Demo: https://www.youtube.com/watch?v=ABGB2nRtMBY
+## 🎬 Demo
 
-(Note: Animated GIF demos for Onboarding, Dashboard, Products, Orders, Customers, Discounts, Staff, and Reports are available in the visual documentation).
+**Youtube Demo:** https://www.youtube.com/watch?v=ABGB2nRtMBY
 
---------------------------------------------------------------------------------
+### Onboarding
+![Onboarding Demo](docs/demo/onboarding.gif)
 
-LINKS
-=====
+### Dashboard & Analytics
+![Dashboard Demo](docs/demo/dashboard.gif)
 
-GitHub Repository: https://github.com/d1nhnguyen/myshop
-Installer Download (Google Drive): https://drive.google.com/file/d/146SID45XBGZGhykwJo6Zmsa7cqIpNorx/view?usp=sharing
+### Product Management
+![Product Management Demo](docs/demo/product1.gif)
 
-Note: The installer package includes both the frontend application and backend server with database setup.
+### Order Processing
+![Order Processing Demo](docs/demo/order.gif)
 
---------------------------------------------------------------------------------
+### Customer Management
+![Customer Management Demo](docs/demo/customer.gif)
 
-INSTALLATION GUIDE (For End Users)
-===================================
+### Discount Management
+![Discount Management Demo](docs/demo/discount.gif)
+
+### Staff Management
+![Staff Management Demo](docs/demo/staff.gif)
+
+### Report Management
+![Report Management Demo](docs/demo/report.gif)
+
+---
+
+## � Links
+
+- **GitHub Repository**: [https://github.com/d1nhnguyen/myshop](https://github.com/d1nhnguyen/myshop)
+- **Installer Download (Google Drive)**: [Download MyShop Installer](https://drive.google.com/file/d/146SID45XBGZGhykwJo6Zmsa7cqIpNorx/view?usp=sharing)
+
+> [!NOTE]
+> The installer package includes both the frontend application and backend server with database setup.
+
+---
+
+## 💿 Installation Guide (For End Users)
 
 If you downloaded the installer from Google Drive, follow these steps:
 
-1. System Requirements
-   - Windows 10 (64-bit) or higher
-   - PostgreSQL 15.x or higher
-   - 500MB free disk space
-   - Administrator privileges
+### 1. System Requirements
+- Windows 10 (64-bit) or higher
+- PostgreSQL 15.x or higher
+- 500MB free disk space
+- Administrator privileges
 
-2. Install PostgreSQL (if not already installed)
-   - Download from: https://www.postgresql.org/download/windows/
-   - During installation, set password: admin (remember this!)
-   - Keep default port: 5432
+### 2. Install PostgreSQL (if not already installed)
+- Download from: https://www.postgresql.org/download/windows/
+- During installation, set password: `admin` (remember this!)
+- Keep default port: 5432
 
-3. Run the Installer
-   - Double-click MyShop_Setup_v1.0.exe
-   - Follow the installation wizard
-   - Choose installation directory (default: C:\Program Files\MyShop Management)
+### 3. Run the Installer
+- Double-click `MyShop_Setup_v1.0.exe`
+- Follow the installation wizard
+- Choose installation directory (default: `C:\Program Files\MyShop Management`)
 
-4. Setup Database
-   - Open pgAdmin 4
-   - Create database named: myshop
-   - Import Database.sql file (located in installation folder)
-   - Run the SQL script
+### 4. Setup Database
+- Open **pgAdmin 4**
+- Create database named: `myshop`
+- Import `Database.sql` file (located in installation folder)
+- Run the SQL script
 
-5. Configure Connection
-   - Navigate to installation folder\Backend_Deploy
-   - Open .env file with Notepad
-   - Verify DATABASE_URL matches your PostgreSQL password:
-     DATABASE_URL="postgresql://postgres:admin@localhost:5432/myshop"
-   - If your password is different, update it in the connection string
+### 5. Configure Connection
+- Navigate to `installation folder\Backend_Deploy`
+- Open `.env` file with Notepad
+- Verify `DATABASE_URL` matches your PostgreSQL password:
+  ```
+  DATABASE_URL="postgresql://postgres:admin@localhost:5432/myshop"
+  ```
+- If your password is different, update it in the connection string
 
-6. Launch Application
-   - Find "MyShop Management" on Desktop or Start Menu
-   - Double-click to run
-   - Login with default accounts:
-     * ADMIN: username: admin, password: Admin@123456
-     * STAFF: username: staff1, password: Password@123
+### 6. Launch Application
+- Find "MyShop Management" on Desktop or Start Menu
+- Double-click to run
+- Login with default accounts:
+  - **ADMIN**: username: `admin`, password: `Admin@123456`
+  - **STAFF**: username: `staff1`, password: `Password@123`
 
-For detailed installation instructions, see tutorial.txt in the installation folder.
+> [!TIP]
+> For detailed installation instructions, see `tutorial.txt` in the installation folder.
 
---------------------------------------------------------------------------------
+---
 
-TABLE OF CONTENTS
-=================
-1. Demo
-2. Features
-3. Architecture
-4. Prerequisites
-5. Getting Started
-6. Project Structure
-7. Advanced Features
-8. Testing
-9. Troubleshooting
-10. Team Resources
-11. Developer Resources (Installer & License Key)
-12. License
+## �📋 Table of Contents
+- [Demo](#-demo)
+- [Links](#-links)
+- [Installation Guide](#-installation-guide-for-end-users)
+- [Features](#-features)
+- [Architecture](#-architecture)
+- [Prerequisites](#-prerequisites)
+- [Getting Started](#-getting-started)
+- [Project Structure](#-project-structure)
+- [Advanced Features](#-advanced-features)
+- [Testing](#-testing)
+- [Troubleshooting](#-troubleshooting)
+- [Team Resources](#-team-resources)
+- [Developer Resources](#-developer-resources-installer--license-key)
+- [License](#-license)
 
---------------------------------------------------------------------------------
+---
 
-FEATURES
-========
+## ✨ Features
 
 ### Core Functionality
-- Product Management: Add, edit, delete products and categories with real-time inventory tracking
-- Order Processing: Create, manage, and track orders with automatic commission calculation
-- Customer Management: Comprehensive customer database with membership tiers (Member, Standard)
-- Dashboard & Analytics: Real-time business insights with interactive charts and reports
-- User Authentication: Secure JWT-based authentication with role-based access control
-- Print System: Generate professional PDF invoices and reports
+- **Product Management**: Add, edit, delete products and categories with real-time inventory tracking
+- **Order Processing**: Create, manage, and track orders with automatic commission calculation
+- **Customer Management**: Comprehensive customer database with membership tiers (Member, Standard)
+- **Dashboard & Analytics**: Real-time business insights with interactive charts and reports
+- **User Authentication**: Secure JWT-based authentication with role-based access control
+- **Print System**: Generate professional PDF invoices and reports
 
 ### Advanced Features
-- Auto-Save: Automatic draft saving when creating orders to prevent data loss.
-- Discount System: Flexible promotion management including member-exclusive deals.
-- Commission System: Automatic sales commission calculation based on order completion.
-- Trial Mode: 15-day full-feature trial period logic with hardware binding.
-- Printing System: Generate clean, print-ready HTML invoices and reports.
-- Database Backup: Support for database backup via PostgreSQL tools.
-- Onboarding System: Interactive first-time user guidance.
+- **Auto-Save**: Automatic draft saving when creating orders to prevent data loss.
+- **Discount System**: Flexible promotion management including member-exclusive deals.
+- **Commission System**: Automatic sales commission calculation based on order completion.
+- **Trial Mode**: 15-day full-feature trial period logic with hardware binding.
+- **Printing System**: Generate clean, print-ready HTML invoices and reports.
+- **Database Backup**: Support for database backup via PostgreSQL tools.
+- **Onboarding System**: Interactive first-time user guidance.
 
 ### Role-Based Access Control (RBAC)
-Three distinct user roles with different permissions:
+Two distinct user roles with different permissions:
 
-1. ADMIN - Full System Access
-   - Complete control over products, categories, and pricing (including purchase prices)
-   - Add, edit, delete staff accounts
-   - Access all orders and customer data
-   - View comprehensive reports: profit margins, revenue, and staff performance
-   - Manage discount campaigns
-   - Separate onboarding experience
+#### **ADMIN** - Full System Access
+- Complete control over products, categories, and pricing (including purchase prices)
+- Add, edit, delete staff accounts
+- Access all orders and customer data
+- View comprehensive reports: profit margins, revenue, and staff performance
+- Manage discount campaigns
+- Separate onboarding experience
 
-2. STAFF - Sales Focus
-   - View products and prices (excluding purchase prices)
-   - Create and manage own orders only
-   - View personal commission for each order
-   - Access own performance metrics only
-   - Cannot create discounts or access other staff's data
-   - Simplified onboarding experience
+#### **STAFF** - Sales Focus
+- View products and prices (excluding purchase prices)
+- Create and manage own orders only
+- View personal commission for each order
+- Access own performance metrics only
+- Cannot create discounts or access other staff's data
+- Simplified onboarding experience
 
---------------------------------------------------------------------------------
+---
 
-ARCHITECTURE
-============
+## 🏗️ Architecture
 
 ### Technology Stack
-- Frontend: WinUI 3, MVVM Pattern, .NET 8.0, GraphQL Client
-- Backend: Node.js, Express.js, Apollo Server, TypeScript
-- Database: PostgreSQL 15 (Dockerized)
-- ORM: Prisma (TypeScript-first ORM)
-- Security: JWT Authentication, BCrypt Password Hashing, Role-Based Access Control
+- **Frontend**: WinUI 3, MVVM Pattern, .NET 8.0, GraphQL Client
+- **Backend**: Node.js, Express.js, Apollo Server, TypeScript
+- **Database**: PostgreSQL 15 (Dockerized)
+- **ORM**: Prisma (TypeScript-first ORM)
+- **Security**: JWT Authentication, BCrypt Password Hashing, Role-Based Access Control
 
 ### Design Patterns
-- MVVM (Model-View-ViewModel): Clear separation between UI and business logic
-- Repository Pattern: Centralized data access with GraphQLRepositoryBase
-- Dependency Injection: Loose coupling and testability
-- Strategy Pattern: Flexible sorting and discount calculation
-- Factory Pattern: Dynamic report generation (Daily, Weekly, Monthly, Yearly)
-- Command Pattern: Order operations (Create, Update, Cancel)
+- **MVVM (Model-View-ViewModel)**: Clear separation between UI and business logic
+- **Repository Pattern**: Centralized data access with `GraphQLRepositoryBase`
+- **Dependency Injection**: Loose coupling and testability
+- **Strategy Pattern**: Flexible sorting and discount calculation
+- **Factory Pattern**: Dynamic report generation (Daily, Weekly, Monthly, Yearly)
+- **Command Pattern**: Order operations (Create, Update, Cancel)
 
---------------------------------------------------------------------------------
+---
 
-PREREQUISITES
-=============
+## 🔧 Prerequisites
 
 Install these before starting:
 
-1. Visual Studio 2022 (Latest)
-   - Purpose: Frontend development (with .NET Desktop & WinUI 3 workloads)
-2. .NET SDK (8.0+)
-   - Purpose: .NET application development
-3. Node.js (18+)
-   - Purpose: Backend development
-4. npm (9+)
-   - Purpose: Package management (comes with Node.js)
-5. Docker Desktop (Latest)
-   - Purpose: PostgreSQL database container
-6. Git (Latest)
-   - Purpose: Version control
+| Software | Version | Purpose |
+|----------|---------|---------|
+| **Visual Studio 2022** | Latest | Frontend development (with .NET Desktop & WinUI 3 workloads) |
+| **.NET SDK** | 8.0+ | .NET application development |
+| **Node.js** | 18+ | Backend development |
+| **npm** | 9+ | Package management (comes with Node.js) |
+| **Docker Desktop** | Latest | PostgreSQL database container |
+| **Git** | Latest | Version control |
 
-Visual Studio Workloads Required:
+### Visual Studio Workloads Required
 - .NET Desktop Development
 - Windows Application Development (with WinUI 3)
 - Windows 10 SDK (10.0.19041.0 or higher)
 
---------------------------------------------------------------------------------
+---
 
-GETTING STARTED
-===============
+## 🚀 Getting Started
 
-1. Clone the Repository
------------------------
+### 1. Clone the Repository
+```bash
 git clone https://github.com/d1nhnguyen/myshop.git
 cd myshop
+```
 
-2. Backend & Database Setup
----------------------------
+### 2. Backend & Database Setup
+
+```bash
 # Navigate to backend folder
 cd src/MyShop.Backend
 
@@ -201,200 +222,369 @@ npm run seed
 
 # Start development server
 npm run dev
+```
 
-** Backend will run on: http://localhost:4000
-** GraphQL Playground: http://localhost:4000/graphql
+**Backend will run on:** `http://localhost:4000`  
+**GraphQL Playground:** `http://localhost:4000/graphql`
 
-3. Frontend Setup
------------------
-1. Open "src/MyShop.sln" in Visual Studio 2022
-2. Right-click solution -> Restore NuGet Packages
-3. Set "MyShop.App" as Startup Project (right-click -> Set as Startup Project)
-4. Build the solution: Build -> Build Solution (or Ctrl+Shift+B)
-5. Run the application: Press F5 or click Debug -> Start Debugging
+### 3. Frontend Setup
 
-4. First Login
---------------
+1. Open `src/MyShop.sln` in **Visual Studio 2022**
+2. Right-click solution → **Restore NuGet Packages**
+3. Set **MyShop.App** as Startup Project (right-click → Set as Startup Project)
+4. Build the solution: **Build → Build Solution** (or `Ctrl+Shift+B`)
+5. Run the application: Press `F5` or click **Debug → Start Debugging**
+
+### 4. First Login
+
 Use one of the pre-seeded accounts:
 
-- Username: admin
-  Password: Admin@123456
-  Role: ADMIN (Full system access)
+| Username | Password | Role | Description |
+|----------|----------|------|-------------|
+| `admin` | `Admin@123456` | **ADMIN** | Full system access |
+| `staff1` | `Password@123` | **STAFF** | Sales representative |
 
-- Username: staff1
-  Password: Password@123
-  Role: STAFF (Sales representative)
+**Note:** If the backend is not running on `localhost:4000`, click the **Config** button on the login screen to set a custom server URL.
 
-Note: If the backend is not running on localhost:4000, click the Config button on the login screen to set a custom server URL.
+---
 
---------------------------------------------------------------------------------
-
-PROJECT STRUCTURE
-=================
-
+## 📁 Project Structure
+```
 myshop/
 ├── src/
-│   ├── MyShop.App/               # WinUI 3 Frontend Application
-│   │   ├── Assets/               # Images, fonts, and static resources
-│   │   ├── Controls/             # Reusable custom UI controls
-│   │   ├── Converters/           # Data binding converters
-│   │   ├── Helpers/              # UI utility classes
-│   │   ├── Models/               # View-specific models
-│   │   ├── Services/             # Frontend services (auth, config, etc.)
-│   │   ├── ViewModels/           # MVVM ViewModels
-│   │   └── Views/                # XAML UI screens
+│   ├── MyShop.App/              # WinUI 3 Frontend Application
+│   │   ├── Assets/              # Images, fonts, and static resources
+│   │   ├── Controls/            # Reusable custom UI controls
+│   │   ├── Converters/          # Data binding converters
+│   │   ├── Helpers/             # UI utility classes
+│   │   ├── Models/              # View-specific models
+│   │   ├── Services/            # Frontend services (auth, config, etc.)
+│   │   ├── ViewModels/          # MVVM ViewModels
+│   │   │   └── Base/            # Base ViewModel classes
+│   │   └── Views/               # XAML UI screens
+│   │       └── Dialogs/         # Modal dialog windows
 │   │
-│   ├── MyShop.Core/              # Business Logic Layer
-│   │   ├── Helpers/              # Utility classes and extensions
-│   │   ├── Interfaces/           # Service and repository contracts
-│   │   ├── Models/               # Domain models and entities
-│   │   ├── Services/             # Business logic services
-│   │   └── Strategies/           # Strategy implementations
+│   ├── MyShop.Core/             # Business Logic Layer
+│   │   ├── Helpers/             # Utility classes and extensions
+│   │   ├── Interfaces/          # Service and repository contracts
+│   │   │   ├── Repositories/    # Repository interfaces
+│   │   │   ├── Services/        # Service interfaces
+│   │   │   └── Strategies/      # Strategy pattern interfaces
+│   │   ├── Models/              # Domain models and entities
+│   │   │   └── DTOs/            # Data Transfer Objects
+│   │   ├── Services/            # Business logic services
+│   │   └── Strategies/          # Strategy implementations (sorting, discounts)
 │   │
-│   ├── MyShop.Data/              # Data Access Layer
-│   │   └── Repositories/         # GraphQL repository implementations
+│   ├── MyShop.Data/             # Data Access Layer
+│   │   └── Repositories/        # GraphQL repository implementations
+│   │       └── Base/            # Base repository class (GraphQLRepositoryBase)
 │   │
-│   ├── MyShop.Backend/           # Node.js + Express + GraphQL Backend
-│   │   ├── prisma/               # Database schema and migrations
-│   │   ├── src/                  # TypeScript source code
-│   │   ├── uploads/              # File upload storage
-│   │   ├── docker-compose.yml    # PostgreSQL container configuration
-│   │   └── package.json          # Node.js dependencies
+│   ├── MyShop.Backend/          # Node.js + Express + GraphQL Backend
+│   │   ├── prisma/              # Database schema and migrations
+│   │   │   └── migrations/      # Database migration history
+│   │   ├── src/                 # TypeScript source code
+│   │   │   ├── config/          # Application configuration
+│   │   │   ├── graphql/         # GraphQL schema and resolvers
+│   │   │   │   ├── resolvers/   # Query and mutation resolvers
+│   │   │   │   └── typeDefs/    # GraphQL type definitions
+│   │   │   ├── middleware/      # Express middleware (auth, error handling)
+│   │   │   ├── types/           # TypeScript type definitions
+│   │   │   └── utils/           # Helper functions and utilities
+│   │   ├── uploads/             # File upload storage
+│   │   │   └── products/        # Product images
+│   │   ├── docker-compose.yml   # PostgreSQL container configuration
+│   │   └── package.json         # Node.js dependencies
 │   │
-│   └── MyShop.Tests/             # Unit and Integration Tests
+│   └── MyShop.Tests/            # Unit and Integration Tests
+│       ├── Mocks/               # Mock objects for testing
+│       └── UnitTests/           # Test files
+│           ├── Repositories/    # Repository tests
+│           ├── Services/        # Service tests
+│           └── Strategies/      # Strategy tests
 │
-├── tools/                        # Build scripts and development utilities
-├── docs/                         # Additional documentation
-├── RBAC.md                       # Role-Based Access Control documentation
-├── TrialSystem.md                # Trial mode implementation details
-├── feature-development.md        # Development workflow guide
-└── README.md                     # This file
+├── tools/                       # Build scripts and development utilities
+├── docs/                        # Additional documentation
+├── RBAC.md                      # Role-Based Access Control documentation
+├── TrialSystem.md               # Trial mode implementation details
+├── feature-development.md       # Development workflow guide
+└── README.md                    # This file
+```
 
---------------------------------------------------------------------------------
+---
 
-ADVANCED FEATURES DETAILS
-=========================
+## 🎯 Advanced Features
 
-1. Auto-Save System: 
-   Automatic data persistence for order creation, product management, and customer updates.
+### 1. Auto-Save System
+Automatic data persistence for:
+- Order creation (saves in real-time as you add items)
+- Product management (auto-saves after each field change)
+- Customer information updates
 
-2. Advanced Search & Filtering: 
-   Multi-criteria search for Products (Name, SKU, Stock), Orders (ID, Date, Status), and Customers.
+### 2. Advanced Search & Filtering
+Multi-criteria search with support for:
+- **Products**: Name, SKU, category, price range, stock level
+- **Orders**: Order ID, customer name, date range, status, payment method
+- **Customers**: Name, phone, email, membership tier
+- **Customizable Sorting**: Any field, ascending or descending
 
-3. Discount System: 
-   Percentage-based, Fixed amount, Member-exclusive, and Time-bound campaigns.
+### 3. Discount System
+Flexible promotion engine:
+- **Percentage-based discounts**: e.g., 20% off
+- **Fixed amount discounts**: e.g., $10 off
+- **Member-exclusive promotions**: Accessible only to Member tier customers
+- **Time-bound campaigns**: Start and end dates
+- **Automatic calculation**: Applied at checkout
 
-4. Commission System: 
-   Real-time per-order commission calculation and KPI-based bonuses.
+### 4. Commission System
+Automatic sales commission based on performance:
+- **Per-order commission**: Displayed in real-time when staff creates orders
+- **KPI-based bonuses**: Additional rewards for high performers
+- **Staff can view**: Personal commission in orders and reports
+- **Admin can view**: All staff performance metrics
 
-5. Trial Mode System: 
-   15-day full-feature trial with hardware binding and activation key system.
+### 5. Trial Mode System
+15-day full-feature trial:
+- First-time users get complete access to all features
+- After 15 days, registration/activation required
+- Activation code or license key system
+- Trial period tracking and expiration notifications
 
-6. Database Backup & Restore: 
-   Manual and scheduled backups with one-click restore functionality.
+### 6. Database Backup & Restore
+Built-in data protection:
+- **Manual backup**: Create database snapshots
+- **Scheduled backups**: Automated daily/weekly backups
+- **One-click restore**: Recover from any backup point
+- **Export formats**: SQL dump, CSV
 
-7. Onboarding System: 
-   Interactive tutorials specific to user roles.
+### 7. Onboarding System
+Interactive first-use experience:
+- **Role-specific tutorials**: Different guides for Admin vs Staff
+- **Step-by-step walkthrough**: Key features and workflows
+- **Interactive tooltips**: Contextual help throughout the app
+- **Skip option**: Can be bypassed for experienced users
 
-8. Printing & Reporting: 
-   Generate PDF/XPS invoices, sales reports, and inventory valuations.
+### 8. Printing & Reporting
+Professional document generation:
+- **Order invoices**: PDF generation with company branding
+- **Sales reports**: Daily, weekly, monthly, yearly
+- **Staff performance reports**: Commission summaries
+- **Inventory reports**: Stock levels and valuation
+- **Export to PDF/XPS**: For printing or digital distribution
 
---------------------------------------------------------------------------------
+---
 
-TESTING
-=======
+## 🧪 Testing
 
 To ensure the application logic works correctly, run the unit tests included in the solution.
 
-Running Tests:
-1. dotnet clean
-2. dotnet build
-3. dotnet test
+### Running Tests
 
-Test Coverage:
+```bash
+# From project root
+
+# 1. Clean previous build artifacts
+dotnet clean
+
+# 2. Build the solution
+dotnet build
+
+# 3. Run all unit tests
+dotnet test
+
+```
+
+### Test Coverage
 - Unit tests for business logic (Services, Commands, Strategies)
 - Integration tests for GraphQL repositories
 - UI component tests for ViewModels
 
---------------------------------------------------------------------------------
+---
 
-TROUBLESHOOTING
-===============
+## 🐛 Troubleshooting
 
-1. Port 5432 (PostgreSQL) already in use
-   - Check usage: netstat -ano | findstr :5432
-   - Stop local PostgreSQL service or change port in docker-compose.yml to "5433:5432".
+### Port 5432 (PostgreSQL) already in use
 
-2. Backend "npm install" fails
-   - Ensure Node.js v18+ is installed.
-   - Run: npm cache clean --force
-   - Delete node_modules and package-lock.json, then run npm install again.
+**Problem**: Docker container can't start because port 5432 is already occupied.
 
-3. WinUI "Windows SDK" missing
-   - Open Visual Studio Installer -> Modify -> Individual Components.
-   - Install "Windows 10 SDK (10.0.19041.0)".
+**Solution**:
+```bash
+# Check what's using the port
+netstat -ano | findstr :5432
 
-4. Database connection errors
-   - Check if Docker container is UP (docker-compose ps).
-   - Check logs (docker-compose logs postgres).
-   - Verify connection string in .env file.
+# Stop local PostgreSQL service (if installed)
+# On Windows: Services → PostgreSQL → Stop
 
-5. Frontend can't connect to backend
-   - Click Config button on login screen.
-   - Verify server URL (default: http://localhost:4000).
+# Or change port in docker-compose.yml:
+ports:
+  - "5433:5432"  # Maps local 5433 to container 5432
+```
 
---------------------------------------------------------------------------------
+### Backend "npm install" fails
 
-TEAM RESOURCES
-==============
-- Team Work Division: docs/team-work-division.md
-- Feature Development Guide: feature-development.md
-- Security & RBAC Guide: docs/security-and-rbac.md
-- RBAC Implementation: RBAC.md
-- Trial System: TrialSystem.md
+**Problem**: Dependencies fail to install.
 
---------------------------------------------------------------------------------
+**Solutions**:
+```bash
+# Ensure Node.js v18+ is installed
+node --version
 
-DEVELOPER RESOURCES (INSTALLER & LICENSE KEY)
-==============================================
+# Clear npm cache
+npm cache clean --force
+
+# Delete node_modules and package-lock.json
+rm -rf node_modules package-lock.json
+
+# Reinstall
+npm install
+```
+
+### WinUI "Windows SDK" missing
+
+**Problem**: Visual Studio can't find Windows SDK.
+
+**Solution**:
+1. Open **Visual Studio Installer**
+2. Click **Modify** on Visual Studio 2022
+3. Go to **Individual Components** tab
+4. Search for "Windows 10 SDK (10.0.19041.0)"
+5. Check the box and click **Modify**
+
+### Database connection errors
+
+**Problem**: Backend can't connect to PostgreSQL.
+
+**Solutions**:
+```bash
+# 1. Check if Docker is running
+docker ps
+
+# 2. Check if container is UP
+docker-compose ps
+
+# 3. View container logs
+docker-compose logs postgres
+
+# 4. Restart containers
+docker-compose down
+docker-compose up -d
+
+# 5. Verify connection string in .env file
+# Should be: postgresql://user:password@localhost:5432/myshop
+```
+
+### Frontend can't connect to backend
+
+**Problem**: "Failed to connect to server" error.
+
+**Solutions**:
+1. Ensure backend is running (`npm run dev` in `src/MyShop.Backend`)
+2. Check backend console for errors
+3. Click **Config** button on login screen
+4. Verify server URL (default: `http://localhost:4000`)
+5. Check Windows Firewall isn't blocking port 4000
+
+### GraphQL query errors
+
+**Problem**: "GraphQL error: ..." messages.
+
+**Solutions**:
+1. Open GraphQL Playground: `http://localhost:4000/graphql`
+2. Test queries directly in the playground
+3. Check Prisma schema is in sync: `npx prisma generate`
+4. Re-seed database if needed: `npm run seed`
+
+---
+
+## 📖 Team Resources
+
+For detailed technical documentation:
+
+| Document | Description |
+|----------|-------------|
+| [RBAC Implementation](RBAC.md) | Detailed role-based access control setup |
+| [Trial System](TrialSystem.md) | 15-day trial mode implementation details |
+
+---
+
+## 🛠️ Developer Resources (Installer & License Key)
 
 For Developers and Administrators:
 
-1. Creating Installer Package
-   - Full guide: tools/installer/HUONG_DAN_TAO_INSTALLER.md
-   - This guide covers how to create a standalone .exe installer using Inno Setup
-   - The installer includes both frontend app and backend server
-   - No need for users to install Node.js or other dependencies
+### 1. Creating Installer Package
+- **Full guide**: [tools/installer/HUONG_DAN_TAO_INSTALLER.md](tools/installer/HUONG_DAN_TAO_INSTALLER.md)
+- This guide covers how to create a standalone `.exe` installer using Inno Setup
+- The installer includes both frontend app and backend server
+- No need for users to install Node.js or other dependencies
 
-2. Generating License Keys
-   - Tool location: tools/KeyGen/
-   - Run KeyGen.exe to generate activation keys for the trial system
-   - Usage:
-     a. Enter Machine ID (get from app's trial dialog)
-     b. Enter Prefix (e.g., MYSH-OP25-PRO) or use default
-     c. Copy the generated license key
-   - The key is hardware-bound and works only on the specific machine
+### 2. Generating License Keys
+- **Tool location**: `tools/KeyGen/`
+- Run `KeyGen.exe` to generate activation keys for the trial system
+- **Usage**:
+  1. Enter Machine ID (get from app's trial dialog)
+  2. Enter Prefix (e.g., `MYSH-OP25-PRO`) or use default
+  3. Copy the generated license key
+- The key is hardware-bound and works only on the specific machine
 
-Quick Start for Installer Creation:
-   1. Install Inno Setup from https://jrsoftware.org/isdl.php
-   2. Open tools/installer/MyShop_Installer.iss
-   3. Click Build -> Compile
-   4. Output: Output/MyShop_Setup_v1.0.exe
+### Quick Start for Installer Creation:
+1. Install Inno Setup from https://jrsoftware.org/isdl.php
+2. Open `tools/installer/MyShop_Installer.iss`
+3. Click **Build → Compile**
+4. Output: `Output/MyShop_Setup_v1.0.exe`
 
-Quick Start for Key Generation:
-   1. Navigate to tools/KeyGen/KeyGen/bin/Debug/net8.0/
-   2. Run KeyGen.exe
-   3. Follow the prompts to generate keys
+### Quick Start for Key Generation:
+1. Navigate to `tools/KeyGen/KeyGen/bin/Debug/net8.0/`
+2. Run `KeyGen.exe`
+3. Follow the prompts to generate keys
 
---------------------------------------------------------------------------------
+---
 
-LICENSE
-=======
-This project is licensed under the MIT License.
+## 🤝 Contributing
 
-ACKNOWLEDGMENTS
-===============
-- Built with WinUI 3
-- Powered by Apollo GraphQL
-- Database by PostgreSQL
-- ORM by Prisma
+### Development Workflow
+
+1. **Create a feature branch**
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
+
+2. **Make your changes**
+   - Follow the existing code style
+   - Update tests if needed
+   - Add documentation for new features
+
+3. **Test your changes**
+   ```bash
+   dotnet test
+   ```
+
+4. **Commit with clear messages**
+   ```bash
+   git commit -m "feat: add customer export functionality"
+   ```
+
+5. **Push and create a pull request**
+   ```bash
+   git push origin feature/your-feature-name
+   ```
+
+### Code Style Guidelines
+- **C#**: Follow Microsoft C# Coding Conventions
+- **TypeScript**: Use ESLint configuration in `MyShop.Backend`
+- **XAML**: Keep view logic minimal, use ViewModels
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 🙏 Acknowledgments
+
+- Built with [WinUI 3](https://github.com/microsoft/microsoft-ui-xaml)
+- Powered by [Apollo GraphQL](https://www.apollographql.com/)
+- Database by [PostgreSQL](https://www.postgresql.org/)
+- ORM by [Prisma](https://www.prisma.io/)
+
+---
