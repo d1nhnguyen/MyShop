@@ -2394,5 +2394,3 @@ REVOKE USAGE ON SCHEMA public FROM PUBLIC;
 -- PostgreSQL database dump complete
 --
 
-\unrestrict AmNOWEcSWmDz2yu5svhA0nZhRs7pVJKhDe8YIfNXfSfxI21c4B7u3rtGwt5kb5c
-
