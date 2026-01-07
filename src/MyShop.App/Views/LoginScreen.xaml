@@ -6,7 +6,8 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:converters="using:MyShop.App.Converters"
     mc:Ignorable="d"
-    Background="#F3F6F9">
+    Background="#F3F6F9"
+    Loaded="Page_Loaded">
     <Page.Resources>
         <converters:BoolNegationConverter x:Key="BoolNegationConverter"/>
         <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
@@ -119,7 +120,8 @@
                 <CheckBox Content="Remember me" 
                           IsChecked="{x:Bind ViewModel.RememberMe, Mode=TwoWay}" />
 
-                <Button Command="{x:Bind ViewModel.LoginCommand}" 
+                <Button x:Name="btnLogin"
+                    Command="{x:Bind ViewModel.LoginCommand}" 
                     HorizontalAlignment="Stretch" 
                     Height="40"
                     Background="#0C2B4E"
@@ -148,6 +150,13 @@
                       Visibility="{x:Bind ViewModel.IsBusy, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
                     </Grid>
                 </Button>
+
+                <TextBlock x:Name="txtStatus"
+                           Text="{x:Bind StatusText, Mode=OneWay}"
+                           Foreground="{x:Bind StatusColor, Mode=OneWay}"
+                           FontSize="12"
+                           HorizontalAlignment="Center"
+                           Margin="0,8,0,0"/>
 
                 <InfoBar IsOpen="{x:Bind ViewModel.HasError, Mode=OneWay}"
                          Severity="Error"

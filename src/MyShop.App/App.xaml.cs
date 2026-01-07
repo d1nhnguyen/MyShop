@@ -7,6 +7,7 @@ using MyShop.Data.Repositories;
 using MyShop.App.ViewModels;
 using MyShop.App.Services;
 using System;
+using System.Diagnostics;
 using System.IO;
 using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;
@@ -192,9 +193,22 @@ namespace MyShop.App
 
                 if (m_window != null)
                 {
+                    // 👇 CHỈ KHI NÀO BUILD RELEASE (ĐÓNG GÓI) MỚI TỰ CHẠY BACKEND 👇
+#if !DEBUG
+                    Log("Starting backend (Release mode)...");
+                    StartBackend();
+                    Log("Backend startup initiated");
+#else
+                    Log("Debug mode: Backend auto-start disabled. Please run backend manually.");
+#endif
+
                     m_window.Closed += (s, e) =>
                     {
                         Log("Window closing...");
+#if !DEBUG
+                        StopBackend();
+                        Log("Backend stopped");
+#endif
                         Application.Current.Exit();
                     };
                     
@@ -220,6 +234,86 @@ namespace MyShop.App
             }
         }
 
+        private void StartBackend()
+        {
+            try
+            {
+                // Lấy đường dẫn thư mục chứa file MyShop.App.exe
+                string appDir = AppDomain.CurrentDomain.BaseDirectory;
+                Log($"App directory: {appDir}");
+
+                // Tạo đường dẫn tới file backend-runtime.exe
+                string backendDir = Path.Combine(appDir, "Backend_Deploy");
+                string exePath = Path.Combine(backendDir, "backend-runtime.exe");
+                string scriptPath = Path.Combine(backendDir, "dist", "index.js");
+
+                Log($"Backend directory: {backendDir}");
+                Log($"Backend exe: {exePath}");
+                Log($"Backend script: {scriptPath}");
+
+                // Chỉ chạy nếu tìm thấy file (tránh crash nếu quên copy)
+                if (File.Exists(exePath) && File.Exists(scriptPath))
+                {
+                    Log("Backend files found, starting process...");
+                    
+                    ProcessStartInfo startInfo = new ProcessStartInfo();
+                    startInfo.FileName = exePath;
+                    startInfo.Arguments = $"\"{scriptPath}\""; // Chạy file index.js
+                    startInfo.WorkingDirectory = backendDir;    // Quan trọng để nhận diện .env
+                    
+                    // Cấu hình chạy ẩn (Không hiện cửa sổ đen)
+                    startInfo.UseShellExecute = false;
+                    startInfo.CreateNoWindow = true; 
+                    // Lưu ý: Nếu muốn debug thì sửa CreateNoWindow = false để xem log
+
+                    _backendProcess = Process.Start(startInfo);
+                    
+                    if (_backendProcess != null)
+                    {
+                        Log($"Backend process started with PID: {_backendProcess.Id}");
+                    }
+                    else
+                    {
+                        Log("Backend process failed to start (null)");
+                    }
+                }
+                else
+                {
+                    Log($"Backend files not found!");
+                    Log($"Exe exists: {File.Exists(exePath)}");
+                    Log($"Script exists: {File.Exists(scriptPath)}");
+                }
+            }
+            catch (Exception ex)
+            {
+                // Ghi log hoặc bỏ qua lỗi khởi động
+                Log($"Lỗi bật backend: {ex.Message}");
+                Log($"Stack trace: {ex.StackTrace}");
+            }
+        }
+
+        private void StopBackend()
+        {
+            try
+            {
+                if (_backendProcess != null && !_backendProcess.HasExited)
+                {
+                    Log($"Stopping backend process (PID: {_backendProcess.Id})...");
+                    _backendProcess.Kill(); // Giết tiến trình Backend
+                    _backendProcess.Dispose();
+                    Log("Backend process terminated");
+                }
+                else
+                {
+                    Log("Backend process already stopped or null");
+                }
+            }
+            catch (Exception ex)
+            {
+                Log($"Error stopping backend: {ex.Message}");
+            }
+        }
+
         private static void Log(string message)
         {
             try
@@ -230,5 +324,6 @@ namespace MyShop.App
         }
 
         private Window? m_window;
+        private Process? _backendProcess; // Biến lưu tiến trình Backend
     }
 }
