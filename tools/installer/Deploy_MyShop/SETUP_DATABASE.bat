@@ -257,9 +257,22 @@ if exist "%ENV_FILE%.backup" del "%ENV_FILE%.backup"
 copy "%ENV_FILE%" "%ENV_FILE%.backup" >nul 2>&1
 :: Cập nhật DATABASE_URL
 set "NEW_DB_URL=postgresql://%DB_USER%:%DB_PASS%@%DB_HOST%:%DB_PORT%/%DB_NAME%?schema=public"
-powershell -Command "(Get-Content '%ENV_FILE%') -replace 'DATABASE_URL=.*', 'DATABASE_URL=\"%NEW_DB_URL%\"' | Set-Content '%ENV_FILE%'" >nul 2>&1
-echo [OK] File .env đã được cập nhật!
-echo     DATABASE_URL="%NEW_DB_URL%"
+
+echo [INFO] Đang cập nhật file: %ENV_FILE%
+echo [INFO] Connection String: postgresql://%DB_USER%:***@%DB_HOST%:%DB_PORT%/%DB_NAME%...
+
+powershell -NoProfile -ExecutionPolicy Bypass -Command "(Get-Content '%ENV_FILE%') -replace 'DATABASE_URL=.*', 'DATABASE_URL=\"%NEW_DB_URL%\"' | Set-Content '%ENV_FILE%'"
+
+if %errorLevel% neq 0 (
+    echo [ERROR] Không thể cập nhật file .env!
+    echo Vui lòng mở file "%ENV_FILE%" và sửa thủ công dòng DATABASE_URL thành:
+    echo.
+    echo DATABASE_URL="%NEW_DB_URL%"
+    echo.
+    pause
+) else (
+    echo [OK] File .env đã được cập nhật!
+)
 echo.
 :: ═══════════════════════════════════════════════════════════════════════════════
 :: HOÀN THÀNH
